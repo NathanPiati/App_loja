@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastro de Produto{% endblock %}
+
+{% block content %}
+<style>
+    .fade-in {
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-custom {
+        background:rgb(59, 59, 59);
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+
+    .card-custom:hover {
+        transform: scale(1.01);
+    }
+
+    h2 {
+        color: #343a40;
+        font-weight: 600;
+    }
+
+    .btn-custom {
+        background: linear-gradient(to right, #0d6efd, #6610f2);
+        color: white;
+        border: none;
+        transition: background 0.3s ease;
+    }
+
+    .btn-custom:hover {
+        background: linear-gradient(to right, #6610f2, #0d6efd);
+    }
+
+    .product-table th, .product-table td {
+        vertical-align: middle;
+    }
+</style>
+
+<div class="fade-in mb-4 d-flex justify-content-between align-items-center">
+    <h2><i class="bi bi-box-seam"></i> Cadastro de Produto</h2>
+    <a href="{% url 'produto_novo' %}" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Novo Produto3
+    </a>
+</div>
+
+<div class="card-custom fade-in mb-4">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-custom">
+            <i class="bi bi-save-fill"></i> Salvar Produto
+        </button>
+    </form>
+</div>
+
+<div class="card-custom fade-in">
+    <form method="get" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="busca" class="form-control" placeholder="Pesquisar produto..." value="{{ request.GET.busca }}">
+            <button class="btn btn-outline-primary" type="submit">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+        </div>
+    </form>
+
+    {% if produtos %}
+    <table class="table table-striped product-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Marca</th>
+                <th>Preço</th>
+                <th>Categoria</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+            <tr>
+                <td>{{ produto.id }}</td>
+                <td>{{ produto.nome }}</td>
+                <td>{{produto.marca}}</td>
+                <td>R$ {{ produto.preco }}</td>
+                <td>{{ produto.categoria.nome }}</td>
+                    
+                <td>
+                    <a href="{% url 'produto_editar' produto.id %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </a>
+
+                    <!-- Botão que abre o modal de exclusão -->
+                    <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalExcluir{{ produto.id }}">
+                        <i class="bi bi-trash-fill"></i> Excluir
+                    </button>
+
+                    <!-- Modal de confirmação -->
+                    <div class="modal fade" id="modalExcluir{{ produto.id }}" tabindex="-1" aria-labelledby="modalLabel{{ produto.id }}" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-content">
+                                <div class="modal-header bg-danger text-white">
+                                    <h5 class="modal-title" id="modalLabel{{ produto.id }}">Confirmar Exclusão do Produto</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Tem certeza que deseja excluir o produto <strong>{{ produto.nome }}</strong>?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                    <a href="{% url 'produto_excluir' produto.id %}" class="btn btn-danger">Excluir</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="text-muted">Nenhum produto encontrado.</p>
+    {% endif %}
+</div>
+{% endblock %}
+

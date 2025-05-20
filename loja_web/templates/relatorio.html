@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Relatório de Vendas</title>
+</head>
+<body>
+    <h1>Relatório de Vendas</h1>
+    <form method="get">
+        {{ form.as_p }}
+        <button type="submit">Filtrar</button>
+    </form>
+
+    <h2>Vendas</h2>
+    <ul>
+        {% for venda in vendas %}
+        <li>{{ venda.data|date:"d/m/Y H:i" }} - Total: R$ {{ venda.total }}</li>
+        {% empty %}
+        <li>Nenhuma venda encontrada para o período.</li>
+        {% endfor %}
+    </ul>
+
+    <h3>Total das Vendas: R$ {{ total_vendas }}</h3>
+</body>
+</html>

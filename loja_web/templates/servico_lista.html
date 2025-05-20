@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Lista de Serviços{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Serviços Cadastrados</h2>
+
+    {% if servicos %}
+        <ul class="list-group">
+            {% for servico in servicos %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ servico.nome }}
+                    <span class="badge bg-primary">R$ {{ servico.preco }}</span>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="alert alert-warning mt-3">Nenhum serviço cadastrado.</div>
+    {% endif %}
+</div>
+{% endblock %}

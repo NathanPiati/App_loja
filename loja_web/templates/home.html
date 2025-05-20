@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard da Loja{% endblock %}
+
+{% block content %}
+
+<style>
+    body {
+        background-color:rgb(51, 51, 51) !important;
+    }
+
+    .card-custom {
+        transition: transform 0.2s ease-in-out;
+        background-color: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+    }
+
+    .card-custom:hover {
+        transform: scale(1.03);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    .icon-blue { color: #007bff; }
+    .icon-green { color: #28a745; }
+    .icon-orange { color: #fd7e14; }
+
+    .btn-custom {
+        border-radius: 30px;
+        padding: 10px 20px;
+        font-weight: 500;
+    }
+</style>
+
+
+<div class="container text-center mt-5">
+    <h1 class="display-5 fw-bold mb-4">Sistema de Gerenciamento</h1>
+    <p class="lead fw-bold mb-5">Controle fácil de categorias, produtos e serviços.</p>
+
+    <div class="row justify-content-center">
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="icon icon-blue"><i class="bi bi-tags-fill"></i></div>
+                    <h5 class="card-title">Categorias</h5>
+                    <p class="card-text text-muted">Crie, edite e organize categorias.</p>
+                    <a href="{% url 'nova_categoria' %}" class="btn btn-primary btn-custom">Nova Categoria</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="icon icon-green"><i class="bi bi-box-seam"></i></div>
+                    <h5 class="card-title">Produtos</h5>
+                    <p class="card-text text-muted">Gerencie seu estoque com praticidade.</p>
+                    <a href="{% url 'produto_lista' %}" class="btn btn-success btn-custom">Ver Produtos</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="icon icon-orange"><i class="bi bi-tools"></i></div>
+                    <h5 class="card-title">Serviços</h5>
+                    <p class="card-text text-muted">Visualize e organize os serviços oferecidos.</p>
+                    <a href="{% url 'servico_lista' %}" class="btn btn-warning text-white btn-custom">Ver Serviços</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

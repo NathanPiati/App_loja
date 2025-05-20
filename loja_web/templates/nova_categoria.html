@@ -1,0 +1,25 @@
+{% extends 'base_categorias.html' %}
+
+{% block title %}Nova Categoria{% endblock %}
+
+{% block content %}
+{% if messages %}
+  {% for message in messages %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+      {{ message }}
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+  {% endfor %}
+{% endif %}
+
+<div class="card bg-dark text-white p-4 fade-slide-in">
+    <h3><i class="bi bi-plus-circle"></i> {% if editando %}Editar Categoria{% else %}Cadastrar Nova Categoria{% endif %}</h3>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success mt-2">Salvar</button>
+    </form>
+</div>
+{% endblock %}
+

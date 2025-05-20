@@ -1,0 +1,36 @@
+{% extends 'base_categorias.html' %}
+
+{% block title %}Pesquisar Categorias{% endblock %}
+
+{% block content %}
+<div class="card bg-dark text-white p-4 fade-slide-in">
+    <h3><i class="bi bi-search"></i> Pesquisar Categorias</h3>
+    <form method="GET">
+        <div class="mb-3">
+            <input type="text" name="q" class="form-control" placeholder="Digite o nome da categoria...">
+        </div>
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </form>
+
+    {% if categorias %}
+        <hr>
+        <h5>Resultados:</h5>
+        <ul class="list-group">
+            {% for cat in categorias %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ cat.id }} - {{ cat.nome }}</span>
+                <div>
+                    <a href="{% url 'editar_categoria' cat.id %}" class="btn btn-warning btn-sm">Editar</a>
+                    <a href="{% url 'excluir_categoria' cat.id %}" class="btn btn-danger btn-sm"
+                       onclick="return confirm('Tem certeza que deseja excluir esta categoria?');">
+                        Excluir
+                    </a>
+                </div>
+            </li>
+            {% empty %}
+                <li class="list-group-item text-white bg-secondary">Nenhuma categoria encontrada.</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}
