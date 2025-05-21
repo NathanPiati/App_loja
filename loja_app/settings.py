@@ -100,22 +100,6 @@ WSGI_APPLICATION = 'loja_app.wsgi.application'
 # }
 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'mssql',
-#         'NAME': 'lojadb',
-#         'USER': 'admin',       # seu usuário SQL criado
-#         'PASSWORD': 'Pakfat50',     # a senha do usuário
-#         'HOST': 'database-app.cfoi8wec06e3.us-east-1.rds.amazonaws.com', # IP da máquina SQL + porta separada por vírgula
-#         'OPTIONS': {
-#             'driver': 'ODBC Driver 17 for SQL Server',
-#             'TrustServerCertificate': 'yes',
-#             'unicode_results': True,
-#             'extra_params': 'charset=utf8',
-#         },
-#     }
-# }
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
