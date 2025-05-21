@@ -65,3 +65,10 @@ class CategoriaForm(forms.ModelForm):
         widgets = {
             'nome': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nome da Categoria'}),
         }
+
+
+class ConfiguracaoDBForm(forms.Form):
+    servidor = forms.CharField(label='Servidor', max_length=100)
+    banco = forms.CharField(label='Banco de Dados', max_length=100)
+    usuario = forms.CharField(label='Usuário', max_length=100)
+    senha = forms.CharField(label='Senha', widget=forms.PasswordInput)

@@ -81,20 +81,52 @@ WSGI_APPLICATION = 'loja_app.wsgi.application'
 #        'NAME': BASE_DIR / 'db.sqlite3',
 #    }
 #}
+
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'mssql',
+#         'NAME': 'LojaDB',
+#         'HOST': 'DESKTOP-NTN\\SQLEXPRESS',
+#         'OPTIONS': {
+#             'driver': 'ODBC Driver 17 for SQL Server',
+#             'trusted_connection': 'yes',  # se usar autenticação Windows
+#             'TrustServerCertificate': 'yes',
+#             'unicode_results': True,   # importantíssimo
+#             'extra_params': 'charset=utf8',
+#         },
+#     }
+# }
+
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'mssql',
+#         'NAME': 'lojadb',
+#         'USER': 'admin',       # seu usuário SQL criado
+#         'PASSWORD': 'Pakfat50',     # a senha do usuário
+#         'HOST': 'database-app.cfoi8wec06e3.us-east-1.rds.amazonaws.com', # IP da máquina SQL + porta separada por vírgula
+#         'OPTIONS': {
+#             'driver': 'ODBC Driver 17 for SQL Server',
+#             'TrustServerCertificate': 'yes',
+#             'unicode_results': True,
+#             'extra_params': 'charset=utf8',
+#         },
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'mssql',
-        'NAME': 'LojaDB',
-        'HOST': 'DESKTOP-NTN\\SQLEXPRESS',
-        'OPTIONS': {
-            'driver': 'ODBC Driver 17 for SQL Server',
-            'trusted_connection': 'yes',  # se usar autenticação Windows
-            'TrustServerCertificate': 'yes',
-            'unicode_results': True,   # importantíssimo
-            'extra_params': 'charset=utf8',
-        },
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'lojadb',
+        'USER': 'admin',
+        'PASSWORD': 'Pakfat50',
+        'HOST': 'database-app.cfoi8wec06e3.us-east-1.rds.amazonaws.com',
+        'PORT': '3306',
     }
 }
+
 
 
 
