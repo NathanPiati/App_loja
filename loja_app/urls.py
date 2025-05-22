@@ -21,7 +21,7 @@ urlpatterns = [
     path('servicos/', views.servico_lista, name='servico_lista'),
     path('categorias/editar/<int:id>/', views.editar_categoria, name='editar_categoria'),
     path('categorias/excluir/<int:id>/', views.excluir_categoria, name='excluir_categoria'),
-    path('configurar-banco/', views.configurar_banco, name='configurar_banco'),
+
 
 
 

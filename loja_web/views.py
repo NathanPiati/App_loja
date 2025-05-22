@@ -229,39 +229,3 @@ def excluir_categoria(request, id):
     categoria.delete()
     messages.success(request, 'Categoria excluída com sucesso!')
     return redirect('pesquisar_categoria')  # ou o nome da URL onde lista as categorias    
-
-
-def configurar_banco(request):
-    mensagem = ''
-    sucesso = False
-
-    if request.method == 'POST':
-        form = ConfiguracaoDBForm(request.POST)
-        if form.is_valid():
-            servidor = form.cleaned_data['servidor']
-            banco = form.cleaned_data['banco']
-            usuario = form.cleaned_data['usuario']
-            senha = form.cleaned_data['senha']
-
-            try:
-                conn_str = (
-                    f'DRIVER={{ODBC Driver 17 for SQL Server}};'
-                    f'SERVER={servidor};'
-                    f'DATABASE={banco};'
-                    f'UID={usuario};'
-                    f'PWD={senha}'
-                )
-                conn = pyodbc.connect(conn_str, timeout=5)
-                conn.close()
-                mensagem = '✅ Conexão bem-sucedida!'
-                sucesso = True
-            except Exception as e:
-                mensagem = f'❌ Erro: {str(e)}'
-    else:
-        form = ConfiguracaoDBForm()
-
-    return render(request, 'configurar_banco.html', {
-        'form': form,
-        'mensagem': mensagem,
-        'sucesso': sucesso
-    })
