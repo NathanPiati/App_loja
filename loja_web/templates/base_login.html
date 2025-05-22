@@ -84,36 +84,8 @@
 <body>
     <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="bi bi-shop-window"></i> Minha Loja</a>
-            <button class="navbar-toggler bg-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon text-white"></span>
             </button>
-
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="bi bi-house-door"></i> Inicio</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/produtos/"><i class="bi bi-box-seam"></i> Produtos</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/categoria/novo/"><i class="bi bi-tools"></i> Categorias</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/nova-venda/"><i class="bi bi-cart-check"></i> Vendas</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/relatorio/"><i class="bi bi-clipboard-data"></i> Relatórios</a>
-                    </li>
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <span class="nav-link disabled">
-                                <li class="nav-item d-flex align-items-center ms-3 ps-3 border-start text-white">
-                                    <i class="bi bi-person-circle"></i> {{ user.username }}
-                                </li>
-                            </span>
-                        </li>
                         <li class="nav-item">
                             <a href="{% url 'logout' %}" class="btn btn-outline-secondary ms-2">Sair</a>
                         </li>

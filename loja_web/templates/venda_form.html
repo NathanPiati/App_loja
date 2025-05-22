@@ -1,26 +1,132 @@
 {% extends 'base.html' %}
 
-{% block title %}Nova Venda{% endblock %}
+{% block title %}Cadastro de Pedido{% endblock %}
 
 {% block content %}
-<html>
-<head>
-    <meta charset="utf-8">
-    <title>Nova Venda</title>
-</head>
-<body>
-    <h1>Nova Venda</h1>
-    <form method="post">
+<div class="card bg-dark text-white p-4 fade-slide-in">
+    <h3><i class="bi bi-bag"></i> Cadastro de Pedido</h3>
+    <form method="POST">
         {% csrf_token %}
-        {{ form.as_p }}
-        <h2>Itens da Venda</h2>
-        {{ formset.management_form }}
-        {% for form in formset %}
-        <div style="border:1px solid #ccc; padding:10px; margin-bottom:10px;">
-            {{ form.as_p }}
+
+        <!-- Dados do Pedido -->
+        <div class="mb-3">
+            <div class="row g-3">
+
+                <!-- Cliente com busca -->
+                <div class="col-md-6">
+                    <label class="form-label"><i class="bi bi-person"></i> Cliente</label>
+                    {{ form.cliente }}
+                </div>
+
+                <!-- Data do pedido -->
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-calendar-event"></i> Data do Pedido</label>
+                    {{ form.data }}
+                </div>
+
+                <!-- Data de criação (somente leitura) -->
+                {% if form.instance.pk %}
+                <div class="col-md-3">
+                    <label class="form-label"><i class="bi bi-clock-history"></i> Criado em</label>
+                    <input type="text" class="form-control bg-secondary text-white" 
+                           value="{{ form.instance.data|date:'d/m/Y' }}" readonly>
+                </div>
+                {% endif %}
+            </div>
         </div>
+
+        <hr>
+
+        <!-- Produtos -->
+        <h5><i class="bi bi-box-seam"></i> Produtos</h5>
+        {{ formset_produtos.management_form }}
+        {% for form in formset_produtos %}
+            <div class="border rounded p-3 mb-3">
+                <div class="row g-2">
+                    {% for field in form.visible_fields %}
+                        <div class="col-md-4">
+                            <label class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="text-danger">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <div class="col-md-2 d-flex align-items-center">
+                        {% if form.instance.pk %}
+                            <label class="form-check-label">Excluir</label>
+                            {{ form.DELETE }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
         {% endfor %}
-        <button type="submit">Salvar Venda</button>
+        <button type="button" class="btn btn-outline-light btn-sm mb-3" onclick="addForm('produtos')">
+            <i class="bi bi-plus-circle"></i> Adicionar Produto
+        </button>
+
+        <hr>
+
+        <!-- Serviços -->
+        <h5><i class="bi bi-wrench-adjustable"></i> Serviços</h5>
+        {{ formset_servicos.management_form }}
+        {% for form in formset_servicos %}
+            <div class="border rounded p-3 mb-3">
+                <div class="row g-2">
+                    {% for field in form.visible_fields %}
+                        <div class="col-md-4">
+                            <label class="form-label">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.errors %}
+                                <div class="text-danger">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                    <div class="col-md-2 d-flex align-items-center">
+                        {% if form.instance.pk %}
+                            <label class="form-check-label">Excluir</label>
+                            {{ form.DELETE }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+        <button type="button" class="btn btn-outline-light btn-sm mb-3" onclick="addForm('servicos')">
+            <i class="bi bi-plus-circle"></i> Adicionar Serviço
+        </button>
+
+        <hr>
+
+        <button type="submit" class="btn btn-success">
+            <i class="bi bi-save"></i> Salvar Pedido
+        </button>
+        <a href="{% url 'listar_pedidos' %}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar
+        </a>
     </form>
-</body>
-</html>
+</div>
+
+<script>
+    function addForm(tipo) {
+        const totalForms = document.querySelector(`#id_${tipo}-TOTAL_FORMS`);
+        const currentFormCount = parseInt(totalForms.value);
+        const formContainer = document.querySelectorAll(`[name^="${tipo}-"]`).item(0).closest('form');
+        const formCopy = formContainer.querySelectorAll('.border.rounded')[0].cloneNode(true);
+
+        formCopy.querySelectorAll('input, select, textarea').forEach(input => {
+            const name = input.getAttribute('name');
+            if (name) {
+                const newName = name.replace(/\d+/, currentFormCount);
+                input.setAttribute('name', newName);
+                input.setAttribute('id', `id_${newName}`);
+                if (input.type !== 'hidden') {
+                    input.value = '';
+                }
+            }
+        });
+
+        formContainer.insertBefore(formCopy, formContainer.querySelector(`button[onclick*="${tipo}"]`));
+        totalForms.value = currentFormCount + 1;
+    }
+</script>
+{% endblock %}

@@ -1,6 +1,51 @@
 from django import forms
-from .models import Produto, Venda, ItemVenda, Categoria
+from django_select2 import forms as s2forms
+from .models import Produto, Venda, ItemVenda, Categoria, Pedido, ItemProduto, ItemServico
 from django.forms import inlineformset_factory
+
+
+
+class ClienteWidget(s2forms.ModelSelect2Widget):
+    search_fields = [
+        'nome__icontains',
+    ]
+
+
+class PedidoForm(forms.ModelForm):
+    class Meta:
+        model = Pedido
+        fields = ['cliente', 'data']
+        widgets = {
+            'cliente': ClienteWidget(
+                attrs={'data-placeholder': 'Selecione o cliente...'}
+            ),
+            'data': forms.DateInput(
+                attrs={'type': 'date', 'class': 'form-control'}
+            ),
+        }
+
+
+
+class PedidoForm(forms.ModelForm):
+    class Meta:
+        model = Pedido
+        fields = '__all__'
+        widgets = {
+            'data': forms.DateInput(attrs={'type': 'date'}),
+        }
+
+
+ItemProdutoFormSet = inlineformset_factory(
+    Pedido, ItemProduto,
+    fields=['descricao', 'quantidade', 'preco_unitario'],
+    extra=1, can_delete=True
+)
+
+ItemServicoFormSet = inlineformset_factory(
+    Pedido, ItemServico,
+    fields=['descricao', 'quantidade', 'preco_unitario'],
+    extra=1, can_delete=True
+)
 
 class ProdutoForm(forms.ModelForm):
     class Meta:
@@ -10,13 +55,19 @@ class ProdutoForm(forms.ModelForm):
 class VendaForm(forms.ModelForm):
     class Meta:
         model = Venda
-        fields = []  # A venda será criada automaticamente; o total será calculado
+        fields = ['cliente']
 
-# Formset para os itens da venda
+
+class ItemVendaForm(forms.ModelForm):
+    class Meta:
+        model = ItemVenda
+        fields = ['produto', 'quantidade', 'preco_unitario']
+
 
 ItemVendaFormSet = inlineformset_factory(
-    Venda, ItemVenda,
-    fields=['produto', 'quantidade', 'preco_unitario'],
+    Venda,
+    ItemVenda,
+    form=ItemVendaForm,
     extra=1,
     can_delete=True
 )

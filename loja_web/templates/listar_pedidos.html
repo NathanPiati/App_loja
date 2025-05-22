@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Pedidos</h1>
+<a href="{% url 'novo_pedido' %}">Novo Pedido</a>
+<table border="1">
+    <tr>
+        <th>Número</th>
+        <th>Data</th>
+        <th>Cliente</th>
+        <th>Status</th>
+        <th>Ações</th>
+    </tr>
+    {% for pedido in pedidos %}
+    <tr>
+        <td>{{ pedido.numero }}</td>
+        <td>{{ pedido.data }}</td>
+        <td>{{ pedido.cliente.nome }}</td>
+        <td>{{ pedido.status }}</td>
+        <td>
+            <a href="{% url 'editar_pedido' pedido.pk %}">Editar</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

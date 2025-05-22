@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Vendas Realizadas</h1>
+
+<a href="{% url 'nova_venda' %}">Nova Venda</a>
+
+<table border="1">
+    <tr>
+        <th>ID</th>
+        <th>Data</th>
+        <th>Cliente</th>
+        <th>Total</th>
+    </tr>
+    {% for venda in vendas %}
+    <tr>
+        <td>{{ venda.id }}</td>
+        <td>{{ venda.data }}</td>
+        <td>{{ venda.cliente }}</td>
+        <td>R$ {{ venda.total }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

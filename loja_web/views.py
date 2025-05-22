@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Produto, Venda, Servicos
-from .forms import ProdutoForm, VendaForm, ItemVendaFormSet, VendasFilterForm, CategoriaForm, Categoria, ConfiguracaoDBForm
+from .models import Produto, Venda, Servicos, ItemVenda, Pedido, ItemProduto, ItemServico
+from .forms import ProdutoForm, VendaForm, ItemVendaFormSet, VendasFilterForm, CategoriaForm, Categoria, ConfiguracaoDBForm, PedidoForm, ItemProdutoFormSet, ItemServicoFormSet
 from django.db.models import Sum
 from .forms import VendasFilterForm
 from django.contrib.auth import authenticate, login, logout
@@ -9,6 +9,45 @@ from django.contrib import messages
 import pyodbc
 
 
+
+def nova_venda(request):
+    if request.method == 'POST':
+        form = VendaForm(request.POST)
+        formset = ItemVendaFormSet(request.POST)
+
+        if form.is_valid() and formset.is_valid():
+            venda = form.save(commit=False)
+            venda.total = 0  # Inicializa
+            venda.save()
+
+            itens = formset.save(commit=False)
+            total = 0
+
+            for item in itens:
+                item.venda = venda
+                item.subtotal_valor = item.quantidade * item.preco_unitario
+                total += item.subtotal_valor
+                item.save()
+
+            venda.total = total
+            venda.save()
+
+            formset.save_m2m()
+
+            return redirect('lista_vendas')  # Ajuste para sua URL de listagem
+    else:
+        form = VendaForm()
+        formset = ItemVendaFormSet()
+
+    return render(request, 'venda_form.html', {
+        'form': form,
+        'formset': formset
+    })
+
+
+def lista_vendas(request):
+    vendas = Venda.objects.all()
+    return render(request, 'lista_vendas.html', {'vendas': vendas})
 
 
 def logout_view(request):
@@ -229,3 +268,41 @@ def excluir_categoria(request, id):
     categoria.delete()
     messages.success(request, 'Categoria excluída com sucesso!')
     return redirect('pesquisar_categoria')  # ou o nome da URL onde lista as categorias    
+
+
+
+
+def pedido_view(request, pk=None):
+    if pk:
+        pedido = get_object_or_404(Pedido, pk=pk)
+    else:
+        pedido = None
+
+    if request.method == 'POST':
+        form = PedidoForm(request.POST, instance=pedido)
+        formset_produto = ItemProdutoFormSet(request.POST, instance=pedido)
+        formset_servico = ItemServicoFormSet(request.POST, instance=pedido)
+
+        if form.is_valid() and formset_produto.is_valid() and formset_servico.is_valid():
+            pedido = form.save()
+            formset_produto.instance = pedido
+            formset_servico.instance = pedido
+            formset_produto.save()
+            formset_servico.save()
+            return redirect('listar_pedidos')
+
+    else:
+        form = PedidoForm(instance=pedido)
+        formset_produto = ItemProdutoFormSet(instance=pedido)
+        formset_servico = ItemServicoFormSet(instance=pedido)
+
+    return render(request, 'venda_form.html', {
+        'form': form,
+        'formset_produtos': formset_produto,
+        'formset_servicos': formset_servico,
+    })
+
+
+def listar_pedidos(request):
+    pedidos = Pedido.objects.all()
+    return render(request, 'listar_pedidos.html', {'pedidos': pedidos})
