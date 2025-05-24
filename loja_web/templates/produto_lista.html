@@ -1,21 +1,99 @@
 {% extends 'base.html' %}
+
 {% block title %}Lista de Produtos{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="mb-4">Produtos Cadastrados</h2>
+<div class="container mt-4">
+    <h2><i class="bi bi-boxes"></i> Lista de Produtos</h2>
 
+    {# Formulário de Filtro #}
+    <style>
+        .card-title,
+        label,
+        .form-control,
+        button {
+            color: black !important;
+        }
+    </style>
+    <div class="card card-body mb-4">
+        <h5 class="card-title">Filtrar Produtos</h5>
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-2">
+                {{ filter_form.id.label_tag }}
+                {{ filter_form.id }}
+            </div>
+            <div class="col-md-3">
+                {{ filter_form.nome.label_tag }}
+                {{ filter_form.nome }}
+            </div>
+            <div class="col-md-3">
+                {{ filter_form.marca.label_tag }}
+                {{ filter_form.marca }}
+            </div>
+            <div class="col-md-3">
+                {{ filter_form.categoria.label_tag }}
+                {{ filter_form.categoria }}
+            </div>
+            <div class="col-md-1">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+            </div>
+        </form>
+    </div>
+
+    {# Tabela de Produtos #}
     {% if produtos %}
-        <ul class="list-group">
-            {% for produto in produtos %}
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    {{ produto.nome }}
-                    <span class="badge bg-success">R$ {{ produto.preco }}</span>
-                </li>
-            {% endfor %}
-        </ul>
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead>
+                <tr style="color: black;">
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Marca</th>
+                    <th>Categoria</th>
+                    <th>Preço</th>
+                    <th>Quantidade</th> {# Nova coluna #}
+                    <th>Ações</th> {# Coluna de Ações #}
+                </tr>
+            </thead>
+            <tbody>
+                {% for produto in produtos %}
+                <tr>
+                    <td>{{ produto.id }}</td>
+                    <td>{{ produto.nome }}</td>
+                    <td>{{ produto.marca|default:"-" }}</td>
+                    <td>{{ produto.categoria.nome }}</td>
+                    <td>R$ {{ produto.preco|default:"0.00" }}</td>
+                    <td>{{ produto.estoque }}</td> {# Exibe a quantidade em estoque #}
+                    <td>
+                        {# Botão Editar #}
+                        <a href="{% url 'produto_editar' produto.id %}" class="btn btn-sm btn-warning me-1" title="Editar Produto">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        
+                        {# Botão Excluir (com modal, se necessário) - Adapte se já tiver #}
+                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalExcluir{{ produto.id }}" title="Excluir Produto">
+                            <i class="bi bi-trash-fill"></i>
+                        </button> 
+                        {# Inclua o modal de exclusão aqui se não estiver em outro lugar #}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     {% else %}
-        <div class="alert alert-warning mt-3">Nenhum produto cadastrado.</div>
+        <div class="alert alert-info" role="alert">
+            Nenhum produto encontrado com os filtros aplicados.
+        </div>
     {% endif %}
+
 </div>
 {% endblock %}
+
+{# --- Notas ---
+1. Este template agora inclui um formulário de filtro na parte superior.
+2. A tabela exibe a coluna "Quantidade" com o valor de `produto.estoque`.
+3. A coluna "Ações" agora inclui um botão "Editar" que leva para a URL `produto_editar`.
+4. Adapte as classes CSS (container, card, row, col-md-*, btn, table, etc.) conforme seu framework (Bootstrap 5 usado como exemplo).
+5. Certifique-se que a view `produto_lista` está passando o `filter_form` e a lista `produtos` filtrada no contexto.
+--- #}

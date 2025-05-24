@@ -1,0 +1,66 @@
+{# templates/loja_web/entrada_estoque_form.html #}
+{# Certifique-se que este caminho corresponde ao usado na sua view (ex: 'loja_web/entrada_estoque_form.html') #}
+
+{# Você pode estender um template base se tiver um #}
+{% extends 'base.html' %} 
+
+{% block content %} 
+
+<div class="container mt-4">
+    <h2>{{ titulo_pagina|default:"Registrar Nova Entrada de Estoque" }}</h2>
+
+    {# Exibir mensagens do Django (success, error, warning) #}
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %} {# Essencial para segurança em forms POST #}
+
+        {# Renderiza o formulário. Usando as_p para simplicidade, mas pode ser campo a campo #}
+        {#{{ form.as_p }}#}
+
+        {# Exemplo renderizando campo a campo (mais controle sobre o HTML e classes CSS) #}
+        {# Remova ou comente a linha {{ form.as_p }} acima se usar este método #}
+         <div class="mb-3">
+            <label for="{{ form.produto.id_for_label }}" class="form-label">{{ form.produto.label }}</label>
+            {{ form.produto }}
+            {% if form.produto.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.produto.errors|striptags }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.quantidade.id_for_label }}" class="form-label">{{ form.quantidade.label }}</label>
+            {{ form.quantidade }}
+            {% if form.quantidade.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.quantidade.errors|striptags }}
+                </div>
+            {% endif %}
+        </div> 
+
+        <button type="submit" class="btn btn-primary mt-3">Registrar Entrada</button>
+    </form>
+
+    {# Link opcional para voltar ou ir para outra página #}
+    <a href="{% url 'buscar_produtos' %}" class="btn btn-secondary mt-3">Voltar</a>
+
+</div>
+
+{% endblock %}
+
+{# --- Notas --- #}
+{# 1. Adapte as classes CSS (ex: container, mt-4, alert, btn, btn-primary, mb-3, form-label, form-select, form-control) #}
+{#    conforme o framework CSS que você está usando (Bootstrap 5 foi usado como exemplo). #}
+{# 2. Salve este arquivo como 'entrada_estoque_form.html' dentro do diretório de templates #}
+{#    do seu app (provavelmente 'loja_web/templates/loja_web/'). #}
+{# 3. A view `registrar_entrada_estoque` espera encontrar este template. #}
+

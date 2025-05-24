@@ -1,0 +1,56 @@
+{% extends 'base_clientes.html' %}
+
+{% block title %}Pesquisar Clientes{% endblock %}
+
+{% block content %}
+<h2><i class="bi bi-search"></i> Pesquisar Clientes</h2>
+
+<div class="card bg-dark text-white p-4 fade-slide-in">
+    <form method="GET">
+        <div class="mb-3">
+            <label for="nome" class="form-label">Nome do Cliente</label>
+            <input type="text" id="nome" name="nome" class="form-control" placeholder="Digite o nome">
+        </div>
+        <div class="mb-3">
+            <label for="telefone" class="form-label">Telefone</label>
+            <input type="text" id="telefone" name="telefone" class="form-control" placeholder="Digite o telefone">
+        </div>
+        <button type="submit" class="btn btn-primary mt-2"><i class="bi bi-search"></i> Pesquisar</button>
+    </form>
+</div>
+
+{% if clientes %}
+    <div class="card bg-dark text-white p-4 fade-slide-in">
+        <h4>Resultado da Pesquisa:</h4>
+        <table class="table table-bordered table-dark table-hover">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Telefone</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.id }}</td>
+                    <td>{{ cliente.nome }}</td>
+                    <td>{{ cliente.telefone }}</td>
+                    <td>
+                        <a href="{% url 'cliente_editar' cliente.id %}" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'cliente_excluir' cliente.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Confirma exclusão?');"><i class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% elif clientes is not none %}
+    <div class="alert alert-warning mt-3">
+        Nenhum cliente encontrado.
+    </div>
+{% endif %}
+
+{% endblock %}
+

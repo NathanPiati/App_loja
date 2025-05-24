@@ -1,0 +1,281 @@
+{% extends 'pedidos_base.html' %}
+
+{% block title %}Novo Pedido{% endblock %}
+
+{% block content %}
+<h2>Novo Pedido</h2>
+{% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+<form method="post">
+    {% csrf_token %}
+    
+    {# Campos do Pedido #}
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Cliente</label>
+            {{ form.cliente }}
+        </div>
+        <div class="col-md-6">
+            <label class="form-label">Data</label>
+            {{ form.data }}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label class="form-label">Condição de Pagamento</label>
+            {{ form.condicao_pagamento }}
+        </div>
+         <div class="col-md-6">
+            <label class="form-label">Status</label>
+            {{ form.status }}
+        </div>
+    </div>
+
+    {# Campo de Desconto Percentual #}
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label for="{{ form.desconto_percentual.id_for_label }}" class="form-label">{{ form.desconto_percentual.label }}</label>
+            {{ form.desconto_percentual }}
+            {% if form.desconto_percentual.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.desconto_percentual.errors|striptags }}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Observações</label>
+        {{ form.observacoes }}
+    </div>
+
+    <hr>
+
+    <h4>Itens do Pedido</h4>
+    <table class="table table-bordered" id="tabelaProdutos">
+        <thead>
+            <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário (R$)</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaProdutosBody">
+            {# Renderiza os forms existentes do formset (para edição) #}
+            {% for item_form in formset %}
+                <tr class="dynamic-form">
+                    {{ item_form.id }}
+                    <td>
+                        {{ item_form.instance.produto.nome|default:item_form.instance.descricao|default:"-" }}
+                        {{ item_form.produto }}
+                        {{ item_form.descricao }}
+                    </td>
+                    <td>
+                        <input type="number" name="{{ item_form.prefix }}-quantidade" value="{{ item_form.instance.quantidade|default:1 }}" class="form-control form-control-sm item-quantidade" min="1">
+                    </td>
+                    <td>
+                        <input type="number" name="{{ item_form.prefix }}-preco_unitario" value="{{ item_form.instance.preco_unitario|stringformat:".2f"|default:"0.00" }}" class="form-control form-control-sm item-preco" step="0.01" min="0">
+                    </td>
+                    <td>
+                        {% if item_form.can_delete %}
+                            {{ item_form.DELETE }} <label for="{{ item_form.DELETE.id_for_label }}">Remover</label>
+                        {% endif %}
+                        <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove(); atualizarTotal();">Remover</button>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <button type="button" class="btn btn-primary mb-3" onclick="abrirModal()">Adicionar Produto</button>
+
+    {{ formset.management_form }}
+
+    {# Totais e Desconto #}
+    <div class="row justify-content-end mt-3">
+        <div class="col-md-4">
+            <div class="text-end">
+                <h5>Subtotal: R$ <span id="subtotalPedido">0.00</span></h5>
+                <h5>Desconto (<span id="descontoPercentualDisplay">{{ form.instance.desconto_percentual|default:"0.00" }}</span>%): R$ <span id="valorDesconto">0.00</span></h5>
+                <hr>
+                <h4>Total do Pedido: R$ <span id="totalPedido">0.00</span></h4>
+            </div>
+        </div>
+    </div>
+
+    <br>
+    <button type="submit" class="btn btn-success">Salvar Pedido</button>
+</form>
+
+<!-- Modal -->
+<div class="modal fade" id="modalProduto" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" style="color: black;">Selecionar Produto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="buscaProduto" class="form-control" placeholder="Buscar produto...">
+                <br>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Preço</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultadoBusca"></tbody>
+                </table>
+                <div>
+                    <label style="color: black;">Quantidade:</label>
+                    <input type="number" id="quantidade" class="form-control" value="1" min="1">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- Seletores --- 
+const busca = document.getElementById('buscaProduto');
+const resultado = document.getElementById('resultadoBusca');
+const tabelaProdutosBody = document.getElementById('tabelaProdutosBody'); // ID adicionado ao tbody
+const subtotalPedidoSpan = document.getElementById('subtotalPedido');
+const descontoPercentualInput = document.getElementById('id_{{ form.desconto_percentual.name }}'); // ID do campo de desconto
+const descontoPercentualDisplaySpan = document.getElementById('descontoPercentualDisplay');
+const valorDescontoSpan = document.getElementById('valorDesconto');
+const totalPedidoSpan = document.getElementById('totalPedido');
+const totalFormsInput = document.getElementById('id_{{ formset.prefix }}-TOTAL_FORMS');
+
+// --- Funções --- 
+function abrirModal() {
+    const modal = new bootstrap.Modal(document.getElementById('modalProduto'));
+    modal.show();
+}
+
+function buscarProdutos() {
+    fetch(`/buscar-produtos/?term=${busca.value}`)
+    .then(res => res.json())
+    .then(data => {
+        resultado.innerHTML = '';
+        data.forEach(p => {
+            resultado.innerHTML += `
+                <tr>
+                    <td>${p.nome}</td>
+                    <td>R$ ${p.preco}</td>
+                    <td><button type="button" class="btn btn-success btn-sm"
+                        onclick="adicionarProduto(${p.id}, '${p.nome}', ${p.preco})">Selecionar</button></td>
+                </tr>
+            `;
+        });
+    });
+}
+
+function atualizarTotal() {
+    let subtotal = 0;
+    console.log("Atualizando total...");
+    tabelaProdutosBody.querySelectorAll('tr').forEach((tr, rowIndex) => {
+        const qtdInput = tr.querySelector('input[name$="-quantidade"]');
+        const precoInput = tr.querySelector('input[name$="-preco_unitario"]');
+        const deleteInput = tr.querySelector('input[name$="-DELETE"]');
+        const isMarkedForDeletion = deleteInput && deleteInput.checked;
+
+        if (!isMarkedForDeletion && qtdInput && precoInput) {
+            const qtd = Number(qtdInput.value);
+            const preco = Number(precoInput.value);
+            if (!isNaN(qtd) && !isNaN(preco)) {
+                subtotal += qtd * preco;
+            }
+        }
+    });
+
+    const descontoPercentual = Number(descontoPercentualInput.value) || 0;
+    const valorDesconto = (subtotal * descontoPercentual) / 100;
+    const totalFinal = subtotal - valorDesconto;
+
+    console.log(`Subtotal: ${subtotal}, Desconto %: ${descontoPercentual}, Valor Desconto: ${valorDesconto}, Total: ${totalFinal}`);
+
+    subtotalPedidoSpan.textContent = subtotal.toFixed(2);
+    descontoPercentualDisplaySpan.textContent = descontoPercentual.toFixed(2); // Atualiza o % exibido
+    valorDescontoSpan.textContent = valorDesconto.toFixed(2);
+    totalPedidoSpan.textContent = totalFinal.toFixed(2);
+}
+
+function adicionarProduto(id, nome, preco) {
+    const qtd = document.getElementById('quantidade').value;
+    const formsetPrefix = '{{ formset.prefix }}';
+    const index = parseInt(totalFormsInput.value);
+
+    const newRow = document.createElement('tr');
+    newRow.innerHTML = `
+        <td>
+            ${nome}
+            <input type="hidden" name="${formsetPrefix}-${index}-produto" value="${id}">
+            <input type="hidden" name="${formsetPrefix}-${index}-descricao" value="${nome}">
+        </td>
+        <td>
+            <input type="number" name="${formsetPrefix}-${index}-quantidade" value="${qtd}" class="form-control form-control-sm item-quantidade" min="1">
+        </td>
+        <td>
+            <input type="number" name="${formsetPrefix}-${index}-preco_unitario" value="${preco.toFixed(2)}" class="form-control form-control-sm item-preco" step="0.01" min="0">
+        </td>
+        <td>
+            <input type="hidden" name="${formsetPrefix}-${index}-id" value=""> 
+            <button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove(); atualizarTotal();">Remover</button>
+        </td>
+    `;
+    tabelaProdutosBody.appendChild(newRow);
+
+    totalFormsInput.value = index + 1;
+
+    // Adiciona listeners para os novos inputs
+    newRow.querySelector('.item-quantidade').addEventListener('input', atualizarTotal);
+    newRow.querySelector('.item-preco').addEventListener('input', atualizarTotal);
+
+    atualizarTotal();
+
+    const modal = bootstrap.Modal.getInstance(document.getElementById('modalProduto'));
+    modal.hide();
+    busca.value = '';
+    resultado.innerHTML = '';
+    document.getElementById('quantidade').value = 1;
+}
+
+// --- Listeners --- 
+busca.addEventListener('input', buscarProdutos);
+
+// Listener para o campo de desconto
+descontoPercentualInput.addEventListener('input', atualizarTotal);
+
+// Adiciona listeners para inputs existentes (quantidade, preço, delete) ao carregar
+document.addEventListener('DOMContentLoaded', function() {
+    tabelaProdutosBody.querySelectorAll('.item-quantidade, .item-preco').forEach(input => {
+        input.addEventListener('input', atualizarTotal);
+    });
+    tabelaProdutosBody.querySelectorAll('input[name$="-DELETE"]').forEach(checkbox => {
+        checkbox.addEventListener('change', atualizarTotal);
+    });
+
+    // Calcula o total inicial
+    console.log("Calculando total inicial...");
+    atualizarTotal();
+});
+
+</script>
+{% endblock %}
+

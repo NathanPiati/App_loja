@@ -1,26 +1,43 @@
-{% extends 'base.html' %}
+{% extends 'pedidos_base.html' %}
+
+{% block title %}Lista de Pedidos{% endblock %}
 
 {% block content %}
-<h1>Pedidos</h1>
-<a href="{% url 'novo_pedido' %}">Novo Pedido</a>
-<table border="1">
-    <tr>
-        <th>Número</th>
-        <th>Data</th>
-        <th>Cliente</th>
-        <th>Status</th>
-        <th>Ações</th>
-    </tr>
-    {% for pedido in pedidos %}
-    <tr>
-        <td>{{ pedido.numero }}</td>
-        <td>{{ pedido.data }}</td>
-        <td>{{ pedido.cliente.nome }}</td>
-        <td>{{ pedido.status }}</td>
-        <td>
-            <a href="{% url 'editar_pedido' pedido.pk %}">Editar</a>
-        </td>
-    </tr>
-    {% endfor %}
-</table>
+<div class="card-custom fade-slide-in">
+    <h3><i class="bi bi-list"></i> Lista de Pedidos</h3>
+    <table class="table table-dark table-hover">
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Cliente</th>
+                <th>Data</th>
+                <th>Status</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for pedido in pedidos %}
+            <tr>
+                <td>{{ pedido.numero }}</td>
+                <td>{{ pedido.cliente }}</td>
+                <td>{{ pedido.data }}</td>
+                <td>{{ pedido.status }}</td>
+                <td>
+                    <a href="{% url 'editar_pedido' pedido.numero %}" class="btn btn-sm btn-warning">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </a>
+                    <a href="{% url 'excluir_pedido' pedido.numero %}" class="btn btn-sm btn-danger" 
+                       onclick="return confirm('Tem certeza que deseja excluir este pedido?');">
+                        <i class="bi bi-trash"></i> Excluir
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">Nenhum pedido encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
