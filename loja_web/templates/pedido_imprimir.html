@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Imprimir Pedido/OS {{ pedido.id }}</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 40px;
+            color: #333;
+            background-color: #f4f7fa;
+        }
+        h1, h2, h3 {
+            text-align: center;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .header-logo {
+            flex: 0 0 auto;
+            margin-right: 20px;
+        }
+        .header-info {
+            flex: 1;
+            text-align: left;
+        }
+        .header-info h2 {
+            margin: 0 0 5px 0;
+            text-align: left;
+        }
+        .header-info p {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+        .info {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+        .info p {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        tr.produto {
+            background-color: #f5f5f5;
+        }
+        tr.serviço {
+            background-color: #dff0d8;
+        }
+        tr:nth-child(even) {
+            background-color: #e8f4f9;
+        }
+        tfoot td {
+            font-weight: bold;
+            background-color: #3498db;
+            color: white;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .no-border {
+            border: none;
+        }
+        .no-print {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 8px 15px;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .no-print:hover {
+            background-color: #0d47a1;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+            .header {
+                flex-wrap: nowrap;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="no-print" onclick="window.print()">🖨️ Imprimir</button>
+    <div class="header">
+        {% if empresa.logo %}
+            <div class="header-logo">
+                <img src="data:image/png;base64,{{ empresa.logo }}" alt="Logo" height="80">
+            </div>
+        {% endif %}
+        <div class="header-info">
+            <h2>{{ empresa.nome|default_if_none:"" }}</h2>
+            <p>CNPJ: {{ empresa.cnpj|default_if_none:"" }}</p>
+            <p>{{ empresa.endereco|default_if_none:"" }}</p>
+            <p>Telefone: {{ empresa.telefone|default_if_none:"" }} | 
+               E-mail: {{ empresa.email|default_if_none:"" }}</p>
+        </div>
+    </div>
+    <hr>
+</body>
+
+
+    <h2>Pedido/OS nº {{ pedido.id }}</h2><hr>
+
+    <div class="info">
+        <p><strong>Cliente:</strong> {{ pedido.cliente.nome }}</p>
+        <p><strong>Data:</strong> {{ pedido.data|date:"d/m/Y H:i" }}</p>
+        <p><strong>Telefone:</strong> {{ pedido.cliente.telefone }}</p>
+        <p><strong>Endereço:</strong> {{ pedido.cliente.endereco|default_if_none:"" }}</p>
+        <p><strong>Status:</strong> {{ pedido.get_status_display }}</p>
+        <p><strong>Condição Pagamento:</strong> {{ pedido.condicao_pagamento|default:"Não especificado" }}</p>
+        {% comment %} <p><strong>Desconto:</strong> {{ pedido.desconto_percentual }}% (R$ {{ valor_desconto|floatformat:2 }})</p>
+        <p><strong>Juros:</strong> {{ pedido.juros }}% (R$ {{ valor_juros|floatformat:2 }})</p> {% endcomment %}
+    </div><hr>
+
+    <h3>Itens do Pedido/OS</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tipo</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Quantidade</th>
+                <th>Valor Unitário</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in itens %}
+            <tr class="{{ item.tipo|lower }}">
+                <td>{{ item.id }}</td>
+                <td>{{ item.tipo }}</td>
+                <td>{{ item.nome }}</td>
+                <td>{{ item.descricao }}</td>
+                <td class="text-right">{{ item.quantidade }}</td>
+                <td class="text-right">R$ {{ item.preco_unitario|floatformat:2 }}</td>
+                <td class="text-right">R$ {{ item.subtotal|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            {% comment %} <tr>
+                <td colspan="6" class="text-right">Desconto:</td>
+                <td class="text-right">R$ {{ valor_desconto|floatformat:2 }}</td>
+            </tr>
+            <tr>
+                <td colspan="6" class="text-right">Juros:</td>
+                <td class="text-right">R$ {{ valor_juros|floatformat:2 }}</td>
+            </tr> {% endcomment %}
+            <tr>
+                <td colspan="6" class="text-right">Total:</td>
+                <td class="text-right">R$ {{ valor_total|floatformat:2 }}</td>
+            </tr>
+        </tfoot>
+    </table>
+
+    <div class="info">
+        <p><strong>Observação:</strong> {{ observacoes|default:"Sem observação" }}</p>
+    </div>
+
+     <div class="info">
+        {% comment %} <p><strong>JUROS: O juros apenas ira ter valor se caso a condicao de pagamento for parcelado.</strong></p>    {% endcomment %}
+    <div class="footer"> <br>
+        <p><strong>Data e Hora da Impressão:</strong> {{ data_hora_impressao|date:"d/m/Y H:i" }}</p>
+    </div>
+</body>
+</html>

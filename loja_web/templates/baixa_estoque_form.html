@@ -1,0 +1,128 @@
+{% extends 'produtos_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ titulo_pagina|default:"Registrar Baixa de Estoque" }}</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="busca_produto" class="form-label">Buscar Produto (ID ou Nome)</label>
+            <input type="text" class="form-control" id="busca_produto" placeholder="Digite o código ou nome do produto" autocomplete="off">
+            <ul id="resultados_produto" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.produto.id_for_label }}" class="form-label">{{ form.produto.label }}</label>
+            {{ form.produto }}
+        </div>
+
+        <div id="info_produto" class="mb-3" style="display:none;">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" id="produto_nome_info"></h5>
+                    <p class="card-text mb-1"><strong>Estoque Atual:</strong> <span id="produto_estoque_info"></span></p>
+                    <p class="card-text mb-1"><strong>Preço:</strong> R$ <span id="produto_preco_info"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.quantidade.id_for_label }}" class="form-label">{{ form.quantidade.label }}</label>
+            {{ form.quantidade }}
+            {% if form.quantidade.errors %}
+                <div class="invalid-feedback d-block">{{ form.quantidade.errors|striptags }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.motivo.id_for_label }}" class="form-label">{{ form.motivo.label }}</label>
+            {{ form.motivo }}
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.observacao.id_for_label }}" class="form-label">{{ form.observacao.label }}</label>
+            {{ form.observacao }}
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-2">Registrar Baixa</button>
+        <a href="{% url 'produtos_geral' %}" class="btn btn-secondary mt-2">Voltar</a>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function(){
+    $("#busca_produto").on("keyup", function(){
+        let termo = $(this).val().trim();
+        if (termo.length < 1) {
+            $("#resultados_produto").empty();
+            $("#info_produto").hide();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'buscar_produtosentrada' %}",
+            data: { term: termo },
+            dataType: "json",
+            success: function(data){
+                let lista = "";
+                if (!data.length) {
+                    lista = '<li class="list-group-item">Nenhum produto encontrado</li>';
+                } else {
+                    data.forEach(function(prod){
+                        lista += `<li class="list-group-item list-group-item-action"
+                                    data-id="${prod.id}"
+                                    data-nome="${prod.nome}"
+                                                                        data-unidade="${prod.unidade_medida || 'un'}"
+                                    data-estoque="${prod.estoque || '0'}"
+                                    data-preco="${prod.preco || '0'}">
+                                    ${prod.id} - ${prod.nome} (Estoque: ${prod.estoque})
+                                  </li>`;
+                    });
+                }
+                $("#resultados_produto").html(lista);
+            }
+        });
+    });
+
+    $(document).on("click", "#resultados_produto li", function(){
+        let id = $(this).data("id");
+        let nome = $(this).data("nome");
+        let unidade = $(this).data("unidade");
+        let estoque = $(this).data("estoque");
+        let preco = $(this).data("preco");
+
+        const campoQtd = $("#id_quantidade");
+        if (unidade === 'un') {
+            campoQtd.attr("step", "1");
+            campoQtd.attr("min", "1");
+            campoQtd.attr("placeholder", "Ex.: 1, 2, 3");
+        } else {
+            campoQtd.attr("step", "0.001");
+            campoQtd.attr("min", "0.001");
+            campoQtd.attr("placeholder", "Ex.: 0.250");
+        }
+
+        $("#id_produto").val(id);
+        $("#produto_nome_info").text(`${id} - ${nome}`);
+        $("#produto_estoque_info").text(estoque);
+        $("#produto_preco_info").text(parseFloat(preco || 0).toFixed(2));
+        $("#info_produto").show();
+
+        $("#resultados_produto").empty();
+        $("#busca_produto").val("");
+    });
+});
+</script>
+{% endblock %}

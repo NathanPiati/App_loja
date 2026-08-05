@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Estilo geral */
+    body {
+        background: linear-gradient(135deg, #222222ff, #222222ff);
+        font-family: 'Arial', sans-serif;
+    }
+    .container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-top: 20px;
+    }
+    h2 {
+        color: #2c3e50;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 30px;
+        animation: fadeIn 1s ease-in;
+    }
+    .btn-primary {
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        border: none;
+        transition: transform 0.2s;
+    }
+    .btn-primary:hover {
+        transform: scale(1.05);
+    }
+    .btn-print {
+        background: linear-gradient(45deg, #2ecc71, #27ae60);
+        border: none;
+        color: white;
+    }
+    .table {
+        border-radius: 10px;
+        overflow: hidden;
+        animation: fadeInUp 0.5s ease-in;
+    }
+    .table thead {
+        background: linear-gradient(45deg, #3498db, #2980b9);
+        color: white;
+    }
+    .table tbody tr {
+        transition: background 0.2s;
+    }
+    .table tbody tr:hover {
+        background: #f1f8ff;
+    }
+    .total-results {
+        font-size: 1.1em;
+        color: #2c3e50;
+        margin-bottom: 20px;
+        font-weight: bold;
+    }
+
+    /* Animações */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Estilo para impressão */
+    @media print {
+        body {
+            background: white;
+        }
+        .container {
+            box-shadow: none;
+            margin: 0;
+            padding: 0;
+        }
+        .no-print {
+            display: none;
+        }
+        .table {
+            border: 1px solid #000;
+        }
+        .table thead {
+            background: #f8f9fa;
+            color: #000;
+        }
+        .table tbody tr:hover {
+            background: none;
+        }
+    }
+</style>
+
+<div class="container">
+    <h2>Relatório de Clientes</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="get" class="row g-3 mb-4 no-print">
+        <div class="col-md-3">
+            <input type="text" name="nome" class="form-control" placeholder="Nome" value="{{ request.GET.nome }}">
+        </div>
+        <div class="col-md-3">
+            <input type="tel" name="telefone" class="form-control" placeholder="Telefone" value="{{ request.GET.telefone }}" pattern="[0-9]{11,11}" maxlength="11">
+        </div>
+        <div class="col-md-3">
+            <input type="text" name="cidade" class="form-control" placeholder="Cidade" value="{{ request.GET.cidade }}">
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+    </form>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="total-results">Total de clientes encontrados: {{ clientes.count }}</div>
+        <a href="{% url 'relatorio_clientes_imprimir' %}?nome={{ request.GET.nome }}&telefone={{ request.GET.telefone }}&cidade={{ request.GET.cidade }}" 
+       class="btn btn-print no-print"
+       target="_blank">
+       🖨️ Imprimir Relatório
+</a>
+    </div>
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Cidade</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>{{ cliente.id }}</td>
+                <td>{{ cliente.nome }}</td>
+                <td>{{ cliente.telefone }}</td>
+                <td>{{ cliente.cidade|default:"-" }}</td>
+                <td>{{ cliente.email|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center">Nenhum cliente encontrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    // Adiciona animação suave ao carregar a página
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.table tbody tr').forEach((row, index) => {
+            row.style.animationDelay = `${index * 0.1}s`;
+            row.classList.add('fadeInUp');
+        });
+    });
+</script>
+
+{% endblock %}

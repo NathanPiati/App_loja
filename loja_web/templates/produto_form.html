@@ -1,0 +1,478 @@
+{% extends 'produtos_base.html' %}
+
+{% block title %}Cadastro de Produto{% endblock %}
+
+{% block content %}
+
+<style>
+    .fade-in {
+        animation: fadeIn 0.8s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card-custom {
+        background: #ffffff;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 2px 12px rgba(61, 123, 196, 0.1);
+        transition: transform 0.3s ease;
+        color: #2c3e50;
+        border: 1px solid #d1dce8;
+    }
+
+    .card-custom:hover {
+        transform: scale(1.01);
+    }
+
+    h2 {
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .btn-custom {
+        background: linear-gradient(to right, #3d7bc4, #5a9fd4);
+        color: white;
+        border: none;
+        transition: background 0.3s ease;
+    }
+
+    .btn-custom:hover {
+        background: linear-gradient(to right, #2a65aa, #3d7bc4);
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-weight: 500;
+    }
+
+    .form-control {
+        border-radius: 8px;
+    }
+
+    .errorlist {
+        color: #ff4d4d;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+</style>
+
+<div class="fade-in mb-4 d-flex justify-content-between align-items-center">
+    <h2><i class="bi bi-box-seam"></i> Cadastro de Produto</h2>
+    <a href="{% url 'produto_novo' %}" class="btn btn-success">
+        <i class="bi bi-plus-circle"></i> Novo Produto
+    </a>
+</div>
+
+<!-- Exibir mensagens -->
+{% if messages %}
+    <div class="fade-in mb-4">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="card-custom fade-in mb-4">
+    <form method="post" novalidate>
+        {% csrf_token %}
+
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label for="id_nome">Nome do Produto</label>
+                {{ form.nome }}
+                {% if form.nome.errors %}
+                    <div class="errorlist">
+                        {% for error in form.nome.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="id_marca">Marca</label>
+                {{ form.marca }}
+                {% if form.marca.errors %}
+                    <div class="errorlist">
+                        {% for error in form.marca.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label for="id_num_fabricante">Número do Fabricante</label>
+                {{ form.num_fabricante }}
+                {% if form.num_fabricante.errors %}
+                    <div class="errorlist">
+                        {% for error in form.num_fabricante.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="id_num_original">Número Original</label>
+                {{ form.num_original }}
+                {% if form.num_original.errors %}
+                    <div class="errorlist">
+                        {% for error in form.num_original.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="col-md-6 form-group">
+                <label for="id_notafiscal">Nota Fiscal</label>
+                {{ form.notafiscal }}
+                {% if form.notafiscal.errors %}
+                    <div class="errorlist">
+                        {% for error in form.notafiscal.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="id_valor_pago">Valor Pago</label>
+                {{ form.valor_pago }}
+                {% if form.valor_pago.errors %}
+                    <div class="errorlist">
+                        {% for error in form.valor_pago.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            {% if segmento_atual == 'sorveteria' %}
+            <div class="col-md-6 form-group">
+                <label for="id_valor_custo_calculado">Valor de Custo</label>
+                <input type="text" id="id_valor_custo_calculado" class="form-control" value="{{ form.instance.custo_calculado|default:form.instance.valor_pago }}" readonly>
+                <small class="text-muted">Calculado automaticamente pelos ingredientes da ficha técnica.</small>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label for="id_preco">Preço</label>
+                {{ form.preco }}
+                {% if form.preco.errors %}
+                    <div class="errorlist">
+                        {% for error in form.preco.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-6 form-group">
+                <label for="id_categoria">Categoria</label>
+                {{ form.categoria }}
+                {% if form.categoria.errors %}
+                    <div class="errorlist">
+                        {% for error in form.categoria.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 form-group">
+                <label for="id_unidade_medida">Unidade de Medida</label>
+                {{ form.unidade_medida }}
+                {% if form.unidade_medida.errors %}
+                    <div class="errorlist">
+                        {% for error in form.unidade_medida.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="col-md-3 form-group">
+                <label for="id_garantia_dias">Garantia (dias)</label>
+                {{ form.garantia_dias }}
+                {% if form.garantia_dias.errors %}
+                    <div class="errorlist">
+                        {% for error in form.garantia_dias.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Lucro compacto -->
+            <div class="col-md-3 form-group">
+                <label for="id_lucro">Lucro (R$)</label>
+                <input type="text" class="form-control form-control-sm mb-2"
+                       id="id_lucro" name="lucro"
+                       value="{{ form.instance.get_lucro }}" readonly>
+
+                <label for="id_lucro_percent">Lucro (%)</label>
+                <input type="text" class="form-control form-control-sm"
+                       id="id_lucro_percent" readonly>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="id_descricao">Descrição</label>
+            {{ form.descricao }}
+            {% if form.descricao.errors %}
+                <div class="errorlist">
+                    {% for error in form.descricao.errors %}
+                        {{ error }}
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Exibir erros gerais do formulário -->
+        {% if form.non_field_errors %}
+            <div class="errorlist">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if segmento_atual == 'sorveteria' %}
+        <div class="mt-4 p-3 border rounded bg-light">
+            <h5 class="mb-3"><i class="bi bi-diagram-3"></i> Ficha Técnica / Ingredientes</h5>
+            <p class="text-muted small mb-3">Use esta área para definir quanto cada produto pronto consome de insumos, como sorvete, leite, calda e outros ingredientes.</p>
+            {{ composicao_formset.management_form }}
+            {% if composicao_formset.non_form_errors %}
+                <div class="alert alert-danger py-2">
+                    {% for error in composicao_formset.non_form_errors %}
+                        <div>{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <div id="lista-componentes">
+                {% for comp_form in composicao_formset %}
+                <div class="row g-2 align-items-end border rounded p-2 mb-2 bg-white componente-linha">
+                    <div class="col-md-7">
+                        <label class="form-label">Ingrediente</label>
+                        {{ comp_form.ingrediente }}
+                        {% if comp_form.ingrediente.errors %}
+                            <div class="errorlist">{{ comp_form.ingrediente.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Quantidade usada</label>
+                        <div class="input-group input-group-sm">
+                            {{ comp_form.quantidade }}
+                            <span class="input-group-text unidade-ingrediente">-</span>
+                        </div>
+                        {% if comp_form.quantidade.errors %}
+                            <div class="errorlist">{{ comp_form.quantidade.errors|join:", " }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="col-md-1">
+                        {% if comp_form.instance.pk %}
+                            <label class="form-label">Remover</label>
+                            <div>{{ comp_form.DELETE }}</div>
+                        {% else %}
+                            <button type="button" class="btn btn-outline-danger btn-sm w-100 remover-componente">X</button>
+                        {% endif %}
+                    </div>
+                    {% for hidden in comp_form.hidden_fields %}
+                        {{ hidden }}
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+            <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="adicionar-componente">
+                <i class="bi bi-plus-circle"></i> Adicionar ingrediente
+            </button>
+        </div>
+
+        <template id="componente-template">
+            <div class="row g-2 align-items-end border rounded p-2 mb-2 bg-white componente-linha">
+                <div class="col-md-7">
+                    <label class="form-label">Ingrediente</label>
+                    {{ composicao_formset.empty_form.ingrediente }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Quantidade usada</label>
+                    <div class="input-group input-group-sm">
+                        {{ composicao_formset.empty_form.quantidade }}
+                        <span class="input-group-text unidade-ingrediente">-</span>
+                    </div>
+                </div>
+                <div class="col-md-1">
+                    <button type="button" class="btn btn-outline-danger btn-sm w-100 remover-componente">X</button>
+                </div>
+                {% for hidden in composicao_formset.empty_form.hidden_fields %}
+                    {{ hidden }}
+                {% endfor %}
+            </div>
+        </template>
+        {% endif %}
+
+    <br><button type="submit" class="btn btn-custom">
+            <i class="bi bi-save-fill"></i> Salvar Produto
+        </button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const valorPago = document.getElementById("id_valor_pago");
+        const preco = document.getElementById("id_preco");
+        const lucro = document.getElementById("id_lucro");
+        const lucroPercent = document.getElementById("id_lucro_percent");
+        const valorCustoCalculado = document.getElementById("id_valor_custo_calculado");
+        const ingredientesCatalogo = {
+            {% for item in ingredientes_catalogo %}
+            "{{ item.id }}": {
+                valor_pago: "{{ item.valor_pago }}",
+                unidade_medida: "{{ item.unidade_medida }}",
+                nome: "{{ item.nome|escapejs }}"
+            },
+            {% endfor %}
+        };
+
+        function calcularLucro() {
+            const vPago = parseFloat(valorPago.value.replace(",", "."));
+            const vPreco = parseFloat(preco.value.replace(",", "."));
+
+            if (!isNaN(vPago) && !isNaN(vPreco) && vPago > 0) {
+                const vLucro = vPreco - vPago;
+                const vLucroPercent = (vLucro / vPago) * 100;
+
+                lucro.value = vLucro.toFixed(2);
+                lucroPercent.value = vLucroPercent.toFixed(2) + " %";
+            } else {
+                lucro.value = "";
+                lucroPercent.value = "";
+            }
+        }
+
+        function calcularCustoComposicao() {
+            if (!valorCustoCalculado) return;
+
+            let total = 0;
+            document.querySelectorAll('#lista-componentes .componente-linha').forEach(function(linha) {
+                const select = linha.querySelector('select');
+                const qtdInput = linha.querySelector('input[name$="-quantidade"]');
+                const deleteInput = linha.querySelector('input[name$="-DELETE"]');
+
+                if (deleteInput && deleteInput.checked) return;
+                if (!select || !qtdInput || !select.value) return;
+
+                const ingrediente = ingredientesCatalogo[select.value];
+                if (!ingrediente) return;
+
+                const quantidade = parseFloat(String(qtdInput.value || '0').replace(',', '.')) || 0;
+                const custoUnitario = parseFloat(String(ingrediente.valor_pago || '0').replace(',', '.')) || 0;
+                total += quantidade * custoUnitario;
+            });
+
+            valorCustoCalculado.value = total.toFixed(2);
+            if (valorPago) valorPago.value = total.toFixed(2);
+            calcularLucro();
+        }
+
+        valorPago.addEventListener("input", calcularLucro);
+        preco.addEventListener("input", calcularLucro);
+
+        function atualizarUnidadeLinha(linha) {
+            const select = linha.querySelector('select');
+            const unidade = linha.querySelector('.unidade-ingrediente');
+            if (!select || !unidade) return;
+            const texto = select.options[select.selectedIndex]?.text || '';
+            const match = texto.match(/\[(.*?)\]$/);
+            unidade.textContent = match ? match[1] : '-';
+
+            const qtdInput = linha.querySelector('input[name$="-quantidade"]');
+            const unidadeValor = match ? match[1] : '';
+            if (qtdInput) {
+                if (unidadeValor === 'un') {
+                    qtdInput.setAttribute('step', '1');
+                    qtdInput.setAttribute('min', '1');
+                } else {
+                    qtdInput.setAttribute('step', '0.001');
+                    qtdInput.setAttribute('min', '0.001');
+                }
+            }
+        }
+
+        function bindLinhaComponente(linha) {
+            const removerBtn = linha.querySelector('.remover-componente');
+            if (removerBtn) {
+                removerBtn.addEventListener('click', function() {
+                    const totalForms = document.getElementById('id_componentes-TOTAL_FORMS');
+                    linha.remove();
+                    if (totalForms) {
+                        const atual = parseInt(totalForms.value || '1', 10);
+                        totalForms.value = Math.max(0, atual - 1);
+                    }
+                    calcularCustoComposicao();
+                });
+            }
+
+            const select = linha.querySelector('select');
+            if (select) {
+                select.addEventListener('change', function() {
+                    atualizarUnidadeLinha(linha);
+                    calcularCustoComposicao();
+                });
+            }
+            const qtdInput = linha.querySelector('input[name$="-quantidade"]');
+            if (qtdInput) {
+                qtdInput.addEventListener('input', calcularCustoComposicao);
+            }
+            const deleteInput = linha.querySelector('input[name$="-DELETE"]');
+            if (deleteInput) {
+                deleteInput.addEventListener('change', calcularCustoComposicao);
+            }
+            atualizarUnidadeLinha(linha);
+        }
+
+        document.querySelectorAll('#lista-componentes .componente-linha').forEach(bindLinhaComponente);
+
+        const addBtn = document.getElementById('adicionar-componente');
+        if (addBtn) {
+            addBtn.addEventListener('click', function() {
+                const lista = document.getElementById('lista-componentes');
+                const template = document.getElementById('componente-template');
+                const totalForms = document.getElementById('id_componentes-TOTAL_FORMS');
+                if (!lista || !template || !totalForms) return;
+
+                const idx = parseInt(totalForms.value || '0', 10);
+                const html = template.innerHTML.replace(/__prefix__/g, idx);
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = html.trim();
+                const linha = wrapper.firstElementChild;
+                lista.appendChild(linha);
+                totalForms.value = idx + 1;
+                bindLinhaComponente(linha);
+                calcularCustoComposicao();
+            });
+        }
+
+        calcularCustoComposicao();
+    });
+</script>
+
+{% endblock %}

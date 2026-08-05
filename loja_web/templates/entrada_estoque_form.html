@@ -1,0 +1,388 @@
+{% extends 'produtos_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ titulo_pagina|default:"Registrar Nova Entrada de Estoque" }}</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="mb-3">
+            <label for="busca_fornecedor" class="form-label">Buscar Fornecedor (ID ou Nome)</label>
+            <input type="text" class="form-control" id="busca_fornecedor" placeholder="Digite o código ou nome do fornecedor" autocomplete="off">
+            <ul id="resultados_fornecedor" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
+        </div>
+
+        <input type="hidden" id="id_fornecedor" name="fornecedor">
+
+        <div id="info_fornecedor" class="mb-3" style="display:none;">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" id="fornecedor_nome_info"></h5>
+                    <p class="card-text mb-1"><strong>CNPJ:</strong> <span id="fornecedor_cnpj_info"></span></p>
+                    <p class="card-text mb-1"><strong>Email:</strong> <span id="fornecedor_email_info"></span></p>
+                    <p class="card-text mb-1"><strong>Telefone:</strong> <span id="fornecedor_telefone_info"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Checkbox para vincular pedido de compra -->
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="vincular_pedido" name="vincular_pedido">
+            <label class="form-check-label" for="vincular_pedido">Vincular a um Pedido de Compra Existente</label>
+        </div>
+
+        <!-- Campo de busca de pedidos, escondido por padrão -->
+        <div id="busca_pedido_container" class="mb-3" style="display:none;">
+            <label for="busca_pedido" class="form-label">Buscar Pedido de Compra (ID ou Número NF)</label>
+            <input type="text" class="form-control" id="busca_pedido" placeholder="Digite o ID ou número da NF do pedido" autocomplete="off">
+            <ul id="resultados_pedido" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
+        </div>
+
+        <input type="hidden" id="id_pedido" name="pedido_compra">
+
+        <div id="info_pedido" class="mb-3" style="display:none;">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" id="pedido_nome_info"></h5>
+                    <p class="card-text mb-1"><strong>Número NF:</strong> <span id="pedido_numero_nf_info"></span></p>
+                    <p class="card-text mb-1"><strong>Data Criação:</strong> <span id="pedido_data_criacao_info"></span></p>
+                    <p class="card-text mb-1"><strong>Total:</strong> R$ <span id="pedido_total_info"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="busca_produto" class="form-label">Buscar Produto (ID ou Nome)</label>
+            <input type="text" class="form-control" id="busca_produto" placeholder="Digite o código ou nome do produto" autocomplete="off">
+            <ul id="resultados_produto" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.produto.id_for_label }}" class="form-label">{{ form.produto.label }}</label>
+            {{ form.produto }}
+            {% if form.produto.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.produto.errors|striptags }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div id="info_produto" class="mb-3" style="display:none;">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title" id="produto_nome_info"></h5>
+                    <p class="card-text mb-1"><strong>Categoria:</strong> <span id="produto_categoria_info"></span></p>
+                    <p class="card-text mb-1"><strong>Marca:</strong> <span id="produto_marca_info"></span></p>
+                    <p class="card-text mb-1"><strong>Nº Fabricante:</strong> <span id="produto_num_fabricante_info"></span></p>
+                    <p class="card-text mb-1"><strong>Nº Original:</strong> <span id="produto_num_original_info"></span></p>
+                    <p class="card-text mb-1"><strong>Descrição:</strong> <span id="produto_descricao_info"></span></p>
+                    <p class="card-text mb-1"><strong>Estoque Atual:</strong> <span id="produto_estoque_info"></span></p>
+                    <p class="card-text mb-1"><strong>Preço:</strong> R$ <span id="produto_preco_info"></span></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="entradas_estoque" class="mb-3" style="display:none;">
+            <h5>Entradas de Estoque</h5>
+            <div id="entradas_estoque_container">
+                <!-- Entradas serão carregadas via AJAX como campos separados -->
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label for="{{ form.quantidade.id_for_label }}" class="form-label">{{ form.quantidade.label }}</label>
+            {{ form.quantidade }}
+            {% if form.quantidade.errors %}
+                <div class="invalid-feedback d-block">
+                    {{ form.quantidade.errors|striptags }}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            <label for="numero_nota_fiscal" class="form-label">Número da Nota Fiscal</label>
+            <input type="text" class="form-control" id="numero_nota_fiscal" name="numero_nota_fiscal" placeholder="Digite o número da nota fiscal">
+        </div>
+
+        <button type="submit" class="btn btn-primary mt-3">Registrar Entrada</button>
+        <a href="{% url 'upload_xml' %}" class="btn btn-primary mt-3">Upload XML NF-e</a>
+    </form>
+
+    <a href="{% url 'produtos_geral' %}" class="btn btn-secondary mt-3">Voltar</a>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function(){
+    // Mostrar/esconder campo de busca de pedidos com base no checkbox
+    $("#vincular_pedido").on("change", function(){
+        if ($(this).is(":checked")) {
+            $("#busca_pedido_container").show();
+            $("#info_pedido").show();
+        } else {
+            $("#busca_pedido_container").hide();
+            $("#info_pedido").hide();
+            $("#resultados_pedido").empty();
+            $("#id_pedido").val("");
+            $("#busca_pedido").val("");
+        }
+    });
+
+    // Busca de pedidos
+    $("#busca_pedido").on("keyup", function(){
+        let termo = $(this).val().trim();
+        if (termo.length < 1) {
+            $("#resultados_pedido").empty();
+            $("#info_pedido").hide();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'buscar_pedidos_compra' %}",
+            data: { term: termo },
+            dataType: "json",
+            success: function(data){
+                let lista = "";
+                if (data.error) {
+                    lista = `<li class="list-group-item">Erro: ${data.error}</li>`;
+                } else if (data.length === 0) {
+                    lista = '<li class="list-group-item">Nenhum pedido encontrado</li>';
+                } else {
+                    data.forEach(function(pedido){
+                        lista += `<li class="list-group-item list-group-item-action"
+                                    data-id="${pedido.id}"
+                                    data-numero_nf="${pedido.numero_nota_fiscal || ''}"
+                                    data-data_criacao="${pedido.data_criacao || ''}"
+                                    data-total="${pedido.total || '0'}">
+                                    ${pedido.id} - NF: ${pedido.numero_nota_fiscal || 'N/A'} (R$ ${pedido.total})
+                                  </li>`;
+                    });
+                }
+                $("#resultados_pedido").html(lista);
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                $("#resultados_pedido").html(`<li class="list-group-item">Erro ao buscar pedidos: ${textStatus} - ${errorThrown}</li>`);
+            }
+        });
+    });
+
+    // Seleção de pedido
+    $(document).on("click", "#resultados_pedido li", function(){
+        let id = $(this).data("id");
+        if (!id) {
+            console.error("ID do pedido não encontrado");
+            $("#info_pedido").hide();
+            return;
+        }
+        let numero_nf = $(this).data("numero_nf");
+        let data_criacao = $(this).data("data_criacao");
+        let total = $(this).data("total");
+
+        $("#id_pedido").val(id);
+        $("#pedido_nome_info").text(`Pedido ${id}`);
+        $("#pedido_numero_nf_info").text(numero_nf || 'N/A');
+        $("#pedido_data_criacao_info").text(data_criacao || 'N/A');
+        $("#pedido_total_info").text(parseFloat(total || 0).toFixed(2));
+        $("#info_pedido").show();
+
+        $("#resultados_pedido").empty();
+        $("#busca_pedido").val("");
+    });
+
+    // Busca de fornecedores (código existente)
+    $("#busca_fornecedor").on("keyup", function(){
+        let termo = $(this).val().trim();
+        if (termo.length < 1) {
+            $("#resultados_fornecedor").empty();
+            $("#info_fornecedor").hide();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'buscar_fornecedores' %}",
+            data: { term: termo },
+            dataType: "json",
+            success: function(data){
+                let lista = "";
+                if (data.error) {
+                    lista = `<li class="list-group-item">Erro: ${data.error}</li>`;
+                } else if (data.length === 0) {
+                    lista = '<li class="list-group-item">Nenhum fornecedor encontrado</li>';
+                } else {
+                    data.forEach(function(forn){
+                        lista += `<li class="list-group-item list-group-item-action"
+                                    data-id="${forn.id}"
+                                    data-nome="${forn.nome}"
+                                    data-cnpj="${forn.cnpj || ''}"
+                                    data-email="${forn.email || ''}"
+                                    data-telefone="${forn.telefone || ''}">
+                                    ${forn.id} - ${forn.nome}
+                                  </li>`;
+                    });
+                }
+                $("#resultados_fornecedor").html(lista);
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                $("#resultados_fornecedor").html(`<li class="list-group-item">Erro ao buscar fornecedores: ${textStatus} - ${errorThrown}</li>`);
+            }
+        });
+    });
+
+    $(document).on("click", "#resultados_fornecedor li", function(){
+        let id = $(this).data("id");
+        if (!id) {
+            console.error("ID do fornecedor não encontrado");
+            $("#info_fornecedor").hide();
+            return;
+        }
+        let nome = $(this).data("nome");
+        let cnpj = $(this).data("cnpj");
+        let email = $(this).data("email");
+        let telefone = $(this).data("telefone");
+
+        $("#id_fornecedor").val(id);
+        $("#fornecedor_nome_info").text(`${id} - ${nome}`);
+        $("#fornecedor_cnpj_info").text(cnpj || 'N/A');
+        $("#fornecedor_email_info").text(email || 'N/A');
+        $("#fornecedor_telefone_info").text(telefone || 'N/A');
+        $("#info_fornecedor").show();
+
+        $("#resultados_fornecedor").empty();
+        $("#busca_fornecedor").val("");
+    });
+
+    // Busca de produtos (código existente)
+    $("#busca_produto").on("keyup", function(){
+        let termo = $(this).val().trim();
+        if (termo.length < 1) {
+            $("#resultados_produto").empty();
+            $("#info_produto").hide();
+            $("#entradas_estoque").hide();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'buscar_produtosentrada' %}",
+            data: { term: termo },
+            dataType: "json",
+            success: function(data){
+                let lista = "";
+                if (data.error) {
+                    lista = `<li class="list-group-item">Erro: ${data.error}</li>`;
+                } else if (data.length === 0) {
+                    lista = '<li class="list-group-item">Nenhum produto encontrado</li>';
+                } else {
+                    data.forEach(function(prod){
+                        lista += `<li class="list-group-item list-group-item-action"
+                                    data-id="${prod.id}"
+                                    data-nome="${prod.nome}"
+                                    data-unidade="${prod.unidade_medida || 'un'}"
+                                    data-categoria="${prod.categoria || ''}"
+                                    data-marca="${prod.marca || ''}"
+                                    data-num_fabricante="${prod.num_fabricante || ''}"
+                                    data-num_original="${prod.num_original || ''}"
+                                    data-descricao="${prod.descricao || ''}"
+                                    data-estoque="${prod.estoque || '0'}"
+                                    data-preco="${prod.preco || '0'}">
+                                    ${prod.id} - ${prod.nome} (R$ ${prod.preco})
+                                  </li>`;
+                    });
+                }
+                $("#resultados_produto").html(lista);
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                $("#resultados_produto").html(`<li class="list-group-item">Erro ao buscar produtos: ${textStatus} - ${errorThrown}</li>`);
+            }
+        });
+    });
+
+    $(document).on("click", "#resultados_produto li", function(){
+        let id = $(this).data("id");
+        if (!id) {
+            console.error("ID do produto não encontrado");
+            $("#entradas_estoque_container").html(`<p class="text-danger">Erro: ID do produto não encontrado</p>`);
+            $("#entradas_estoque").show();
+            return;
+        }
+        let nome = $(this).data("nome");
+        let categoria = $(this).data("categoria");
+        let marca = $(this).data("marca");
+        let num_fabricante = $(this).data("num_fabricante");
+        let num_original = $(this).data("num_original");
+        let descricao = $(this).data("descricao");
+        let unidade = $(this).data("unidade");
+        let estoque = $(this).data("estoque");
+        let preco = $(this).data("preco");
+
+        const campoQtd = $("#id_quantidade");
+        if (unidade === 'un') {
+            campoQtd.attr("step", "1");
+            campoQtd.attr("min", "1");
+            campoQtd.attr("placeholder", "Ex.: 1, 2, 3");
+        } else {
+            campoQtd.attr("step", "0.001");
+            campoQtd.attr("min", "0.001");
+            campoQtd.attr("placeholder", "Ex.: 0.250");
+        }
+
+        $("#id_produto").val(id);
+        $("#produto_nome_info").text(`${id} - ${nome}`);
+        $("#produto_categoria_info").text(categoria || 'N/A');
+        $("#produto_marca_info").text(marca || 'N/A');
+        $("#produto_num_fabricante_info").text(num_fabricante || 'N/A');
+        $("#produto_num_original_info").text(num_original || 'N/A');
+        $("#produto_descricao_info").text(descricao || 'N/A');
+        $("#produto_estoque_info").text(estoque || '0');
+        $("#produto_preco_info").text(parseFloat(preco || 0).toFixed(2));
+        $("#info_produto").show();
+
+        $.ajax({
+            url: "{% url 'buscar_entradas_estoque' %}",
+            data: { produto_id: id },
+            dataType: "json",
+            success: function(data){
+                let container = '';
+                if (data.error) {
+                    container = `<p class="text-danger">Erro: ${data.error}</p>`;
+                } else if (data.entradas.length === 0) {
+                    container = '<p class="text-muted">Nenhuma entrada registrada</p>';
+                } else {
+                    data.entradas.forEach(function(entrada, index){
+                        container += `
+                            <div class="mb-3 border p-3 rounded">
+                                <h6>Entrada ${index + 1}</h6>
+                                <div class="mb-2">
+                                    <label class="form-label">Data da Entrada:</label>
+                                    <p class="form-control-static">${entrada.data_entrada}</p>
+                                </div>
+                                <div class="mb-2">
+                                    <label class="form-label">Quantidade Recebida:</label>
+                                    <p class="form-control-static">${entrada.quantidade}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+                $("#entradas_estoque_container").html(container);
+                $("#entradas_estoque").show();
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                $("#entradas_estoque_container").html(`<p class="text-danger">Erro ao carregar entradas: ${textStatus} - ${errorThrown}</p>`);
+                $("#entradas_estoque").show();
+            }
+        });
+
+        $("#resultados_produto").empty();
+        $("#busca_produto").val("");
+    });
+});
+</script>
+{% endblock %}

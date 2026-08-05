@@ -1,0 +1,183 @@
+﻿<nav class="navbar navbar-expand-lg fixed-top">
+    <div class="container-fluid">
+        <a class="navbar-brand text-white" href="#">
+            <i class="bi bi-shop-window"></i>
+            <span class="navbar-brand-text">{{ empresa.nome|default:"Minha Loja" }}</span>
+        </a>
+
+        <button class="navbar-toggler bg-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon text-white"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+
+                <!-- INÍCIO (sempre visível ou com permissão básica) -->
+                {% if perms.core.acessar_dashboard or user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/"><i class="bi bi-house-door"></i> Início</a>
+                </li>
+                {% endif %}
+
+                <!-- VENDA DIRETA -->
+                {% if perms.core.realizar_venda or user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/venda-direta/"><i class="bi bi-cart"></i> Venda Direta</a>
+                </li>
+                {% endif %}
+
+                <!-- ENTIDADES (CLIENTES + FORNECEDORES) -->
+                {% if perms.core.gerenciar_entidades or perms.core.ver_clientes or perms.core.gerenciar_fornecedores or user.is_superuser %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="fornecedoresDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-building"></i> Entidades
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="fornecedoresDropdown">
+                        {% if perms.core.ver_clientes or user.is_superuser %}
+                        <li><a class="dropdown-item" href="/clientes/"><i class="bi bi-person"></i> Clientes</a></li>
+                        {% endif %}
+                        {% if perms.core.gerenciar_fornecedores or user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'fornecedor_list' %}"><i class="bi bi-search"></i> Fornecedores</a></li>
+                        <li><a class="dropdown-item" href="{% url 'fornecedor_create' %}"><i class="bi bi-plus-circle"></i> Novo Fornecedor</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                <!-- PRODUTOS -->
+                {% if perms.core.gerenciar_produtos or perms.core.estoque or user.is_superuser %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="produtosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-box-seam"></i> {{ ui_labels.produtos_modulo }}
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="produtosDropdown">
+                        {% if perms.core.ver_produtos or user.is_superuser %}
+                        <li><a class="dropdown-item" href="/produtos/listar/"><i class="bi bi-search"></i> Listar Produtos</a></li>
+                        {% endif %}
+                        {% if perms.core.criar_produto or user.is_superuser %}
+                        <li><a class="dropdown-item" href="/produto/novo/"><i class="bi bi-plus-circle"></i> Novo Produto</a></li>
+                        {% endif %}
+                        {% if perms.core.gerenciar_estoque or user.is_superuser %}
+                        <li><a class="dropdown-item" href="/estoque/entrada/registrar/"><i class="bi bi-box-arrow-in-down"></i> Entrada de Produtos</a></li>
+                        <li><a class="dropdown-item" href="{% url 'consultar_entradas' %}"><i class="bi bi-search"></i> Consultar Entradas</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                <!-- SERVIÇOS -->
+                {% if perms.core.gerenciar_servicos or user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/servicos/"><i class="bi bi-gear"></i> {{ ui_labels.servicos_modulo }}</a>
+                </li>
+                {% endif %}
+
+                <!-- CATEGORIAS -->
+                {% if perms.core.gerenciar_categorias or user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/categoria/novo/"><i class="bi bi-tools"></i> Categorias</a>
+                </li>
+                {% endif %}
+
+                <!-- PEDIDOS/OS -->
+                {% if perms.core.gerenciar_pedidos or user.is_superuser %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="pedidosDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-cart-check"></i> {{ ui_labels.pedidos_modulo }}
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="pedidosDropdown">
+                        {% if perms.core.ver_pedidos or user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'lista_pedidos' %}">
+                            <i class="bi bi-cart-check"></i> {{ ui_labels.pedidos_listar }}</a></li>
+                        {% endif %}
+                        {% if perms.core.criar_pedido or user.is_superuser %}
+                        <li><a class="dropdown-item" href="/pedido/novo/">
+                            <i class="bi bi-plus-circle"></i> {{ ui_labels.pedidos_novo }}</a></li>
+                        <li><a class="dropdown-item" href="{% url 'criar_pedido_compra' %}">
+                            <i class="bi bi-plus-circle"></i> Novo Pedido de Compra</a></li>
+                        <li><a class="dropdown-item" href="{% url 'pedidos_compra_lista' %}">
+                            <i class="bi bi-search"></i> Listar Pedidos de Compra</a></li>
+                        {% endif %}
+                        {% if perms.core.encerrar_pedido or user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'encerrar_pedido' %}">
+                            <i class="bi bi-check2-square"></i> {{ ui_labels.pedidos_encerrar }}</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                <!-- CONDIÇÕES DE PAGAMENTO -->
+                {% if perms.core.gerenciar_condicoes_pagamento or user.is_superuser %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="condicoesPagamentoDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-box-arrow-in-down"></i> Condições de Pagamento
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="condicoesPagamentoDropdown">
+                        {% if perms.core.ver_condicoes_pagamento or user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'lista_condicoes_pagamento' %}"><i class="bi bi-search"></i> Pesquisar</a></li>
+                        {% endif %}
+                        {% if perms.core.criar_condicao_pagamento or user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'criar_condicao_pagamento' %}"><i class="bi bi-plus-circle"></i> Nova Condição</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                <!-- FINANCEIRO -->
+                {% if perms.core.gerenciar_financeiro or user.is_superuser %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="financeiroDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-cash-stack"></i> Financeiro
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="financeiroDropdown">
+                        {% if perms.core.ver_financeiro or user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'lista_financeiro' %}"><i class="bi bi-search"></i> Listar Financeiro</a></li>
+                        {% endif %}
+                        {% if perms.core.fechamento_caixa or user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'fechamento_caixa' %}"><i class="bi bi-plus-circle"></i> Fechamento de caixa</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                <!-- RELATÓRIOS -->
+                {% if perms.core.ver_relatorios or user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'relatorios' %}"><i class="bi bi-clipboard-data"></i> Relatórios</a>
+                </li>
+                {% endif %}
+
+                <!-- CONFIGURAÇÕES -->
+                {% if perms.core.configurar_empresa or perms.core.gerenciar_permissoes or user.is_superuser %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="configDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-gear"></i> Configurações
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="configDropdown">
+                        {% if perms.core.configurar_empresa or user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'config_empresa' %}"><i class="bi bi-gear"></i> Configuração da Empresa</a></li>
+                        {% endif %}
+                        {% if perms.core.gerenciar_permissoes or user.is_superuser %}
+                        <li><a class="dropdown-item" href="{% url 'gerenciar_usuarios_permissoes' %}"><i class="bi bi-tools"></i> Permissões de Usuários</a></li>
+                        {% endif %}
+                        {% if user.is_staff or user.is_superuser %}
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'visualizar_logs' %}"><i class="bi bi-journal-text"></i> Logs de Auditoria</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                <!-- USUÁRIO LOGADO -->
+                {% if user.is_authenticated %}
+                <li class="nav-item d-flex align-items-center ms-3 ps-3 border-start text-white">
+                    <i class="bi bi-person-circle"></i> {{ user.username }}
+                </li>
+                <li class="nav-item">
+                    <a href="{% url 'logout' %}" class="btn btn-outline-secondary ms-2">Sair</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

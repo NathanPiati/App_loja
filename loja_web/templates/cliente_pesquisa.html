@@ -1,0 +1,126 @@
+{% extends 'base_clientes.html' %}
+{% load querystring %}
+
+{% block title %}Pesquisar Clientes{% endblock %}
+
+{% block content %}
+<style>
+    .clientes-table thead th {
+        background-color: #2e4a7a;
+        color: #ffffff;
+    }
+
+    .clientes-table tbody tr:hover {
+        background-color: #e8f0fb;
+    }
+</style>
+
+<h2><i class="bi bi-search"></i> Pesquisar Clientes</h2>
+
+<div class="card card-custom fade-slide-in p-4">
+    <form method="GET">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="nome" class="form-label">Nome do Cliente</label>
+                <input type="text" id="nome" name="nome" class="form-control" placeholder="Digite o nome" value="{{ request.GET.nome }}">
+            </div>
+            <div class="col-md-4">
+                <label for="telefone" class="form-label">Telefone</label>
+                <input type="text" id="telefone" name="telefone" class="form-control" placeholder="Digite o telefone" value="{{ request.GET.telefone }}">
+            </div>
+            <div class="col-md-4">
+                <label for="cidade" class="form-label">Cidade</label>
+                <input type="text" id="cidade" name="cidade" class="form-control" placeholder="Digite a cidade" value="{{ request.GET.cidade }}">
+            </div>
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-search"></i> Pesquisar
+            </button>
+        </div>
+    </form>
+</div>
+
+
+{% if clientes %}
+    <div class="card p-4 fade-slide-in mt-3">
+        <h4>Resultado da Pesquisa:</h4>
+        <table class="table table-bordered table-hover align-middle clientes-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Cidade</th>
+                    <th>Telefone</th>
+                    <th>E-mail</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cliente in clientes %}
+                <tr>
+                    <td>{{ cliente.id }}</td>
+                    <td>{{ cliente.nome }}</td>
+                    <td>{{ cliente.cidade|default_if_none:"" }}</td>
+                    <td>{{ cliente.telefone|default_if_none:"" }}</td>
+                    <td>{{ cliente.email|default_if_none:"" }}</td>
+                    <td>
+                        <a href="{% url 'cliente_editar' cliente.id %}" class="btn btn-warning btn-sm"><i class="bi bi-pencil"></i></a>
+                        <a href="{% url 'cliente_excluir' cliente.id %}" class="btn btn-danger btn-sm" onclick="return confirm('Confirma exclusão?');"><i class="bi bi-trash"></i></a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+<p>Total de resultados: {{ total_clientes }}</p>
+        <!-- Paginação -->
+        {% if page_obj.has_other_pages %}
+        <nav aria-label="Navegação de página">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% querystring request.GET 'page' page_obj.previous_page_number %}" aria-label="Anterior">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&laquo;</span>
+                </li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% else %}
+                        <li class="page-item">
+                            <a class="page-link" href="?{% querystring request.GET 'page' num %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?{% querystring request.GET 'page' page_obj.next_page_number %}" aria-label="Próximo">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+                {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">&raquo;</span>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+
+
+
+
+{% elif clientes is not none %}
+    <div class="alert alert-warning mt-3">
+        Nenhum cliente encontrado.
+    </div>
+{% endif %}
+{% endblock %}

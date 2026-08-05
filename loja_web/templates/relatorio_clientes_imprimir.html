@@ -1,0 +1,155 @@
+{% load static %}
+
+{% block content %}
+<style>
+    body {
+        background: #f8f9fa;
+        font-family: 'Segoe UI', Arial, sans-serif;
+    }
+    .container {
+        margin-top: 20px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 32px 24px;
+        width: 100%;
+        max-width: 1200px;
+    }
+    h2 {
+        color: #1976d2;
+        text-align: center;
+        margin-bottom: 28px;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+    .table {
+        border: none;
+        border-radius: 8px;
+        overflow: hidden;
+        width: 100%;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+        table-layout: fixed;
+    }
+    .table th, .table td {
+        border: none;
+        padding: 10px 8px;
+        font-size: 15px;
+        word-break: break-word;
+        text-align: left;
+    }
+    .table th {
+        background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+        color: #fff;
+        font-size: 16px;
+        font-weight: 600;
+    }
+    .table td {
+        background: #f9f9f9;
+    }
+    .table tbody tr:nth-child(even) td {
+        background: #e3f2fd;
+    }
+    .table tbody tr:hover td {
+        background: #bbdefb;
+        transition: background 0.2s;
+    }
+    .total-results, .total-clientes {
+        margin-top: 24px;
+        font-weight: bold;
+        font-size: 18px;
+        color: #1976d2;
+        text-align: right;
+        background: #e3f2fd;
+        border-radius: 6px;
+        padding: 10px 16px;
+        box-shadow: 0 1px 4px rgba(33,150,243,0.08);
+    }
+    @media print {
+        @page {
+            margin: 10mm 10mm 10mm 10mm;
+            size: auto;
+        }
+        body {
+            background: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        .container {
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            width: 100% !important;
+            max-width: none !important;
+        }
+        .table {
+            width: 100% !important;
+            font-size: 13px !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            page-break-inside: avoid;
+        }
+        .table th, .table td {
+            padding: 7px 4px !important;
+            font-size: 13px !important;
+        }
+        h2 {
+            color: #1976d2 !important;
+            margin-bottom: 18px !important;
+        }
+        .total-clientes {
+            background: #e3f2fd !important;
+            color: #1976d2 !important;
+            font-size: 15px !important;
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            margin-top: 18px !important;
+            padding: 7px 10px !important;
+        }
+        .no-print {
+            display: none !important;
+        }
+        a, a:visited, a:active {
+            color: inherit !important;
+            text-decoration: none !important;
+        }
+        /* Remove cabeçalho/rodapé do navegador (alguns navegadores permitem) */
+        html, body {
+            overflow: visible !important;
+        }
+    }
+</style>
+
+<div class="container">
+    <button class="btn btn-primary no-print mb-3" onclick="window.print()" style="float: right;">
+        <i class="fa fa-print"></i> Imprimir
+    </button>
+    <h2>Relatório de Clientes</h2><hr><br>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Telefone</th>
+                <th>Cidade</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cliente in clientes %}
+            <tr>
+                <td>{{ cliente.id }}</td>
+                <td>{{ cliente.nome }}</td>
+                <td>{{ cliente.telefone }}</td>
+                <td>{{ cliente.cidade|default:"-" }}</td>
+                <td>{{ cliente.email|default:"-" }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5" class="text-center">Nenhum cliente encontrado.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table><br><hr>
+    <div class="total-clientes">
+        Total de clientes: {{ clientes.count }}
+    </div>
+</div>
+{% endblock %}

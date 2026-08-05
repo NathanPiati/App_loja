@@ -1,0 +1,97 @@
+{% extends 'pedidos_base.html' %}
+
+{% block title %}Criar Pedido{% endblock %}
+
+{% block content %}
+
+<h1>Criar Pedido</h1>
+
+{% if messages %}
+  <ul>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<form method="post">
+  {% csrf_token %}
+
+  <h3>Cliente:</h3>
+  <select name="cliente_id" required>
+    <option value="">Selecione</option>
+    {% for cliente in clientes %}
+      <option value="{{ cliente.id }}">{{ cliente.nome }}</option>
+    {% endfor %}
+  </select>
+
+  <hr>
+
+  <h3>Produtos:</h3>
+  <div id="produtos"></div>
+  <button type="button" onclick="adicionarProduto()">Adicionar Produto</button>
+
+  <hr>
+
+  <h3>Serviços:</h3>
+  <div id="servicos"></div>
+  <button type="button" onclick="adicionarServico()">Adicionar Serviço</button>
+
+  <hr>
+  <button type="submit">Salvar Pedido</button>
+</form>
+
+
+<script>
+function adicionarProduto() {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+    <select name="produto_id" onchange="atualizarQuantidadeProduto(this)">
+            <option value="">Selecione</option>
+            {% for produto in produtos %}
+      <option value="{{ produto.id }}" data-unidade="{{ produto.unidade_medida }}">{{ produto.nome }} (Estoque: {{ produto.estoque_exibicao }})</option>
+            {% endfor %}
+        </select>
+    Quantidade: <input type="number" name="quantidade" min="1" step="1">
+        Preço Unitário: <input type="number" step="0.01" name="preco_unitario">
+        <button type="button" onclick="this.parentNode.remove()">Remover</button>
+    `;
+    document.getElementById('produtos').appendChild(div);
+}
+
+function atualizarQuantidadeProduto(select) {
+  const unidade = select.options[select.selectedIndex]?.dataset.unidade || 'un';
+  const input = select.parentNode.querySelector('input[name="quantidade"]');
+  if (!input) return;
+  if (unidade === 'un') {
+    input.step = '1';
+    input.min = '1';
+    input.placeholder = 'Ex.: 1, 2, 3';
+  } else {
+    input.step = '0.001';
+    input.min = '0.001';
+    input.placeholder = 'Ex.: 0.250';
+  }
+}
+
+function adicionarServico() {
+    const div = document.createElement('div');
+    div.className = 'item';
+    div.innerHTML = `
+        <select name="servico_id">
+            <option value="">Selecione</option>
+            {% for servico in servicos %}
+                <option value="{{ servico.id }}">{{ servico.nome }}</option>
+            {% endfor %}
+        </select>
+        Quantidade: <input type="number" step="0.01" name="quantidade_servico">
+        Preço Unitário: <input type="number" step="0.01" name="preco_servico">
+        <button type="button" onclick="this.parentNode.remove()">Remover</button>
+    `;
+    document.getElementById('servicos').appendChild(div);
+}
+</script>
+
+{% endblock %}
+

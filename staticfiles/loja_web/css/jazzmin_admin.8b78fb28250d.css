@@ -1,0 +1,97 @@
+/* Ajustes leves para deixar o Jazzmin mais limpo e consistente */
+
+:root {
+    --admin-bg: #f4f7fb;
+    --admin-surface: #ffffff;
+    --admin-border: rgba(15, 23, 42, 0.08);
+    --admin-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+    --admin-accent: #0f766e;
+    --admin-text: #0f172a;
+}
+
+body,
+.content-wrapper,
+.main-footer {
+    background: var(--admin-bg);
+    color: var(--admin-text);
+}
+
+.navbar-white {
+    background: rgba(255, 255, 255, 0.92) !important;
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.main-sidebar {
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+}
+
+.brand-link {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.card,
+.small-box,
+.dropdown-menu,
+.modal-content,
+.info-box,
+.direct-chat-messages {
+    border: 1px solid var(--admin-border);
+    border-radius: 16px;
+    box-shadow: var(--admin-shadow);
+}
+
+.card-header {
+    background: transparent;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.btn-primary,
+.btn-outline-primary:hover {
+    background-color: var(--admin-accent);
+    border-color: var(--admin-accent);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #115e59;
+    border-color: #115e59;
+}
+
+.btn,
+.form-control,
+.custom-select,
+.input-group-text {
+    border-radius: 12px;
+}
+
+.table {
+    overflow: hidden;
+}
+
+.table thead th {
+    background: #eef3f8;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.table tbody tr:hover {
+    background: rgba(15, 118, 110, 0.04);
+}
+
+.content-header h1,
+.content-header .h1,
+.navbar-light .navbar-nav .nav-link,
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link,
+.sidebar-dark-primary .brand-link,
+.navbar-light .navbar-brand {
+    letter-spacing: 0.01em;
+}
+
+.content-wrapper {
+    padding-top: 0.25rem;
+}
+
+.sidebar-dark-primary .nav-sidebar > .nav-item > .nav-link.active {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+}

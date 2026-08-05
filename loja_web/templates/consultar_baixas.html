@@ -1,0 +1,67 @@
+{% extends 'produtos_base.html' %}
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ titulo_pagina|default:"Consultar Baixas de Estoque" }}</h2>
+
+    <form method="get" class="row g-3 mb-3">
+        <div class="col-md-3">
+            <label for="produto_id" class="form-label">Produto ID</label>
+            <input type="number" class="form-control" id="produto_id" name="produto_id" value="{{ request.GET.produto_id }}">
+        </div>
+        <div class="col-md-3">
+            <label for="data_inicio" class="form-label">Data Início</label>
+            <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio }}">
+        </div>
+        <div class="col-md-3">
+            <label for="data_fim" class="form-label">Data Fim</label>
+            <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ request.GET.data_fim }}">
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+    </form>
+
+    <div class="alert alert-info">Total de baixas encontradas: {{ total_baixas }}</div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-light">
+                <tr>
+                    <th>Data</th>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Motivo</th>
+                    <th>Observação</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for baixa in baixas %}
+                <tr>
+                    <td>{{ baixa.data_saida|date:"d/m/Y H:i" }}</td>
+                    <td>{{ baixa.produto.id }} - {{ baixa.produto.nome }}</td>
+                    <td>{{ baixa.quantidade }}</td>
+                    <td>{{ baixa.motivo|default:"-" }}</td>
+                    <td>{{ baixa.observacao|default:"-" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center">Nenhuma baixa encontrada.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if baixas.has_other_pages %}
+    <nav aria-label="Paginação">
+        <ul class="pagination">
+            {% if baixas.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ baixas.previous_page_number }}&produto_id={{ request.GET.produto_id }}&data_inicio={{ request.GET.data_inicio }}&data_fim={{ request.GET.data_fim }}">Anterior</a></li>
+            {% endif %}
+            <li class="page-item disabled"><span class="page-link">Página {{ baixas.number }} de {{ baixas.paginator.num_pages }}</span></li>
+            {% if baixas.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ baixas.next_page_number }}&produto_id={{ request.GET.produto_id }}&data_inicio={{ request.GET.data_inicio }}&data_fim={{ request.GET.data_fim }}">Próxima</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Cadastro de Venda</h2>
+
+    <form method="post" action="{% url 'nova_venda' %}" id="form-venda">
+        {% csrf_token %}
+
+        <!-- Cliente -->
+        <div class="row mb-3">
+            <div class="col-md-6 position-relative">
+                <label class="form-label">Cliente (padrão: ID 3)</label>
+                <input type="text" class="form-control" id="busca_cliente" placeholder="Digite nome ou ID">
+                <ul id="resultados_cliente"
+                    class="list-group position-absolute w-100"
+                    style="z-index:1000; max-height:200px; overflow-y:auto; display:none;"></ul>
+
+                <input type="hidden" id="cliente_id" name="cliente" value="3">
+
+                <small class="text-muted d-block mt-1" id="cliente_info">
+                    ID: 3 - Consumidor
+                </small>
+            </div>
+
+            <!-- Condição de pagamento -->
+            <div class="col-md-4">
+                <label class="form-label">Condição de Pagamento</label>
+                {{ venda_form.condicao_pagamento }}
+            </div>
+        </div>
+
+        <!-- Produto -->
+        <div class="row mb-3">
+            <div class="col-md-6 position-relative">
+                <label class="form-label">Produto</label>
+                <input type="text" class="form-control" id="busca_produto" placeholder="ID ou nome">
+                <ul id="resultados"
+                    class="list-group position-absolute w-100"
+                    style="z-index:1000; max-height:200px; overflow-y:auto; display:none;"></ul>
+
+                <input type="hidden" id="produto_id">
+
+                <div class="row mt-2">
+                    <div class="col-6">
+                        <label class="form-label small">Preço unitário</label>
+                        <input type="number" class="form-control form-control-sm"
+                               id="preco_unitario" step="0.01" min="0">
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small">Qtd</label>
+                        <input type="number" class="form-control form-control-sm"
+                               id="quantidade" min="1" value="1">
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="button" id="adicionar_item" class="btn btn-primary w-100">
+                    Adicionar
+                </button>
+            </div>
+        </div>
+
+        <!-- Tabela -->
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th>Qtd</th>
+                    <th>Preço</th>
+                    <th>Total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="tbody-itens">
+                <tr>
+                    <td colspan="5" class="text-center">Sem itens</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3" class="text-end fw-bold">Total</td>
+                    <td id="total-geral">R$ 0,00</td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+
+        <button type="submit" name="salvar_venda" class="btn btn-success mt-3">
+            Finalizar Venda
+        </button>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<script>
+$(function(){
+
+    /* ================= CLIENTE ================= */
+    $('#busca_cliente').on('input', function(){
+        let term = $(this).val().trim();
+        if(!term){
+            $('#resultados_cliente').hide().empty();
+            return;
+        }
+
+        $.get("{% url 'busca_clientes' %}", {term}, function(data){
+            let html = '';
+            data.forEach(c => {
+                html += `<li class="list-group-item list-group-item-action"
+                            data-id="${c.id}" data-nome="${c.nome}">
+                            ${c.id} - ${c.nome}
+                         </li>`;
+            });
+            $('#resultados_cliente').html(html).show();
+        });
+    });
+
+    $(document).on('click', '#resultados_cliente li', function(){
+        $('#cliente_id').val($(this).data('id'));
+        $('#busca_cliente').val($(this).data('nome'));
+        $('#cliente_info').text(`ID: ${$(this).data('id')} - ${$(this).data('nome')}`);
+        $('#resultados_cliente').hide();
+    });
+
+    /* ================= PRODUTO ================= */
+    $('#busca_produto').on('input', function(){
+        let term = $(this).val().trim();
+        if(!term){
+            $('#resultados').hide().empty();
+            return;
+        }
+
+        $.get("{% url 'busca_produtosVenda' %}", {term}, function(data){
+            let html = '';
+            data.forEach(p => {
+                html += `<li class="list-group-item list-group-item-action"
+                            data-id="${p.id}" data-nome="${p.nome}" data-preco="${p.preco}">
+                            ${p.id} - ${p.nome} (R$ ${p.preco})
+                         </li>`;
+            });
+            $('#resultados').html(html).show();
+        });
+    });
+
+    $(document).on('click', '#resultados li', function(){
+        $('#produto_id').val($(this).data('id'));
+        $('#busca_produto').val($(this).data('nome'));
+        $('#preco_unitario').val(parseFloat($(this).data('preco')).toFixed(2));
+        $('#resultados').hide();
+    });
+
+    /* ================= ADICIONAR ================= */
+    $('#adicionar_item').click(function(){
+        let produto = $('#produto_id').val();
+        let qtd = $('#quantidade').val();
+        let preco = $('#preco_unitario').val();
+
+        if(!produto) return alert('Selecione o produto');
+        if(preco <= 0) return alert('Preço inválido');
+
+        $.post("{% url 'nova_venda' %}", {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            adicionar_item: 1,
+            produto_id: produto,
+            quantidade: qtd,
+            preco_produto: preco
+        }, function(data){
+            renderTabela(data);
+            limparProduto();
+        });
+    });
+
+    /* ================= REMOVER ================= */
+    $(document).on('click', '.remover', function(){
+        $.post("{% url 'nova_venda' %}", {
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            remover_item: $(this).data('id')
+        }, function(data){
+            renderTabela(data);
+        });
+    });
+
+    function renderTabela(data){
+        let tbody = $('#tbody-itens');
+        tbody.empty();
+
+        if(data.itens.length === 0){
+            tbody.append('<tr><td colspan="5" class="text-center">Sem itens</td></tr>');
+            $('#total-geral').text('R$ 0,00');
+            return;
+        }
+
+        data.itens.forEach(i => {
+            tbody.append(`
+                <tr>
+                    <td>${i.nome}</td>
+                    <td>${i.quantidade}</td>
+                    <td>R$ ${i.preco.toFixed(2)}</td>
+                    <td>R$ ${i.total.toFixed(2)}</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-danger remover"
+                                data-id="${i.produto_id}">×</button>
+                    </td>
+                </tr>
+            `);
+        });
+
+        $('#total-geral').text(`R$ ${data.total.toFixed(2)}`);
+    }
+
+    function limparProduto(){
+        $('#produto_id').val('');
+        $('#busca_produto').val('');
+        $('#preco_unitario').val('');
+        $('#quantidade').val(1);
+    }
+
+});
+</script>
+{% endblock %}

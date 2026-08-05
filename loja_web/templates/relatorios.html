@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Relatórios{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4" style="color:#2c3e50;"><i class="bi bi-bar-chart-line me-2"></i>Relatórios</h2>
+
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card card-custom h-100">
+                <div class="card-header" style="background-color:#2e4a7a; color:#fff;">
+                    <i class="bi bi-receipt me-1"></i> Vendas Diretas
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">Relatório de vendas diretas com filtro por data e valor.</p>
+                    <a href="{% url 'relatorio_vendas' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Ver relatório
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-custom h-100">
+                <div class="card-header" style="background-color:#2e4a7a; color:#fff;">
+                    <i class="bi bi-boxes me-1"></i> Estoque
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">Relatório de estoque com filtro por produto e quantidade.</p>
+                    <a href="{% url 'relatorio_estoque' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Ver relatório
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-custom h-100">
+                <div class="card-header" style="background-color:#2e4a7a; color:#fff;">
+                    <i class="bi bi-clipboard-check me-1"></i> Pedidos
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">Relatório de pedidos com filtro por status e data.</p>
+                    <a href="{% url 'relatorio_pedidos' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Ver relatório
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-custom h-100">
+                <div class="card-header" style="background-color:#2e4a7a; color:#fff;">
+                    <i class="bi bi-people me-1"></i> Clientes
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">Relatório de clientes com filtro por nome e e-mail.</p>
+                    <a href="{% url 'relatorio_clientes' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Ver relatório
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-custom h-100">
+                <div class="card-header" style="background-color:#2e4a7a; color:#fff;">
+                    <i class="bi bi-cash-stack me-1"></i> Movimentos Financeiros
+                </div>
+                <div class="card-body">
+                    <p class="card-text text-muted">Relatório de movimentos financeiros com filtro por data, valor e status.</p>
+                    <a href="{% url 'relatorio_movimentos_financeiros' %}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right-circle me-1"></i> Ver relatório
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,731 @@
+{% extends 'pedidos_base.html' %}
+{% load static pedido_filters %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Cadastro de Pedido</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" id="pedidoForm">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {{ formset.management_form }}
+
+        <!-- Card para Informações do Pedido -->
+        <div class="card mb-3">
+            <div class="card-header">Informações do Pedido</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3 position-relative">
+                        <label for="buscaClienteInput" class="form-label fw-bold">Cliente</label>
+                        <input type="text" id="buscaClienteInput" class="form-control" placeholder="Digite ID ou Nome do cliente" autocomplete="off">
+                        <div id="sugestoesCliente" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                        <input type="hidden" id="id_cliente" name="cliente" required>
+                        <div id="info_cliente" class="mt-2 p-2 bg-light border rounded" style="display:none;">
+                            <small id="cliente_nome_info"></small>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="condicao_pagamento" class="form-label fw-bold">Condição de Pagamento</label>
+                        <select class="form-select" id="condicao_pagamento" name="condicao_pagamento">
+                            <option value="">Selecione</option>
+                            {% for condicao in condicoes_pagamento %}
+                                <option value="{{ condicao.id }}" data-juros="{{ condicao.juros|floatformat:2 }}">{{ condicao.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="status" class="form-label fw-bold">Status</label>
+                        <select class="form-select" id="status" name="status" required>
+                            <option value="pendente" selected>Pendente</option>
+                            <option value="concluido">Concluído</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="juros" class="form-label fw-bold">Juros (%)</label>
+                        <input type="text" class="form-control" id="juros" name="juros" value="0,00">
+                    </div>
+                    <div class="col-md-12 mb-3">
+                        <label for="observacoes" class="form-label fw-bold">Observações</label>
+                        <textarea class="form-control" id="observacoes" name="observacoes" rows="3"></textarea>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="desconto_percentual" class="form-label fw-bold">Desconto (%)</label>
+                        <input type="text" class="form-control" id="desconto_percentual" name="desconto_percentual" value="0,00">
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="simulacao_parcelas" class="form-label fw-bold">Simulação de Parcelas</label>
+                        <textarea class="form-control" id="simulacao_parcelas" rows="6" readonly></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card para Produtos -->
+        <div class="card mb-3">
+            <div class="card-header fw-bold text-white bg-primary">Produtos</div>
+            <div class="card-body">
+                <div class="input-group mb-3 position-relative">
+                    <input type="text" id="buscaProdutoInput" class="form-control" placeholder="Digite ID, Nome, Número do Fabricante ou Número Original" autocomplete="off">
+                    <button type="button" class="btn btn-primary" id="btnAdicionarProduto">Adicionar</button>
+                    <div id="sugestoes" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                </div>
+                <table class="table table-bordered" id="tabela-itens">
+                    <thead>
+                        <tr>
+                            <th>Produto</th>
+                            <th>Número do Fabricante</th>
+                            <th>Número Original</th>
+                            <th>Quantidade</th>
+                            <th>Preço Unitário</th>
+                            <th>Acompanhamentos</th>
+                            <th>Subtotal</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="itens-body">
+                        <!-- Tabela começa vazia -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Card para Serviços -->
+        <div class="card mb-3">
+            <div class="card-header fw-bold text-white bg-success">Serviços</div>
+            <div class="card-body">
+                <div class="input-group mb-3 position-relative">
+                    <input type="text" id="buscaServicoInput" class="form-control" placeholder="Digite ID ou Nome do Serviço" autocomplete="off">
+                    <button type="button" class="btn btn-primary" id="btnAdicionarServico">Adicionar</button>
+                    <div id="sugestoesServico" class="list-group position-absolute w-100" style="z-index: 1000;"></div>
+                </div>
+                <table class="table table-bordered" id="tabela-servicos">
+                    <thead>
+                        <tr>
+                            <th>Serviço</th>
+                            <th>Quantidade</th>
+                            <th>Preço Unitário</th>
+                            <th>Subtotal</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="servicos-body">
+                        <!-- Tabela começa vazia -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Card para Totais -->
+        <div class="card mb-3">
+            <div class="card-header fw-bold text-white bg-dark">Totais</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Desconto (R$)</label>
+                        <input type="text" class="form-control" id="desconto" name="desconto" value="0,00" readonly>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Valor Total (R$)</label>
+                        <input type="text" class="form-control" id="valor_total" name="valor_total" value="0,00" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success">Salvar Pedido</button>
+        <a href="{% url 'lista_pedidos' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<script>
+// Parse clientes, produtos e condições de pagamento do template
+const clientes = [
+    {% for cliente in clientes %}
+        { id: "{{ cliente.id }}", nome: "{{ cliente.nome }}", telefone: "{{ cliente.telefone|default:"" }}" },
+    {% endfor %}
+];
+
+const produtos = [
+    {% for produto in produtos %}
+        { 
+            id: "{{ produto.id }}", 
+            nome: "{{ produto.nome }}", 
+            preco: "{{ produto.preco|clean_number }}", 
+            unidade_medida: "{{ produto.unidade_medida|default:'un' }}",
+            unidade_label: "{{ produto.get_unidade_medida_display|default:'Unidade' }}",
+            num_fabricante: "{{ produto.num_fabricante|default:"" }}", 
+            num_original: "{{ produto.num_original|default:"" }}" 
+        },
+    {% endfor %}
+];
+
+const acompanhamentosAtivos = [
+    {% for acompanhamento in acompanhamentos_ativos %}
+        {
+            id: "{{ acompanhamento.id }}",
+            nome: "{{ acompanhamento.nome|escapejs }}",
+            preco: "{{ acompanhamento.preco|clean_number }}"
+        },
+    {% endfor %}
+];
+
+const condicoesPagamento = [
+    {% for condicao in condicoes_pagamento %}
+        {
+            id: "{{ condicao.id }}",
+            nome: "{{ condicao.nome }}",
+            numero_parcelas: {{ condicao.numero_parcelas }},
+            intervalo_dias: {{ condicao.intervalo_dias }},
+            entrada: {{ condicao.entrada|yesno:"true,false" }}
+        },
+    {% endfor %}
+];
+
+// Elementos DOM
+const buscaClienteInput = document.getElementById('buscaClienteInput');
+const sugestoesCliente = document.getElementById('sugestoesCliente');
+const idClienteInput = document.getElementById('id_cliente');
+const infoCliente = document.getElementById('info_cliente');
+const clienteNomeInfo = document.getElementById('cliente_nome_info');
+const buscaInput = document.getElementById('buscaProdutoInput');
+const btnAdicionarProduto = document.getElementById('btnAdicionarProduto');
+const itensBody = document.getElementById('itens-body');
+const descontoPercentual = document.getElementById('desconto_percentual');
+const descontoInput = document.getElementById('desconto');
+const valorTotalInput = document.getElementById('valor_total');
+const buscaServicoInput = document.getElementById('buscaServicoInput');
+const btnAdicionarServico = document.getElementById('btnAdicionarServico');
+const servicosBody = document.getElementById('servicos-body');
+const sugestoesServico = document.getElementById('sugestoesServico');
+const condicaoPagamentoSelect = document.getElementById('condicao_pagamento');
+const simulacaoParcelasTextarea = document.getElementById('simulacao_parcelas');
+const jurosInput = document.getElementById('juros');
+
+let produtoIndex = 0;
+let servicoIndex = 0;
+
+// Autocomplete para clientes
+buscaClienteInput.addEventListener('input', function() {
+    const busca = this.value.trim().toLowerCase();
+    sugestoesCliente.innerHTML = '';
+
+    if (busca.length === 0) {
+        infoCliente.style.display = 'none';
+        idClienteInput.value = '';
+        return;
+    }
+
+    const resultados = clientes.filter(c => 
+        c.id.toLowerCase().includes(busca) || 
+        c.nome.toLowerCase().includes(busca) || 
+        c.telefone.toLowerCase().includes(busca)
+    );
+
+    if (resultados.length === 0) {
+        sugestoesCliente.innerHTML = '<div class="list-group-item">Nenhum cliente encontrado.</div>';
+        return;
+    }
+
+    resultados.forEach(cliente => {
+        const item = document.createElement('a');
+        item.classList.add('list-group-item', 'list-group-item-action');
+        item.textContent = `${cliente.id} - ${cliente.nome} - ${cliente.telefone || '-'}`;
+        item.addEventListener('click', () => {
+            idClienteInput.value = cliente.id;
+            clienteNomeInfo.textContent = `${cliente.id} - ${cliente.nome}`;
+            infoCliente.style.display = 'block';
+            buscaClienteInput.value = '';
+            sugestoesCliente.innerHTML = '';
+        });
+        sugestoesCliente.appendChild(item);
+    });
+});
+
+// Função para buscar e adicionar produto
+function buscarEAdicionarProduto() {
+    const busca = buscaInput.value.trim().toLowerCase();
+    if (!busca) {
+        alert('Digite um ID, nome, número do fabricante ou número original!');
+        return;
+    }
+    const produtoEncontrado = produtos.find(p => 
+        p.id === busca || 
+        p.nome.toLowerCase().includes(busca) || 
+        p.num_fabricante.toLowerCase().includes(busca) || 
+        p.num_original.toLowerCase().includes(busca)
+    );
+    if (!produtoEncontrado) {
+        alert('Produto não encontrado.');
+        return;
+    }
+    adicionarLinhaProduto(produtoEncontrado.id, produtoEncontrado.nome, produtoEncontrado.preco, produtoEncontrado.num_fabricante, produtoEncontrado.num_original);
+    buscaInput.value = '';
+    document.getElementById('sugestoes').innerHTML = '';
+}
+
+// Adiciona uma nova linha com produto preenchido
+function adicionarLinhaProduto(produtoId, nome, preco, num_fabricante, num_original) {
+    const produtoInfo = produtos.find(p => p.id === String(produtoId));
+    const unidadeMedida = produtoInfo?.unidade_medida || 'un';
+    const unidadeLabel = produtoInfo?.unidade_label || 'Unidade';
+    const stepQuantidade = unidadeMedida === 'un' ? '1' : '0.001';
+    const minQuantidade = unidadeMedida === 'un' ? '1' : '0.001';
+
+    const linha = document.createElement('tr');
+    linha.innerHTML = `
+        <td>${produtoId} - ${nome}<input type="hidden" name="produtos" value="${produtoId}"></td>
+        <td>${num_fabricante || '-'}</td>
+        <td>${num_original || '-'}</td>
+        <td>
+            <input type="number" class="form-control quantidade-input" name="quantidades" value="1" min="${minQuantidade}" step="${stepQuantidade}">
+            <small class="text-muted">${unidadeLabel}</small>
+        </td>
+        <td><input type="text" class="form-control preco-input" name="precos_unitarios" value="${preco}"></td>
+        <td>
+            <input type="hidden" name="acompanhamentos_json" class="acompanhamentos-json" value="[]">
+            <div class="small text-muted acompanhamentos-resumo">Nenhum</div>
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-1 configurar-acomp">Configurar</button>
+        </td>
+        <td class="subtotal">0,00</td>
+        <td><button type="button" class="btn btn-danger btn-sm remover-item" onclick="return confirm('Tem certeza que deseja remover o item ${produtoId} - ${nome}?');">Remover</button></td>
+    `;
+    itensBody.appendChild(linha);
+    atualizarSubtotalLinha(linha);
+    atualizarTotal();
+    produtoIndex++;
+}
+
+// Atualiza subtotal da linha (produtos)
+function atualizarSubtotalLinha(linha) {
+    const qtd = parseFloat(linha.querySelector('.quantidade-input').value) || 0;
+    const preco = parseFloat(linha.querySelector('.preco-input').value.replace(',', '.')) || 0;
+    const subtotalBase = qtd * preco;
+
+    let subtotalAcompanhamentos = 0;
+    try {
+        const lista = JSON.parse(linha.querySelector('.acompanhamentos-json')?.value || '[]');
+        subtotalAcompanhamentos = lista.reduce((acc, item) => {
+            const acomp = acompanhamentosAtivos.find(a => a.id === String(item.id));
+            const precoAcomp = acomp ? parseFloat(String(acomp.preco).replace(',', '.')) || 0 : 0;
+            const qtdAcomp = parseInt(item.qtd, 10) || 1;
+            return acc + (precoAcomp * qtdAcomp);
+        }, 0);
+    } catch (e) {
+        subtotalAcompanhamentos = 0;
+    }
+
+    const subtotal = subtotalBase + subtotalAcompanhamentos;
+    linha.querySelector('.subtotal').innerText = subtotal.toFixed(2).replace('.', ',');
+}
+
+function parseAcompanhamentosTexto(texto) {
+    if (!texto || !texto.trim()) return [];
+
+    return texto
+        .split(',')
+        .map(parte => parte.trim())
+        .filter(Boolean)
+        .map(parte => {
+            const [idRaw, qtdRaw] = parte.split(':').map(v => v.trim());
+            const id = idRaw;
+            const qtd = parseInt(qtdRaw || '1', 10);
+            if (!id || Number.isNaN(qtd) || qtd < 1) return null;
+            return { id, qtd };
+        })
+        .filter(Boolean);
+}
+
+function resumoAcompanhamentos(lista) {
+    if (!lista.length) return 'Nenhum';
+
+    return lista.map(item => {
+        const acomp = acompanhamentosAtivos.find(a => a.id === String(item.id));
+        if (!acomp) return null;
+        return `${item.qtd}x ${acomp.nome}`;
+    }).filter(Boolean).join(', ') || 'Nenhum';
+}
+
+function abrirConfiguracaoAcompanhamentos(linha) {
+    if (!acompanhamentosAtivos.length) {
+        alert('Não há acompanhamentos ativos cadastrados.');
+        return;
+    }
+
+    const hidden = linha.querySelector('.acompanhamentos-json');
+    let atuais = [];
+    try {
+        atuais = JSON.parse(hidden.value || '[]');
+    } catch (e) {
+        atuais = [];
+    }
+
+    const atualTexto = atuais.map(item => `${item.id}:${item.qtd}`).join(', ');
+    const catalogo = acompanhamentosAtivos
+        .map(a => `${a.id} - ${a.nome} (R$ ${String(a.preco).replace('.', ',')})`)
+        .join('\n');
+
+    const entrada = prompt(
+        `Informe no formato ID:QTD, separados por vírgula. Ex.: 1:2, 3:1\n\nDisponíveis:\n${catalogo}`,
+        atualTexto
+    );
+
+    if (entrada === null) return;
+
+    const lista = parseAcompanhamentosTexto(entrada);
+    hidden.value = JSON.stringify(lista);
+    linha.querySelector('.acompanhamentos-resumo').textContent = resumoAcompanhamentos(lista);
+    atualizarSubtotalLinha(linha);
+    atualizarTotal();
+}
+
+// Função para buscar e adicionar serviço
+async function buscarEAdicionarServico() {
+    const busca = buscaServicoInput.value.trim();
+    if (!busca) {
+        alert('Digite o ID ou nome do serviço!');
+        return;
+    }
+    try {
+        const response = await fetch(`/api/servicos/?q=${encodeURIComponent(busca)}`);
+        if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+        const resultados = await response.json();
+        const servicoEncontrado = resultados.find(s => String(s.id) === busca || s.nome.toLowerCase().includes(busca.toLowerCase()));
+        if (!servicoEncontrado) {
+            alert('Serviço não encontrado.');
+            return;
+        }
+        adicionarLinhaServico(servicoEncontrado.id, servicoEncontrado.nome, servicoEncontrado.preco);
+        buscaServicoInput.value = '';
+        sugestoesServico.innerHTML = '';
+    } catch (error) {
+        console.error('Erro ao buscar serviço:', error);
+        alert('Erro ao carregar serviços. Verifique a conexão ou tente novamente.');
+    }
+}
+
+// Adiciona uma nova linha com serviço preenchido
+function adicionarLinhaServico(servicoId, nome, preco) {
+    const precoFormatado = parseFloat(preco).toFixed(2).replace('.', ',');
+    const linha = document.createElement('tr');
+    linha.innerHTML = `
+        <td>${servicoId} - ${nome}<input type="hidden" name="servicos" value="${servicoId}"></td>
+        <td><input type="number" class="form-control quantidade-input-servico" name="quantidades_servicos" value="1" min="1"></td>
+        <td><input type="text" class="form-control preco-input-servico" name="precos_servicos" value="${precoFormatado}"></td>
+        <td class="subtotal-servico">0,00</td>
+        <td><button type="button" class="btn btn-danger btn-sm remover-servico" onclick="return confirm('Tem certeza que deseja remover o serviço ${servicoId} - ${nome}?');">Remover</button></td>
+    `;
+    servicosBody.appendChild(linha);
+    atualizarSubtotalLinhaServico(linha);
+    atualizarTotal();
+    servicoIndex++;
+}
+
+// Atualiza subtotal da linha (serviços)
+function atualizarSubtotalLinhaServico(linha) {
+    const qtd = parseFloat(linha.querySelector('.quantidade-input-servico').value) || 0;
+    const preco = parseFloat(linha.querySelector('.preco-input-servico').value.replace(',', '.')) || 0;
+    const subtotal = qtd * preco;
+    linha.querySelector('.subtotal-servico').innerText = subtotal.toFixed(2).replace('.', ',');
+}
+
+// Atualiza valor total, desconto e juros
+function atualizarTotal() {
+    let total = 0;
+    const itensBody = document.getElementById('itens-body');
+    const servicosBody = document.getElementById('servicos-body');
+    const descontoPercentInput = document.getElementById('desconto_percentual');
+    const descontoInput = document.getElementById('desconto');
+    const valorTotalInput = document.getElementById('valor_total');
+    const jurosInput = document.getElementById('juros');
+
+    // Soma os subtotais dos produtos
+    itensBody.querySelectorAll('tr').forEach(linha => {
+        const subtotalText = linha.querySelector('.subtotal')?.innerText.replace(',', '.') || '0';
+        const subtotal = parseFloat(subtotalText) || 0;
+        total += subtotal;
+    });
+
+    // Soma os subtotais dos serviços
+    servicosBody.querySelectorAll('tr').forEach(linha => {
+        const subtotalText = linha.querySelector('.subtotal-servico')?.innerText.replace(',', '.') || '0';
+        const subtotal = parseFloat(subtotalText) || 0;
+        total += subtotal;
+    });
+
+    // Converte desconto percentual corretamente
+    let descontoPercent = parseFloat(descontoPercentInput.value.replace(',', '.')) || 0;
+    if (descontoPercent < 0 || isNaN(descontoPercent)) {
+        descontoPercent = 0;
+        descontoPercentInput.value = '0,00';
+    } else if (descontoPercent > 100) {
+        descontoPercent = 100;
+        descontoPercentInput.value = '100,00';
+    }
+    const valorDesconto = (total * descontoPercent) / 100;
+
+    // Calcula juros
+    let jurosPercent = parseFloat(jurosInput.value.replace(',', '.')) || 0;
+    if (jurosPercent < 0 || isNaN(jurosPercent)) {
+        jurosPercent = 0;
+        jurosInput.value = '0,00';
+    }
+    const valorComDesconto = total - valorDesconto;
+    const valorJuros = (valorComDesconto * jurosPercent) / 100;
+    const valorTotalComJuros = valorComDesconto + valorJuros;
+
+    // Atualiza os campos no formulário
+    descontoInput.value = valorDesconto.toFixed(2).replace('.', ',');
+    valorTotalInput.value = valorTotalComJuros.toFixed(2).replace('.', ',');
+}
+
+// Remove linha de produto
+function removerLinhaProduto(e) {
+    const linha = e.target.closest('tr');
+    linha.remove();
+    atualizarTotal();
+}
+
+// Remove linha de serviço
+function removerLinhaServico(e) {
+    const linha = e.target.closest('tr');
+    linha.remove();
+    atualizarTotal();
+}
+
+// Autocomplete para produtos
+buscaInput.addEventListener('input', function() {
+    const busca = this.value.trim().toLowerCase();
+    const sugestoesDiv = document.getElementById('sugestoes');
+    sugestoesDiv.innerHTML = '';
+
+    if (busca.length === 0) return;
+
+    const resultados = produtos.filter(p => 
+        p.id.toLowerCase().includes(busca) || 
+        p.nome.toLowerCase().includes(busca) || 
+        p.num_fabricante.toLowerCase().includes(busca) || 
+        p.num_original.toLowerCase().includes(busca)
+    );
+
+    resultados.forEach(produto => {
+        const item = document.createElement('a');
+        item.classList.add('list-group-item', 'list-group-item-action');
+        item.textContent = `${produto.id} - ${produto.nome} - ${produto.num_fabricante || '-'} - ${produto.num_original || '-'} - R$ ${produto.preco}`;
+        item.addEventListener('click', () => {
+            adicionarLinhaProduto(produto.id, produto.nome, produto.preco, produto.num_fabricante, produto.num_original);
+            buscaInput.value = '';
+            sugestoesDiv.innerHTML = '';
+        });
+        sugestoesDiv.appendChild(item);
+    });
+});
+
+// Autocomplete para serviços
+let debounceTimeout;
+buscaServicoInput.addEventListener('input', function() {
+    clearTimeout(debounceTimeout);
+    debounceTimeout = setTimeout(async () => {
+        const busca = this.value.trim();
+        sugestoesServico.innerHTML = '';
+
+        if (busca.length === 0) return;
+
+        try {
+            const response = await fetch(`/api/servicos/?q=${encodeURIComponent(busca)}`);
+            if (!response.ok) throw new Error(`Erro HTTP: ${response.status}`);
+            const resultados = await response.json();
+
+            if (resultados.length === 0) {
+                sugestoesServico.innerHTML = '<div class="list-group-item">Nenhum serviço encontrado.</div>';
+                return;
+            }
+
+            resultados.forEach(servico => {
+                const item = document.createElement('a');
+                item.classList.add('list-group-item', 'list-group-item-action');
+                item.textContent = `${servico.id} - ${servico.nome} - R$ ${servico.preco}`;
+                item.addEventListener('click', () => {
+                    adicionarLinhaServico(servico.id, servico.nome, servico.preco);
+                    buscaServicoInput.value = '';
+                    sugestoesServico.innerHTML = '';
+                });
+                sugestoesServico.appendChild(item);
+            });
+        } catch (error) {
+            console.error('Erro ao buscar serviço:', error);
+            sugestoesServico.innerHTML = '<div class="list-group-item text-danger">Erro ao carregar serviços.</div>';
+        }
+    }, 300);
+});
+
+// Fecha sugestões ao clicar fora
+document.addEventListener('click', function(e) {
+    if (!buscaClienteInput.contains(e.target) && !sugestoesCliente.contains(e.target)) {
+        sugestoesCliente.innerHTML = '';
+    }
+    if (!buscaInput.contains(e.target) && !document.getElementById('sugestoes').contains(e.target)) {
+        document.getElementById('sugestoes').innerHTML = '';
+    }
+    if (!buscaServicoInput.contains(e.target) && !sugestoesServico.contains(e.target)) {
+        sugestoesServico.innerHTML = '';
+    }
+});
+
+// Adiciona produto com Enter ou botão
+buscaInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        buscarEAdicionarProduto();
+    }
+});
+btnAdicionarProduto.addEventListener('click', buscarEAdicionarProduto);
+
+// Adiciona serviço com Enter ou botão
+buscaServicoInput.addEventListener('keydown', async e => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        buscarEAdicionarServico();
+    }
+});
+btnAdicionarServico.addEventListener('click', buscarEAdicionarServico);
+
+// Atualiza subtotais e total ao alterar quantidades ou preços
+itensBody.addEventListener('input', e => {
+    if (e.target.classList.contains('quantidade-input') || e.target.classList.contains('preco-input')) {
+        const linha = e.target.closest('tr');
+        atualizarSubtotalLinha(linha);
+        atualizarTotal();
+    }
+});
+
+itensBody.addEventListener('click', e => {
+    if (e.target.classList.contains('configurar-acomp')) {
+        const linha = e.target.closest('tr');
+        abrirConfiguracaoAcompanhamentos(linha);
+    }
+});
+servicosBody.addEventListener('input', e => {
+    if (e.target.classList.contains('quantidade-input-servico') || e.target.classList.contains('preco-input-servico')) {
+        const linha = e.target.closest('tr');
+        atualizarSubtotalLinhaServico(linha);
+        atualizarTotal();
+    }
+});
+
+// Atualiza total ao alterar desconto percentual ou juros
+descontoPercentual.addEventListener('input', function() {
+    let desconto = parseFloat(this.value.replace(',', '.')) || 0;
+    if (desconto < 0 || isNaN(desconto)) {
+        this.value = '0,00';
+    } else if (desconto > 100) {
+        this.value = '100,00';
+    }
+    atualizarTotal();
+});
+
+jurosInput.addEventListener('input', function() {
+    let juros = parseFloat(this.value.replace(',', '.')) || 0;
+    if (juros < 0 || isNaN(juros)) {
+        this.value = '0,00';
+    }
+    atualizarTotal();
+});
+
+// Remove linhas de produtos
+itensBody.addEventListener('click', e => {
+    if (e.target.classList.contains('remover-item')) {
+        removerLinhaProduto(e);
+    }
+});
+
+// Remove linhas de serviços
+servicosBody.addEventListener('click', e => {
+    if (e.target.classList.contains('remover-servico')) {
+        removerLinhaServico(e);
+    }
+});
+
+// Simulação de parcelas
+function atualizarSimulacaoParcelas() {
+    atualizarTotal(); // Garante que o total está atualizado
+    const condicaoId = condicaoPagamentoSelect.value;
+    const condicao = condicoesPagamento.find(c => c.id === condicaoId);
+    let total = parseFloat(valorTotalInput.value.replace(',', '.')) || 0;
+
+    if (!condicao || total <= 0 || !condicao.numero_parcelas) {
+        simulacaoParcelasTextarea.value = '';
+        return;
+    }
+
+    const parcelas = [];
+    let restante = total;
+    const hoje = new Date();
+    let dataBase = new Date(hoje);
+
+    if (condicao.entrada) {
+        const valorEntrada = (total / (condicao.numero_parcelas + 1)).toFixed(2);
+        parcelas.push({
+            descricao: `Entrada`,
+            data: hoje.toLocaleDateString('pt-BR'),
+            valor: valorEntrada
+        });
+        restante -= parseFloat(valorEntrada);
+    }
+
+    const valorParcela = (restante / condicao.numero_parcelas).toFixed(2);
+
+    for (let i = 1; i <= condicao.numero_parcelas; i++) {
+        dataBase.setDate(dataBase.getDate() + condicao.intervalo_dias);
+        parcelas.push({
+            descricao: `${i}ª Parcela`,
+            data: dataBase.toLocaleDateString('pt-BR'),
+            valor: valorParcela
+        });
+    }
+
+    console.log('Parcelas calculadas:', parcelas); // Para depuração
+    simulacaoParcelasTextarea.value = parcelas.map(p =>
+        `${p.descricao} - ${p.data} - R$ ${p.valor}`
+    ).join("\n");
+}
+
+// Atualiza juros com base na condição de pagamento
+condicaoPagamentoSelect.addEventListener("change", function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const juros = selectedOption.getAttribute("data-juros");
+
+    if (juros !== null) {
+        jurosInput.value = parseFloat(juros).toFixed(2).replace('.', ',');
+    } else {
+        jurosInput.value = "0,00";
+    }
+    atualizarSimulacaoParcelas();
+});
+
+// Inicializa totais e simulação na carga da página
+document.addEventListener('DOMContentLoaded', function() {
+    atualizarTotal();
+    if (condicaoPagamentoSelect.value) {
+        atualizarSimulacaoParcelas();
+    }
+});
+
+// Formata valores antes de enviar o formulário
+document.getElementById('pedidoForm').addEventListener('submit', function(e) {
+    document.querySelectorAll('.preco-input, .preco-input-servico, #desconto_percentual, #juros').forEach(input => {
+        if (input.value) {
+            input.value = input.value.replace(',', '.');
+        }
+    });
+});
+</script>
+{% endblock %}

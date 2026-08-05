@@ -1,0 +1,13 @@
+{% extends 'base_servicos.html' %}
+{% block title %}Novo Serviço{% endblock %}
+{% block content %}
+<div class="card card-custom fade-slide-in p-4">
+    <h2>Novo Serviço</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success"><i class="bi bi-check-circle"></i> Salvar</button>
+        <a href="{% url 'listar_servicos' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+    </form>
+</div>
+{% endblock %}

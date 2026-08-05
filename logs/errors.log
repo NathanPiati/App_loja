@@ -1,0 +1,1370 @@
+[2026-03-25 16:39:52,891] ERROR django.request - Internal Server Error: /produtos/listar/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 511, in parse
+    compile_func = self.tags[command]
+                   ~~~~~~~~~^^^^^^^^^
+KeyError: 'endfor'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\loja_web\views.py", line 808, in produto_lista
+    return render(request, 'produto_lista.html', context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 134, in render
+    compiled_parent = self.get_parent(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 131, in get_parent
+    return self.find_template(parent, context)
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 109, in find_template
+    template, origin = context.template.engine.find_template(
+                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        template_name,
+        ^^^^^^^^^^^^^^
+        skip=history,
+        ^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\engine.py", line 159, in find_template
+    template = loader.get_template(name, skip=skip)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loaders\cached.py", line 57, in get_template
+    template = super().get_template(template_name, skip)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loaders\base.py", line 28, in get_template
+    return Template(
+        contents,
+    ...<2 lines>...
+        self.engine,
+    )
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 155, in __init__
+    self.nodelist = self.compile_nodelist()
+                    ~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 197, in compile_nodelist
+    nodelist = parser.parse()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 513, in parse
+    self.invalid_block_tag(token, command, parse_until)
+    ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 578, in invalid_block_tag
+    raise self.error(
+    ...<3 lines>...
+    )
+django.template.exceptions.TemplateSyntaxError: Invalid block tag on line 113: 'endfor'. Did you forget to register or load this tag?
+[2026-03-26 12:05:29,675] ERROR django.request - Internal Server Error: /produto/novo/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'ModelChoiceIteratorValue'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\loja_web\views.py", line 581, in produto_novo
+    return render(request, 'produto_form.html', {
+        'form': form,
+        'composicao_formset': composicao_formset,
+    })
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\formsets.py", line 121, in __len__
+    return len(self.forms)
+               ^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\formsets.py", line 206, in forms
+    self._construct_form(i, **self.get_form_kwargs(i))
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\models.py", line 1126, in _construct_form
+    form = super()._construct_form(i, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\models.py", line 743, in _construct_form
+    form = super()._construct_form(i, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\formsets.py", line 244, in _construct_form
+    form = self.form(**defaults)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\loja_web\forms.py", line 179, in __init__
+    produto = Produto.objects.get(pk=pk)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 621, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 1495, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 1513, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 1523, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1415, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\lookups.py", line 38, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\lookups.py", line 410, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\lookups.py", line 96, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+TypeError: Field 'id' expected a number but got <django.forms.models.ModelChoiceIteratorValue object at 0x0000021C175D36F0>.
+[2026-03-26 12:06:38,047] ERROR django.request - Internal Server Error: /produto/novo/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'ModelChoiceIteratorValue'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\loja_web\views.py", line 581, in produto_novo
+    return render(request, 'produto_form.html', {
+        'form': form,
+        'composicao_formset': composicao_formset,
+    })
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\formsets.py", line 121, in __len__
+    return len(self.forms)
+               ^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\formsets.py", line 206, in forms
+    self._construct_form(i, **self.get_form_kwargs(i))
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\models.py", line 1126, in _construct_form
+    form = super()._construct_form(i, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\models.py", line 743, in _construct_form
+    form = super()._construct_form(i, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\formsets.py", line 244, in _construct_form
+    form = self.form(**defaults)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\loja_web\forms.py", line 179, in __init__
+    produto = Produto.objects.get(pk=pk)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 621, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 1495, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 1513, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 1523, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1415, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\lookups.py", line 38, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\lookups.py", line 410, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\lookups.py", line 96, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+TypeError: Field 'id' expected a number but got <django.forms.models.ModelChoiceIteratorValue object at 0x0000021C17558750>.
+[2026-03-26 12:06:39,918] ERROR django.request - Internal Server Error: /produto/novo/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2128, in get_prep_value
+    return int(value)
+TypeError: int() argument must be a string, a bytes-like object or a real number, not 'ModelChoiceIteratorValue'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\loja_web\views.py", line 581, in produto_novo
+    return render(request, 'produto_form.html', {
+        'form': form,
+        'composicao_formset': composicao_formset,
+    })
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\defaulttags.py", line 199, in render
+    len_values = len(values)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\formsets.py", line 121, in __len__
+    return len(self.forms)
+               ^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\utils\functional.py", line 47, in __get__
+    res = instance.__dict__[self.name] = self.func(instance)
+                                         ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\formsets.py", line 206, in forms
+    self._construct_form(i, **self.get_form_kwargs(i))
+    ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\models.py", line 1126, in _construct_form
+    form = super()._construct_form(i, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\models.py", line 743, in _construct_form
+    form = super()._construct_form(i, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\forms\formsets.py", line 244, in _construct_form
+    form = self.form(**defaults)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\loja_web\forms.py", line 179, in __init__
+    produto = Produto.objects.get(pk=pk)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 621, in get
+    clone = self._chain() if self.query.combinator else self.filter(*args, **kwargs)
+                                                        ~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 1495, in filter
+    return self._filter_or_exclude(False, args, kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 1513, in _filter_or_exclude
+    clone._filter_or_exclude_inplace(negate, args, kwargs)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 1523, in _filter_or_exclude_inplace
+    self._query.add_q(Q(*args, **kwargs))
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1646, in add_q
+    clause, _ = self._add_q(q_object, can_reuse)
+                ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1678, in _add_q
+    child_clause, needed_inner = self.build_filter(
+                                 ~~~~~~~~~~~~~~~~~^
+        child,
+        ^^^^^^
+    ...<7 lines>...
+        update_join_types=update_join_types,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1588, in build_filter
+    condition = self.build_lookup(lookups, col, value)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\query.py", line 1415, in build_lookup
+    lookup = lookup_class(lhs, rhs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\lookups.py", line 38, in __init__
+    self.rhs = self.get_prep_lookup()
+               ~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\lookups.py", line 410, in get_prep_lookup
+    return super().get_prep_lookup()
+           ~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\lookups.py", line 96, in get_prep_lookup
+    return self.lhs.output_field.get_prep_value(self.rhs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\fields\__init__.py", line 2130, in get_prep_value
+    raise e.__class__(
+        "Field '%s' expected a number but got %r." % (self.name, value),
+    ) from e
+TypeError: Field 'id' expected a number but got <django.forms.models.ModelChoiceIteratorValue object at 0x0000021C17673AD0>.
+[2026-03-26 14:24:48,183] ERROR django.request - Internal Server Error: /produto/novo/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 892, in _resolve_lookup
+    raise TypeError
+TypeError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\loja_web\views.py", line 590, in produto_novo
+    return render(request, 'produto_form.html', {
+        'form': form,
+        'composicao_formset': composicao_formset,
+        'ingredientes_catalogo': Produto.objects.values('id', 'valor_pago', 'unidade_medida', 'nome'),
+    })
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\defaulttags.py", line 327, in render
+    return nodelist.render(context)
+           ~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1077, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 723, in resolve
+    obj = self.var.resolve(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 856, in resolve
+    value = self._resolve_lookup(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 903, in _resolve_lookup
+    current = getattr(current, bit)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\loja_web\models.py", line 57, in custo_calculado
+    for componente in self.componentes.select_related('ingrediente').all():
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+                   ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 760, in get_queryset
+    raise ValueError(
+    ...<2 lines>...
+    )
+ValueError: 'Produto' instance needs to have a primary key value before this relationship can be used.
+[2026-04-30 16:56:01,600] ERROR django.request - Internal Server Error: /pedido/editar/3/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 892, in _resolve_lookup
+    raise TypeError
+TypeError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 243, in __get__
+    rel_obj = self.field.get_cached_value(instance)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\fields\mixins.py", line 37, in get_cached_value
+    return instance._state.fields_cache[self.cache_name]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+KeyError: 'produto'
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: ERRO:  coluna loja_web_produto.garantia_dias não existe
+LINE 1: ...o"."valor_pago", "loja_web_produto"."eh_servico", "loja_web_...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Nathan Piati\AppData\Local\Programs\Python\Python313\Lib\contextlib.py", line 85, in inner
+    return func(*args, **kwds)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\auth\decorators.py", line 59, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\loja_web\views.py", line 1962, in editar_pedido
+    return render(request, 'pedido_edit.html', {
+        'form': form,
+    ...<11 lines>...
+        'valor_total': valor_total,
+    })
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\shortcuts.py", line 25, in render
+    content = loader.render_to_string(template_name, context, request, using=using)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader.py", line 62, in render_to_string
+    return template.render(context, request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 65, in render
+    result = block.nodelist.render(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\defaulttags.py", line 243, in render
+    nodelist.append(node.render_annotated(context))
+                    ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1077, in render
+    output = self.filter_expression.resolve(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 723, in resolve
+    obj = self.var.resolve(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 856, in resolve
+    value = self._resolve_lookup(context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 903, in _resolve_lookup
+    current = getattr(current, bit)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 261, in __get__
+    rel_obj = self.get_object(instance)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\fields\related_descriptors.py", line 224, in get_object
+    return qs.get(self.field.get_reverse_related_filter(instance))
+           ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 631, in get
+    num = len(clone)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 368, in __len__
+    self._fetch_all()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 1954, in _fetch_all
+    self._result_cache = list(self._iterable_class(self))
+                         ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 93, in __iter__
+    results = compiler.execute_sql(
+        chunked_fetch=self.chunked_fetch, chunk_size=self.chunk_size
+    )
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1623, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\backends\utils.py", line 122, in execute
+    return super().execute(sql, params)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.ProgrammingError: ERRO:  coluna loja_web_produto.garantia_dias não existe
+LINE 1: ...o"."valor_pago", "loja_web_produto"."eh_servico", "loja_web_...
+                                                             ^
+
+[2026-08-03 23:24:54,167] ERROR django.request - Internal Server Error: /admin/billing/lead/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\library.py", line 324, in render
+    output = self.func(*resolved_args, **resolved_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\templatetags\jazzmin.py", line 161, in get_jazzmin_ui_tweaks
+    return get_ui_tweaks()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\settings.py", line 313, in get_ui_tweaks
+    "theme": {"name": theme, "src": static(THEMES[theme])},
+                                    ~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 179, in static
+    return StaticNode.handle_simple(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 129, in handle_simple
+    return staticfiles_storage.url(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 204, in url
+    return self._url(self.stored_name, name, force)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 183, in _url
+    hashed_name = hashed_name_func(*args)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 518, in stored_name
+    raise ValueError(
+        "Missing staticfiles manifest entry for '%s'" % clean_name
+    )
+ValueError: Missing staticfiles manifest entry for 'vendor/bootswatch/simplex/bootstrap.min.css'
+[2026-08-03 23:24:56,543] ERROR django.request - Internal Server Error: /admin/loja_web/fornecedor/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\library.py", line 324, in render
+    output = self.func(*resolved_args, **resolved_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\templatetags\jazzmin.py", line 161, in get_jazzmin_ui_tweaks
+    return get_ui_tweaks()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\settings.py", line 313, in get_ui_tweaks
+    "theme": {"name": theme, "src": static(THEMES[theme])},
+                                    ~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 179, in static
+    return StaticNode.handle_simple(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 129, in handle_simple
+    return staticfiles_storage.url(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 204, in url
+    return self._url(self.stored_name, name, force)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 183, in _url
+    hashed_name = hashed_name_func(*args)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 518, in stored_name
+    raise ValueError(
+        "Missing staticfiles manifest entry for '%s'" % clean_name
+    )
+ValueError: Missing staticfiles manifest entry for 'vendor/bootswatch/simplex/bootstrap.min.css'
+[2026-08-03 23:24:59,130] ERROR django.request - Internal Server Error: /admin/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\library.py", line 324, in render
+    output = self.func(*resolved_args, **resolved_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\templatetags\jazzmin.py", line 161, in get_jazzmin_ui_tweaks
+    return get_ui_tweaks()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\settings.py", line 313, in get_ui_tweaks
+    "theme": {"name": theme, "src": static(THEMES[theme])},
+                                    ~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 179, in static
+    return StaticNode.handle_simple(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 129, in handle_simple
+    return staticfiles_storage.url(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 204, in url
+    return self._url(self.stored_name, name, force)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 183, in _url
+    hashed_name = hashed_name_func(*args)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 518, in stored_name
+    raise ValueError(
+        "Missing staticfiles manifest entry for '%s'" % clean_name
+    )
+ValueError: Missing staticfiles manifest entry for 'vendor/bootswatch/simplex/bootstrap.min.css'
+[2026-08-03 23:25:00,938] ERROR django.request - Internal Server Error: /admin/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\library.py", line 324, in render
+    output = self.func(*resolved_args, **resolved_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\templatetags\jazzmin.py", line 161, in get_jazzmin_ui_tweaks
+    return get_ui_tweaks()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\settings.py", line 313, in get_ui_tweaks
+    "theme": {"name": theme, "src": static(THEMES[theme])},
+                                    ~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 179, in static
+    return StaticNode.handle_simple(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 129, in handle_simple
+    return staticfiles_storage.url(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 204, in url
+    return self._url(self.stored_name, name, force)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 183, in _url
+    hashed_name = hashed_name_func(*args)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 518, in stored_name
+    raise ValueError(
+        "Missing staticfiles manifest entry for '%s'" % clean_name
+    )
+ValueError: Missing staticfiles manifest entry for 'vendor/bootswatch/simplex/bootstrap.min.css'
+[2026-08-03 23:25:07,023] ERROR django.request - Internal Server Error: /admin/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\library.py", line 324, in render
+    output = self.func(*resolved_args, **resolved_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\templatetags\jazzmin.py", line 161, in get_jazzmin_ui_tweaks
+    return get_ui_tweaks()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\settings.py", line 313, in get_ui_tweaks
+    "theme": {"name": theme, "src": static(THEMES[theme])},
+                                    ~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 179, in static
+    return StaticNode.handle_simple(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 129, in handle_simple
+    return staticfiles_storage.url(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 204, in url
+    return self._url(self.stored_name, name, force)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 183, in _url
+    hashed_name = hashed_name_func(*args)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 518, in stored_name
+    raise ValueError(
+        "Missing staticfiles manifest entry for '%s'" % clean_name
+    )
+ValueError: Missing staticfiles manifest entry for 'vendor/bootswatch/simplex/bootstrap.min.css'
+[2026-08-03 23:25:26,090] ERROR django.request - Internal Server Error: /admin/login/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\library.py", line 324, in render
+    output = self.func(*resolved_args, **resolved_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\templatetags\jazzmin.py", line 161, in get_jazzmin_ui_tweaks
+    return get_ui_tweaks()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\settings.py", line 313, in get_ui_tweaks
+    "theme": {"name": theme, "src": static(THEMES[theme])},
+                                    ~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 179, in static
+    return StaticNode.handle_simple(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 129, in handle_simple
+    return staticfiles_storage.url(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 204, in url
+    return self._url(self.stored_name, name, force)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 183, in _url
+    hashed_name = hashed_name_func(*args)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 518, in stored_name
+    raise ValueError(
+        "Missing staticfiles manifest entry for '%s'" % clean_name
+    )
+ValueError: Missing staticfiles manifest entry for 'vendor/bootswatch/simplex/bootstrap.min.css'
+[2026-08-03 23:26:07,139] ERROR django.request - Internal Server Error: /admin/login/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\library.py", line 324, in render
+    output = self.func(*resolved_args, **resolved_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\templatetags\jazzmin.py", line 161, in get_jazzmin_ui_tweaks
+    return get_ui_tweaks()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\settings.py", line 313, in get_ui_tweaks
+    "theme": {"name": theme, "src": static(THEMES[theme])},
+                                    ~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 179, in static
+    return StaticNode.handle_simple(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 129, in handle_simple
+    return staticfiles_storage.url(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 204, in url
+    return self._url(self.stored_name, name, force)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 183, in _url
+    hashed_name = hashed_name_func(*args)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 518, in stored_name
+    raise ValueError(
+        "Missing staticfiles manifest entry for '%s'" % clean_name
+    )
+ValueError: Missing staticfiles manifest entry for 'vendor/bootswatch/simplex/bootstrap.min.css'
+[2026-08-03 23:26:51,803] ERROR django.request - Internal Server Error: /admin/login/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 220, in _get_response
+    response = response.render()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\backends\django.py", line 107, in render
+    return self.template.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 172, in render
+    return self._render(context)
+           ~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\loader_tags.py", line 159, in render
+    return compiled_parent._render(context)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 164, in _render
+    return self.nodelist.render(context)
+           ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 1018, in render
+    return SafeString("".join([node.render_annotated(context) for node in self]))
+                               ~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\base.py", line 979, in render_annotated
+    return self.render(context)
+           ~~~~~~~~~~~^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\template\library.py", line 324, in render
+    output = self.func(*resolved_args, **resolved_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\templatetags\jazzmin.py", line 161, in get_jazzmin_ui_tweaks
+    return get_ui_tweaks()
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\jazzmin\settings.py", line 313, in get_ui_tweaks
+    "theme": {"name": theme, "src": static(THEMES[theme])},
+                                    ~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 179, in static
+    return StaticNode.handle_simple(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\templatetags\static.py", line 129, in handle_simple
+    return staticfiles_storage.url(path)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 204, in url
+    return self._url(self.stored_name, name, force)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 183, in _url
+    hashed_name = hashed_name_func(*args)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\contrib\staticfiles\storage.py", line 518, in stored_name
+    raise ValueError(
+        "Missing staticfiles manifest entry for '%s'" % clean_name
+    )
+ValueError: Missing staticfiles manifest entry for 'vendor/bootswatch/simplex/bootstrap.min.css'
+[2026-08-03 23:52:47,688] ERROR django.request - Internal Server Error: /assinatura/assinar/3/
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 948, in get_or_create
+    return self.get(**kwargs), False
+           ~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 635, in get
+    raise self.model.DoesNotExist(
+        "%s matching query does not exist." % self.model._meta.object_name
+    )
+billing.models.Assinatura.DoesNotExist: Assinatura matching query does not exist.
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+psycopg2.errors.NotNullViolation: ERRO:  o valor nulo na coluna "empresa_id" da relação "billing_assinatura" viola a restrição de não-nulo
+DETAIL:  Registro que falhou contém (1, trial, , , , 2026-08-03, null, null, 2026-08-03 23:52:47.536687-03, 2026-08-03 23:52:47.536691-03, null, 1, 3).
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\exception.py", line 55, in inner
+    response = get_response(request)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\core\handlers\base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\billing\views.py", line 20, in iniciar_assinatura
+    assinatura, created = Assinatura.objects.get_or_create(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        empresa=request.user.empresa_set.first() if hasattr(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+        },
+        ^^
+    )
+    ^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 955, in get_or_create
+    return self.create(**params), True
+           ~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 665, in create
+    obj.save(force_insert=True, using=self.db)
+    ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\base.py", line 902, in save
+    self.save_base(
+    ~~~~~~~~~~~~~~^
+        using=using,
+        ^^^^^^^^^^^^
+    ...<2 lines>...
+        update_fields=update_fields,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\base.py", line 1008, in save_base
+    updated = self._save_table(
+        raw,
+    ...<4 lines>...
+        update_fields,
+    )
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\base.py", line 1169, in _save_table
+    results = self._do_insert(
+        cls._base_manager, using, fields, returning_fields, raw
+    )
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\base.py", line 1210, in _do_insert
+    return manager._insert(
+           ~~~~~~~~~~~~~~~^
+        [self],
+        ^^^^^^^
+    ...<3 lines>...
+        raw=raw,
+        ^^^^^^^^
+    )
+    ^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\manager.py", line 87, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\query.py", line 1873, in _insert
+    return query.get_compiler(using=using).execute_sql(returning_fields)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\models\sql\compiler.py", line 1882, in execute_sql
+    cursor.execute(sql, params)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\backends\utils.py", line 79, in execute
+    return self._execute_with_wrappers(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        sql, params, many=False, executor=self._execute
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\backends\utils.py", line 92, in _execute_with_wrappers
+    return executor(sql, params, many, context)
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\backends\utils.py", line 100, in _execute
+    with self.db.wrap_database_errors:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\utils.py", line 91, in __exit__
+    raise dj_exc_value.with_traceback(traceback) from exc_value
+  File "C:\Users\Nathan Piati\Documents\Python Scripts\loja_app\venv\Lib\site-packages\django\db\backends\utils.py", line 105, in _execute
+    return self.cursor.execute(sql, params)
+           ~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+django.db.utils.IntegrityError: ERRO:  o valor nulo na coluna "empresa_id" da relação "billing_assinatura" viola a restrição de não-nulo
+DETAIL:  Registro que falhou contém (1, trial, , , , 2026-08-03, null, null, 2026-08-03 23:52:47.536687-03, 2026-08-03 23:52:47.536691-03, null, 1, 3).
+

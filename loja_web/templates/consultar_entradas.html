@@ -1,0 +1,454 @@
+{% extends 'produtos_base.html' %}
+{% load static %}
+
+{% block title %}Consultar Entradas de Estoque{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <h2><i class="bi bi-box-arrow-in-down"></i> Consultar Entradas de Estoque</h2><hr>
+
+    <style>
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-custom {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(61, 123, 196, 0.1);
+            transition: transform 0.3s ease;
+            color: #2c3e50;
+            border: 1px solid #d1dce8;
+        }
+
+        .card-custom:hover {
+            transform: scale(1.01);
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .btn-custom {
+            background: linear-gradient(to right, #3d7bc4, #5a9fd4);
+            color: white;
+            border: none;
+            transition: background 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background: linear-gradient(to right, #2a65aa, #3d7bc4);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            border-radius: 8px;
+        }
+
+        .entradas-table thead th {
+            background-color: #2e4a7a;
+            color: #ffffff;
+        }
+
+        .entradas-table tbody tr:hover {
+            background-color: #e8f0fb;
+        }
+    </style>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} fade-in" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {# Formulário de Filtro #}
+    <div class="fade-in mb-4">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-2 form-group">
+                <label for="busca_fornecedor" class="form-label">Fornecedor</label>
+                <input type="text" class="form-control" id="busca_fornecedor" name="fornecedor_term" placeholder="ID ou Nome" autocomplete="off" value="{{ request.GET.fornecedor_term|default_if_none:'' }}">
+                <ul id="resultados_fornecedor" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
+                <input type="hidden" id="id_fornecedor" name="fornecedor_id" value="{{ request.GET.fornecedor_id|default_if_none:'' }}">
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="busca_produto" class="form-label">Produto</label>
+                <input type="text" class="form-control" id="busca_produto" name="produto_term" placeholder="ID ou Nome" autocomplete="off" value="{{ request.GET.produto_term|default_if_none:'' }}">
+                <ul id="resultados_produto" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
+                <input type="hidden" id="id_produto" name="produto_id" value="{{ request.GET.produto_id|default_if_none:'' }}">
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="busca_pedido" class="form-label">Pedido de Compra</label>
+                <input type="text" class="form-control" id="busca_pedido" name="pedido_term" placeholder="ID ou Nº NF" autocomplete="off" value="{{ request.GET.pedido_term|default_if_none:'' }}">
+                <ul id="resultados_pedido" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
+                <input type="hidden" id="id_pedido" name="pedido_compra_id" value="{{ request.GET.pedido_compra_id|default_if_none:'' }}">
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="data_inicio" class="form-label">Data Início</label>
+                <input type="date" class="form-control" id="data_inicio" name="data_inicio" value="{{ request.GET.data_inicio|default_if_none:'' }}">
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="data_fim" class="form-label">Data Fim</label>
+                <input type="date" class="form-control" id="data_fim" name="data_fim" value="{{ request.GET.data_fim|default_if_none:'' }}">
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="numero_nota_fiscal" class="form-label">Nota Fiscal</label>
+                <input type="text" class="form-control" id="numero_nota_fiscal" name="numero_nota_fiscal" placeholder="Nº da Nota" value="{{ request.GET.numero_nota_fiscal|default_if_none:'' }}">
+            </div>
+            <div class="col-md-1 form-group">
+                <button type="submit" class="btn btn-custom w-100"><i class="bi bi-search"></i> Pesquisar</button>
+            </div>
+            <div class="col-md-1 form-group">
+                <a href="{% url 'consultar_entradas' %}" class="btn btn-custom w-100" title="Limpar Filtros"><i class="bi bi-arrow-counterclockwise"></i> Limpar</a>
+            </div>
+        </form>
+    </div>
+
+    {# Informações de Fornecedor, Produto e Pedido #}
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div id="info_fornecedor" class="card-custom fade-in" style="display:{% if request.GET.fornecedor_id %}block{% else %}none{% endif %}">
+                <div class="card-body">
+                    <h5 class="card-title" id="fornecedor_nome_info">{{ fornecedor_nome|default:"" }}</h5>
+                    <p class="card-text mb-1"><strong>CNPJ:</strong> <span id="fornecedor_cnpj_info">{{ fornecedor_cnpj|default:"N/A" }}</span></p>
+                    <p class="card-text mb-1"><strong>Email:</strong> <span id="fornecedor_email_info">{{ fornecedor_email|default:"N/A" }}</span></p>
+                    <p class="card-text mb-1"><strong>Telefone:</strong> <span id="fornecedor_telefone_info">{{ fornecedor_telefone|default:"N/A" }}</span></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div id="info_produto" class="card-custom fade-in" style="display:{% if request.GET.produto_id %}block{% else %}none{% endif %}">
+                <div class="card-body">
+                    <h5 class="card-title" id="produto_nome_info">{{ produto_nome|default:"" }}</h5>
+                    <p class="card-text mb-1"><strong>Categoria:</strong> <span id="produto_categoria_info">{{ produto_categoria|default:"N/A" }}</span></p>
+                    <p class="card-text mb-1"><strong>Marca:</strong> <span id="produto_marca_info">{{ produto_marca|default:"N/A" }}</span></p>
+                    <p class="card-text mb-1"><strong>Nº Fabricante:</strong> <span id="produto_num_fabricante_info">{{ produto_num_fabricante|default:"N/A" }}</span></p>
+                    <p class="card-text mb-1"><strong>Nº Original:</strong> <span id="produto_num_original_info">{{ produto_num_original|default:"N/A" }}</span></p>
+                    <p class="card-text mb-1"><strong>Descrição:</strong> <span id="produto_descricao_info">{{ produto_descricao|default:"N/A" }}</span></p>
+                    <p class="card-text mb-1"><strong>Estoque:</strong> <span id="produto_estoque_info">{{ produto_estoque|default:"0" }}</span></p>
+                    <p class="card-text mb-1"><strong>Preço:</strong> R$ <span id="produto_preco_info">{{ produto_preco|default:"0.00" }}</span></p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div id="info_pedido" class="card-custom fade-in" style="display:{% if request.GET.pedido_compra_id %}block{% else %}none{% endif %}">
+                <div class="card-body">
+                    <h5 class="card-title" id="pedido_nome_info">{{ pedido_nome|default:"" }}</h5>
+                    <p class="card-text mb-1"><strong>Número NF:</strong> <span id="pedido_numero_nf_info">{{ pedido_numero_nf|default:"N/A" }}</span></p>
+                    <p class="card-text mb-1"><strong>Data Criação:</strong> <span id="pedido_data_criacao_info">{{ pedido_data_criacao|default:"N/A" }}</span></p>
+                    <p class="card-text mb-1"><strong>Total:</strong> R$ <span id="pedido_total_info">{{ pedido_total|default:"0.00" }}</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# Tabela de Entradas #}
+    {% if entradas %}
+    <div class="card-custom mt-4 fade-in">
+        <table class="table table-bordered table-hover align-middle entradas-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Produto</th>
+                    <th>Quantidade</th>
+                    <th>Data Entrada</th>
+                    <th>Fornecedor</th>
+                    <th>Nota Fiscal</th>
+                    <th>Pedido de Compra</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entrada in entradas %}
+                <tr>
+                    <td>{{ entrada.id }}</td>
+                    <td>{{ entrada.produto.nome }}</td>
+                    <td>{{ entrada.quantidade }}</td>
+                    <td>{{ entrada.data_entrada|date:"d/m/Y H:i" }}</td>
+                    <td>{{ entrada.nome_fornecedor|default:"N/A" }}</td>
+                    <td>{{ entrada.numero_nota_fiscal|default:"N/A" }}</td>
+                    <td>
+                        {% if entrada.pedido_compra %}
+                            {{ entrada.pedido_compra.id }} - NF: {{ entrada.pedido_compra.numero_nota_fiscal|default:"N/A" }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">Nenhuma entrada encontrada</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="alert alert-info fade-in">
+        Foram encontradas <strong>{{ total_entradas }}</strong> entradas de estoque.
+    </div>
+
+    {% if entradas.has_other_pages %}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if entradas.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Primeira Página">&laquo;&laquo;</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ entradas.previous_page_number }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Anterior">&laquo;</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;&laquo;</span></li>
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+            {% endif %}
+
+            {% for num in entradas.paginator.page_range %}
+            {% if entradas.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num >= entradas.number|add:'-2' and num <= entradas.number|add:'2' %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}">{{ num }}</a></li>
+            {% endif %}
+            {% endfor %}
+
+            {% if entradas.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ entradas.next_page_number }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Próxima">&raquo;</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ entradas.paginator.num_pages }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Última Página">&raquo;&raquo;</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+            <li class="page-item disabled"><span class="page-link">&raquo;&raquo;</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-info fade-in" role="alert">
+        Nenhuma entrada encontrada com os filtros aplicados.
+    </div>
+    {% endif %}
+
+    {# Botão Voltar #}
+    <div class="mt-4">
+        <a href="{% url 'registrar_entrada_estoque' %}" class="btn btn-custom"><i class="bi bi-arrow-left"></i> Voltar</a>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function(){
+    // Busca de fornecedores
+    $("#busca_fornecedor").on("keyup", function(){
+        let termo = $(this).val().trim();
+        if (termo.length < 1) {
+            $("#resultados_fornecedor").empty();
+            $("#info_fornecedor").hide();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'buscar_fornecedores' %}",
+            data: { term: termo },
+            dataType: "json",
+            success: function(data){
+                let lista = "";
+                if (data.error) {
+                    lista = `<li class="list-group-item">Erro: ${data.error}</li>`;
+                } else if (data.length === 0) {
+                    lista = '<li class="list-group-item">Nenhum fornecedor encontrado</li>';
+                } else {
+                    data.forEach(function(forn){
+                        lista += `<li class="list-group-item list-group-item-action"
+                                    data-id="${forn.id}"
+                                    data-nome="${forn.nome}"
+                                    data-cnpj="${forn.cnpj || ''}"
+                                    data-email="${forn.email || ''}"
+                                    data-telefone="${forn.telefone || ''}">
+                                    ${forn.id} - ${forn.nome}
+                                  </li>`;
+                    });
+                }
+                $("#resultados_fornecedor").html(lista);
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                $("#resultados_fornecedor").html(`<li class="list-group-item">Erro ao buscar fornecedores: ${textStatus} - ${errorThrown}</li>`);
+            }
+        });
+    });
+
+    $(document).on("click", "#resultados_fornecedor li", function(){
+        let id = $(this).data("id");
+        if (!id) {
+            console.error("ID do fornecedor não encontrado");
+            $("#info_fornecedor").hide();
+            return;
+        }
+        let nome = $(this).data("nome");
+        let cnpj = $(this).data("cnpj");
+        let email = $(this).data("email");
+        let telefone = $(this).data("telefone");
+
+        $("#id_fornecedor").val(id);
+        $("#fornecedor_nome_info").text(`${id} - ${nome}`);
+        $("#fornecedor_cnpj_info").text(cnpj || 'N/A');
+        $("#fornecedor_email_info").text(email || 'N/A');
+        $("#fornecedor_telefone_info").text(telefone || 'N/A');
+        $("#info_fornecedor").show();
+
+        $("#resultados_fornecedor").empty();
+        $("#busca_fornecedor").val("");
+    });
+
+    // Busca de produtos
+    $("#busca_produto").on("keyup", function(){
+        let termo = $(this).val().trim();
+        if (termo.length < 1) {
+            $("#resultados_produto").empty();
+            $("#info_produto").hide();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'buscar_produtosentrada' %}",
+            data: { term: termo },
+            dataType: "json",
+            success: function(data){
+                let lista = "";
+                if (data.error) {
+                    lista = `<li class="list-group-item">Erro: ${data.error}</li>`;
+                } else if (data.length === 0) {
+                    lista = '<li class="list-group-item">Nenhum produto encontrado</li>';
+                } else {
+                    data.forEach(function(prod){
+                        lista += `<li class="list-group-item list-group-item-action"
+                                    data-id="${prod.id}"
+                                    data-nome="${prod.nome}"
+                                    data-categoria="${prod.categoria || ''}"
+                                    data-marca="${prod.marca || ''}"
+                                    data-num_fabricante="${prod.num_fabricante || ''}"
+                                    data-num_original="${prod.num_original || ''}"
+                                    data-descricao="${prod.descricao || ''}"
+                                    data-estoque="${prod.estoque || '0'}"
+                                    data-preco="${prod.preco || '0'}">
+                                    ${prod.id} - ${prod.nome} (R$ ${prod.preco})
+                                  </li>`;
+                    });
+                }
+                $("#resultados_produto").html(lista);
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                $("#resultados_produto").html(`<li class="list-group-item">Erro ao buscar produtos: ${textStatus} - ${errorThrown}</li>`);
+            }
+        });
+    });
+
+    $(document).on("click", "#resultados_produto li", function(){
+        let id = $(this).data("id");
+        if (!id) {
+            console.error("ID do produto não encontrado");
+            $("#info_produto").hide();
+            return;
+        }
+        let nome = $(this).data("nome");
+        let categoria = $(this).data("categoria");
+        let marca = $(this).data("marca");
+        let num_fabricante = $(this).data("num_fabricante");
+        let num_original = $(this).data("num_original");
+        let descricao = $(this).data("descricao");
+        let estoque = $(this).data("estoque");
+        let preco = $(this).data("preco");
+
+        $("#id_produto").val(id);
+        $("#produto_nome_info").text(`${id} - ${nome}`);
+        $("#produto_categoria_info").text(categoria || 'N/A');
+        $("#produto_marca_info").text(marca || 'N/A');
+        $("#produto_num_fabricante_info").text(num_fabricante || 'N/A');
+        $("#produto_num_original_info").text(num_original || 'N/A');
+        $("#produto_descricao_info").text(descricao || 'N/A');
+        $("#produto_estoque_info").text(estoque || '0');
+        $("#produto_preco_info").text(parseFloat(preco || 0).toFixed(2));
+        $("#info_produto").show();
+
+        $("#resultados_produto").empty();
+        $("#busca_produto").val("");
+    });
+
+    // Busca de pedidos de compra
+    $("#busca_pedido").on("keyup", function(){
+        let termo = $(this).val().trim();
+        if (termo.length < 1) {
+            $("#resultados_pedido").empty();
+            $("#info_pedido").hide();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'buscar_pedidos_compra' %}",
+            data: { term: termo },
+            dataType: "json",
+            success: function(data){
+                let lista = "";
+                if (data.error) {
+                    lista = `<li class="list-group-item">Erro: ${data.error}</li>`;
+                } else if (data.length === 0) {
+                    lista = '<li class="list-group-item">Nenhum pedido encontrado</li>';
+                } else {
+                    data.forEach(function(pedido){
+                        lista += `<li class="list-group-item list-group-item-action"
+                                    data-id="${pedido.id}"
+                                    data-numero_nf="${pedido.numero_nota_fiscal || ''}"
+                                    data-data_criacao="${pedido.data_criacao || ''}"
+                                    data-total="${pedido.total || '0'}">
+                                    ${pedido.id} - NF: ${pedido.numero_nota_fiscal || 'N/A'} (R$ ${pedido.total})
+                                  </li>`;
+                    });
+                }
+                $("#resultados_pedido").html(lista);
+            },
+            error: function(jqXHR, textStatus, errorThrown){
+                $("#resultados_pedido").html(`<li class="list-group-item">Erro ao buscar pedidos: ${textStatus} - ${errorThrown}</li>`);
+            }
+        });
+    });
+
+    $(document).on("click", "#resultados_pedido li", function(){
+        let id = $(this).data("id");
+        if (!id) {
+            console.error("ID do pedido não encontrado");
+            $("#info_pedido").hide();
+            return;
+        }
+        let numero_nf = $(this).data("numero_nf");
+        let data_criacao = $(this).data("data_criacao");
+        let total = $(this).data("total");
+
+        $("#id_pedido").val(id);
+        $("#pedido_nome_info").text(`Pedido ${id}`);
+        $("#pedido_numero_nf_info").text(numero_nf || 'N/A');
+        $("#pedido_data_criacao_info").text(data_criacao || 'N/A');
+        $("#pedido_total_info").text(parseFloat(total || 0).toFixed(2));
+        $("#info_pedido").show();
+
+        $("#resultados_pedido").empty();
+        $("#busca_pedido").val("");
+    });
+});
+</script>
+{% endblock %}

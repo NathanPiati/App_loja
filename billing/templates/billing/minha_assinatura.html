@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha assinatura</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f1f5f9; margin: 0; color: #0f172a; }
+        .wrap { width: min(960px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0; }
+        .card { background: #fff; border-radius: 18px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <div class="card">
+            <h1>Minha assinatura</h1>
+            {% if assinatura %}
+            <p><strong>Plano:</strong> {{ assinatura.plano.nome }}</p>
+            <p><strong>Status:</strong> {{ assinatura.get_status_display }}</p>
+            <p><strong>Inicio:</strong> {{ assinatura.inicio_ciclo }}</p>
+            <p><strong>Fim:</strong> {{ assinatura.fim_ciclo }}</p>
+            {% else %}
+            <p>Voce ainda nao possui uma assinatura vinculada.</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

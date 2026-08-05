@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório de Pedidos{% endblock %}
+
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    body {
+        background-color: #eef2f7;
+        color: #2c3e50;
+    }
+    .table {
+        color: #2c3e50;
+        background-color: #ffffff;
+    }
+    .table th {
+        background-color: #2e4a7a;
+        color: #ffffff;
+    }
+    .table td {
+        background-color: #ffffff;
+        color: #2c3e50;
+    }
+    .form-control, .form-select {
+        background-color: #f8fafd;
+        color: #2c3e50;
+        border: 1px solid #d1dce8;
+    }
+    .form-control:focus, .form-select:focus {
+        background-color: #f8fafd;
+        color: #2c3e50;
+        border-color: #3d7bc4;
+    }
+    .btn-primary {
+        background-color: #3d7bc4;
+        border: none;
+    }
+    .btn-secondary {
+        background-color: #6c7a8d;
+        border: none;
+    }
+    .btn-success {
+        background-color: #198754;
+        border: none;
+    }
+    /* Estilização do status */
+    .status-concluido {
+        color: #198754 !important; /* Verde para Concluído */
+        font-weight: bold;
+    }
+    .status-pendente {
+        color: #dc3545 !important; /* Vermelho para Pendente */
+        font-weight: bold;
+    }
+    /* CSS para impressão */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #conteudo-para-imprimir, #conteudo-para-imprimir * {
+            visibility: visible;
+        }
+        #conteudo-para-imprimir {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .table td {
+            background-color: #ffffff; /* Fundo branco para impressão */
+        }
+        .status-concluido {
+            color: #008000 !important; /* Verde escuro para impressão */
+        }
+        .status-pendente {
+            color: #ff0000 !important; /* Vermelho para impressão */
+        }
+    }
+</style>
+
+<div class="no-print mb-3">
+    <button onclick="window.print()" class="btn btn-success">🖨️ Imprimir</button>
+    <a href="{% url 'relatorios' %}" class="btn btn-secondary">🔙 Voltar</a>
+</div>
+
+<div class="no-print">
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <label class="form-label">Ordenar por:</label>
+            <select name="ordenacao" class="form-select">
+                <option value="-id" {% if ordenacao == '-id' %}selected{% endif %}>Mais recentes primeiro</option>
+                <option value="id" {% if ordenacao == 'id' %}selected{% endif %}>Mais antigos primeiro</option>
+                <option value="cliente__nome" {% if ordenacao == 'cliente__nome' %}selected{% endif %}>Cliente (A → Z)</option>
+                <option value="-cliente__nome" {% if ordenacao == '-cliente__nome' %}selected{% endif %}>Cliente (Z → A)</option>
+                <option value="data" {% if ordenacao == 'data' %}selected{% endif %}>Data mais antiga</option>
+                <option value="-data" {% if ordenacao == '-data' %}selected{% endif %}>Data mais recente</option>
+                <option value="valor_total" {% if ordenacao == 'valor_total' %}selected{% endif %}>Valor menor primeiro</option>
+                <option value="-valor_total" {% if ordenacao == '-valor_total' %}selected{% endif %}>Valor maior primeiro</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">ID inicial:</label>
+            <input type="number" name="id_inicial" class="form-control" value="{{ id_inicial }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">ID final:</label>
+            <input type="number" name="id_final" class="form-control" value="{{ id_final }}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Cliente:</label>
+            <input type="text" name="cliente" class="form-control" value="{{ filtro_cliente }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Status:</label>
+            <select name="status" class="form-select">
+                <option value="">Todos</option>
+                <option value="pendente" {% if filtro_status == 'pendente' %}selected{% endif %}>Pendente</option>
+                <option value="concluido" {% if filtro_status == 'concluido' %}selected{% endif %}>Concluído</option>
+            </select>
+        </div>
+        <div class="col-md-12 text-end">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a href="{% url 'relatorio_pedidos' %}" class="btn btn-secondary">Limpar</a>
+        </div>
+    </form>
+</div>
+
+
+<!-- CONTEÚDO A SER IMPRESSO -->
+<div id="conteudo-para-imprimir">
+    <h2 class="mb-4">Relatório de Pedidos</h2>
+
+    <!-- Filtros utilizados -->
+    <div class="mb-3">
+        <strong>Filtros Aplicados:</strong><br>
+        {% if id_inicial and id_final %}
+            IDs de {{ id_inicial }} até {{ id_final }}<br>
+        {% elif id_inicial %}
+            ID a partir de {{ id_inicial }}<br>
+        {% elif id_final %}
+            Até ID {{ id_final }}<br>
+        {% endif %}
+
+        {% if filtro_cliente %}
+            Cliente contendo: "{{ filtro_cliente }}"<br>
+        {% endif %}
+
+        {% if filtro_status %}
+            Status: {{ filtro_status|title }}<br>
+        {% endif %}
+
+        {% if not id_inicial and not id_final and not filtro_cliente and not filtro_status %}
+            Nenhum filtro aplicado. (Mostrando todos os registros)<br>
+        {% endif %}
+    </div>
+
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Cliente</th>
+                <th>Data</th>
+                <th>Status</th>
+                <th>Valor Total (R$)</th>
+                <th>Desconto (%)</th>
+                <th>Lucro Total (R$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in pedidos %}
+                <tr>
+                    <td>{{ item.pedido.id }}</td>
+                    <td>{{ item.pedido.cliente.nome|default_if_none:"" }}</td>
+                    <td>{{ item.pedido.data|date:"d/m/Y H:i" }}</td>
+                    <td class="{% if item.pedido.status == 'concluido' %}status-concluido{% elif item.pedido.status == 'pendente' %}status-pendente{% endif %}">
+                        {{ item.pedido.get_status_display }}
+                    </td>
+                    <td>R$ {{ item.pedido.valor_total|floatformat:2 }}</td>
+                    <td>{{ item.pedido.desconto_percentual|floatformat:2 }}%</td>
+                    <td>R$ {{ item.lucro_total|floatformat:2 }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">Nenhum pedido encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <footer class="mt-4">
+        <div class="fw-bold">
+            Gerado em: {{ data_atual }}<br>
+            Total de pedidos filtrados: {{ quantidade_registros }}<br>
+            Valor total dos lucros: <strong>R$ {{ total_geral|floatformat:2 }}</strong>
+        </div>
+    </footer>
+</div>
+
+{% endblock %}

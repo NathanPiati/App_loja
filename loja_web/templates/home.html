@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard da Loja{% endblock %}
+
+{% block content %}
+
+<style>
+    .card-custom {
+        transition: transform 0.2s ease-in-out;
+        background-color: #ffffff;
+        border-radius: 10px;
+        border: 1px solid #dee2e6;
+    }
+
+    .card-custom:hover {
+        transform: scale(1.03);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .icon {
+        font-size: 3rem;
+        margin-bottom: 15px;
+    }
+
+    .icon-blue { color: #3d7bc4; }
+    .icon-green { color: #28a745; }
+    .icon-orange { color: #fd7e14; }
+
+    h1, p.lead {
+        color: #2c3e50;
+    }
+
+    .btn-custom {
+        border-radius: 30px;
+        padding: 10px 20px;
+        font-weight: 500;
+    }
+</style>
+
+
+<div class="container text-center mt-5">
+    <h1 class="display-5 fw-bold mb-4">Sistema de Gestão Inteligente</h1>
+    <p class="lead fw-bold mb-5">A sua empresa em suas mãos!</p>
+
+    <div class="row justify-content-center">
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="icon icon-blue"><i class="bi bi-tags-fill"></i></div>
+                    <h5 class="card-title">Categorias</h5>
+                    <p class="card-text text-muted">Crie, edite e organize categorias.</p>
+                    <a href="{% url 'pesquisar_categoria' %}" class="btn btn-primary btn-custom">Ver Categorias</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="icon icon-green"><i class="bi bi-box-seam"></i></div>
+                    <h5 class="card-title">{{ ui_labels.produtos_modulo }}</h5>
+                    <p class="card-text text-muted">{{ ui_labels.produtos_desc }}</p>
+                    <a href="{% url 'produtos_geral' %}" class="btn btn-success btn-custom">{{ ui_labels.produtos_verbo }}</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="icon icon-orange"><i class="bi bi-tools"></i></div>
+                    <h5 class="card-title">{{ ui_labels.servicos_modulo }}</h5>
+                    <p class="card-text text-muted">{{ ui_labels.servicos_desc }}</p>
+                    <a href="{% url 'servicos' %}" class="btn btn-warning text-white btn-custom">{{ ui_labels.servicos_verbo }}</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="icon icon-blue"><i class="bi bi-people-fill"></i></div>
+                    <h5 class="card-title">Clientes</h5>
+                    <p class="card-text text-muted">Visualize e organize os clientes.</p>
+                    <a href="{% url 'clientes' %}" class="btn btn-primary btn-custom">Ver Clientes</a>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="icon icon-orange"><i class="bi bi-cash-stack"></i></div>
+                    <h5 class="card-title">Financeiro</h5>
+                    <p class="card-text text-muted">Visualize e organize o financeiro.</p>
+                    <a href="{% url 'lista_financeiro' %}" class="btn btn-warning text-white btn-custom">Ver Financeiro</a>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="col-md-4 mb-4">
+            <div class="card card-custom h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="icon icon-blue"><i class="bi bi-receipt"></i></div>
+                    <h5 class="card-title">{{ ui_labels.pedidos_modulo }}</h5>
+                    <p class="card-text text-muted">{{ ui_labels.pedidos_desc }}</p>
+                    <a href="{% url 'pedidos' %}" class="btn btn-primary btn-custom">{{ ui_labels.pedidos_verbo }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

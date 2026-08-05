@@ -1,0 +1,97 @@
+{% extends 'base_login.html' %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background-color: #222222ff;
+    }
+
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .login-box {
+        background: white;
+        padding: 40px;
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: 400px;
+    }
+
+    .form-control {
+        border-radius: 8px;
+    }
+
+    .btn-primary {
+        border-radius: 8px;
+    }
+</style>
+
+<div class="login-container">
+    <div class="login-box">
+
+
+        <h1 class="text-center mb-4 fw-bold text-black">
+         InovaSys
+        </h1>
+        <p class="text-center text-secondary mb-4">
+            Sistema de Gestão Inteligente
+        </p>
+        <hr class="mb-4" style="color:rgb(58, 58, 58);"> <br>
+
+        <h2 style="color:rgb(58, 58, 58);" class="text-center mb-4">
+            Entrar no Sistema
+        </h2>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-danger text-center" role="alert">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="username" class="form-label" style="color: rgb(58, 58, 58);">
+                    Usuário
+                </label>
+                <input
+                    type="text"
+                    class="form-control"
+                    id="username"
+                    name="username"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label" style="color: rgb(58, 58, 58);">
+                    Senha
+                </label>
+                <input
+                    type="password"
+                    class="form-control"
+                    id="password"
+                    name="password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">
+                Entrar
+            </button>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

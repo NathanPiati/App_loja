@@ -1,0 +1,13 @@
+{% extends 'base_servicos.html' %}
+{% block title %}Editar Serviço{% endblock %}
+{% block content %}
+<div class="card card-custom fade-slide-in">
+    <h2><b>Editar Serviço</b>: {{ servico.nome }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success"><i class="bi bi-save"></i> Salvar</button>
+        <a href="{% url 'listar_servicos' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Voltar</a>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load meus_filtros %}
+
+{% block content %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+    body { background-color: #eef2f7; color: #2c3e50; }
+    .page-wide { max-width: 1900px; margin: 0 auto; padding: 0 16px; }
+    .page-wide > * { width: 100%; }
+    .card, .table { background-color: #ffffff; color: #2c3e50; }
+    .card-header { background-color: #2e4a7a; color: #ffffff; border-bottom: none; }
+    .table-bordered { border-color: #d1dce8; }
+    .table-bordered th, .table-bordered td { border-color: #d1dce8; }
+    .btn-primary { background: linear-gradient(to right, #3d7bc4, #5a9fd4); border: none; }
+    .btn-primary:hover { background: linear-gradient(to right, #2a65aa, #3d7bc4); }
+    @media print {
+        body * { visibility: hidden; }
+        .printable, .printable * { visibility: visible; }
+        .printable { position: absolute; left: 0; top: 0; width: 100%; }
+    }
+</style>
+
+<div class="page-wide mt-4">
+    <h2><i class="bi bi-cash-coin"></i> Visualizar Caixa #{{ caixa.id }}</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="card mb-3 printable">
+        <div class="card-header"><h5>Detalhes do Caixa</h5></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Abertura:</strong> {{ caixa.data_abertura|date:"d/m/Y H:i" }}</p>
+                    <p><strong>Fechamento:</strong> {{ caixa.data_fechamento|date:"d/m/Y H:i"|default:"Aberto" }}</p>
+                    <p><strong>Usuário:</strong> {{ caixa.user.username|default:"-" }}</p>
+                    <p><strong>Saldo Inicial:</strong> R$ {{ caixa.saldo_inicial|floatformat:2 }}</p>
+                    {% if caixa.saldo_final %}
+                    <p><strong>Saldo Final:</strong> R$ {{ caixa.saldo_final|floatformat:2 }}</p>
+                    <p><strong>Diferença:</strong> R$ {{ diferenca|floatformat:2 }}</p>
+                    {% endif %}
+                    <p><strong>Saldo Esperado:</strong> R$ {{ saldo_esperado|floatformat:2 }}</p>
+                    <p><strong>Observações:</strong> {{ caixa.observacoes|default:"Nenhuma" }}</p>
+                </div>
+            </div>
+
+            <div class="row g-2 mb-3">
+                <div class="col-md-3"><div class="p-2 border rounded"><small>Vendas</small><br><strong>R$ {{ total_vendas|floatformat:2 }}</strong></div></div>
+                <div class="col-md-3"><div class="p-2 border rounded"><small>Entradas</small><br><strong>R$ {{ total_entradas|floatformat:2 }}</strong></div></div>
+                <div class="col-md-3"><div class="p-2 border rounded"><small>Compras</small><br><strong>R$ {{ total_compras|floatformat:2 }}</strong></div></div>
+                <div class="col-md-3"><div class="p-2 border rounded"><small>Saídas</small><br><strong>R$ {{ total_saidas|floatformat:2 }}</strong></div></div>
+            </div>
+
+            <h5 class="mt-4">Entradas</h5>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entrada in entradas_periodo %}
+                    <tr>
+                        <td>{{ entrada.descricao|default:"Entrada manual" }}</td>
+                        <td class="text-success">R$ {{ entrada.valor_parcela|floatformat:2 }}</td>
+                        <td>{{ entrada.data_pagamento|date:"d/m/Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center">Nenhuma entrada registrada.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h5 class="mt-4">Compras (Saídas)</h5>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for compra in compras_periodo %}
+                    <tr>
+                        <td>
+                            Pedido Compra #{{ compra.pedido_compra.id }}
+                            - Parcela {{ compra.parcela }}/{{ compra.total_parcelas }}
+                        </td>
+                        <td class="text-warning">- R$ {{ compra.valor_parcela|abs|floatformat:2 }}</td>
+                        <td>{{ compra.data_pagamento|date:"d/m/Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center">Nenhuma compra registrada no período.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <h5 class="mt-4">Saídas Manuais</h5>
+            <table class="table table-bordered">
+                <thead class="table-light">
+                    <tr>
+                        <th>Descrição</th>
+                        <th>Valor</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for saida in saidas_periodo %}
+                    <tr>
+                        <td>{{ saida.descricao|default:"Saída manual" }}</td>
+                        <td class="text-danger">- R$ {{ saida.valor|abs|floatformat:2 }}</td>
+                        <td>{{ saida.data|date:"d/m/Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center">Nenhuma saída registrada.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <a href="{% url 'fechamento_caixa' %}" class="btn btn-primary mt-3">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

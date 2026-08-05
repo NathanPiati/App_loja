@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% load meus_filtros %}
+{% block title %}Lista de Condições de Pagamento{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <style>
+        .condicoes-table thead th {
+            background-color: #2e4a7a;
+            color: #ffffff;
+        }
+
+        .condicoes-table tbody tr:hover {
+            background-color: #e8f0fb;
+        }
+    </style>
+
+    <h2 class="mb-4"><i class="bi bi-credit-card-2-front"></i> Lista de Condições de Pagamento</h2>
+
+    <!-- Formulário de filtros -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            {{ form.nome.label_tag }}
+            {{ form.nome|add_class:"form-control" }}
+        </div>
+        <div class="col-md-3">
+            {{ form.descricao.label_tag }}
+            {{ form.descricao|add_class:"form-control" }}
+        </div>
+        <div class="col-md-2">
+            {{ form.numero_parcelas.label_tag }}
+            {{ form.numero_parcelas|add_class:"form-control" }}
+        </div>
+        <div class="col-md-2">
+            {{ form.intervalo_dias.label_tag }}
+            {{ form.intervalo_dias|add_class:"form-control" }}
+        </div>
+        <div class="col-md-2">
+            {{ form.entrada.label_tag }}
+            {{ form.entrada|add_class:"form-select" }}
+        </div>
+        <div class="col-md-12 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-search"></i> Filtrar
+            </button>
+        </div>
+    </form>
+
+    <div class="card-custom">
+        <table class="table table-bordered table-hover align-middle condicoes-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Descrição</th>
+                    <th>Parcelas</th>
+                    <th>Juros (%)</th>
+                    <th>Intervalo (dias)</th>
+                    <th>Entrada?</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for condicao in condicoes %}
+                <tr>
+                    <td>{{ condicao.id }}</td>
+                    <td>{{ condicao.nome }}</td>
+                    <td>{{ condicao.descricao|default:"-" }}</td>
+                    <td>{{ condicao.numero_parcelas }}</td>
+                    <td>{{ condicao.juros }}</td>
+                    <td>{{ condicao.intervalo_dias }}</td>
+                    <td>{% if condicao.entrada %}Sim{% else %}Não{% endif %}</td>
+                    <td>
+                        <a href="{% url 'editar_condicao_pagamento' condicao.id %}" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i> Editar
+                        </a>
+                        <a href="{% url 'excluir_condicao_pagamento' condicao.id %}" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i> Excluir
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center">Nenhuma condição cadastrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a href="{% url 'criar_condicao_pagamento' %}" class="btn btn-success mt-3">
+        <i class="bi bi-plus-lg"></i> Nova Condição
+    </a>
+</div>
+{% endblock %}

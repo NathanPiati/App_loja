@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .usuarios-table thead th {
+        background-color: #2e4a7a;
+        color: #ffffff;
+    }
+
+    .usuarios-table tbody tr:hover {
+        background-color: #e8f0fb;
+    }
+</style>
+
+<div class="container mt-5">
+
+    <!-- Mensagens -->
+    {% if messages %}
+    <div class="mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Lista de Usuários -->
+    <h2 class="mb-4 text-primary">Usuários Cadastrados</h2>
+    <div class="card shadow-sm mb-5">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover usuarios-table">
+                    <thead>
+                        <tr>
+                            <th>Usuário</th>
+                            <th>Email</th>
+                            <th>Grupo Atual</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in usuarios %}
+                        <tr>
+                            <td>{{ u.username }}</td>
+                            <td>{{ u.email }}</td>
+                            <td>{{ u.groups.first.name|default:"Nenhum" }}</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary"
+                                        onclick="editarUsuario({{ u.id }}, '{{ u.username }}')">
+                                    Editar Grupo
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center">Nenhum usuário.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Formulário de Edição -->
+    <div id="formulario-edicao" class="card shadow-sm mt-5" style="display: none;">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h3 class="h5 mb-0">Editando grupo de: <span id="usuario-nome"></span></h3>
+            <button type="button" class="btn-close btn-close-white" onclick="fecharEdicao()"></button>
+        </div>
+        <div class="card-body">
+            <form method="post" id="form-grupo-usuario">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="permissoes_usuario">
+                <input type="hidden" name="usuario" id="usuario-id">
+
+                <!-- Grupo Atual (somente leitura) -->
+                <div class="mb-4">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Grupo Atual:</label>
+                            <div id="grupo-atual-nome" class="p-2 bg-light border rounded">Carregando...</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-bold">Permissões Atuais:</label>
+                            <div id="permissoes-atual" class="p-2 bg-light border rounded" style="max-height: 120px; overflow-y: auto;">
+                                <em>Carregando...</em>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Novo Grupo -->
+                <div class="mb-3">
+                    <label class="form-label">Alterar para:</label>
+                    <select name="grupo" id="select-grupo" class="form-select" onchange="mostrarNovoGrupo(this.value)">
+                        <option value="">-- Remover de todos os grupos --</option>
+                        {% for g in grupos %}
+                        <option value="{{ g.id }}">{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <!-- Permissões do novo grupo (dinâmico) -->
+                <div class="mb-4" id="novo-grupo-container" style="display: none; min-height: 300px;">
+                    <label class="form-label fw-bold">Permissões do novo grupo:</label>
+                    <div id="permissoes-novo" class="p-2 border rounded bg-success text-white" style="max-height: 100%; overflow-y: auto;">
+                        Selecione um grupo acima...
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success">Salvar Novo Grupo</button>
+                    <button type="button" class="btn btn-secondary" onclick="fecharEdicao()">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Gerenciar Grupos (inalterado) -->
+    <div class="card shadow-sm mt-5">
+        <div class="card-header bg-success text-white"><h3 class="h5 mb-0">Gerenciar Grupos</h3></div>
+        <div class="card-body">
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="gerenciar_grupo">
+
+                <div class="mb-3">
+                    <label class="form-label">Grupo:</label>
+                    <select name="grupo_id" id="grupo_id" class="form-select" onchange="carregarGrupo(this.value)">
+                        <option value="">Criar novo</option>
+                        {% for g in grupos %}
+                        <option value="{{ g.id }}" {% if grupo_atual and g.id == grupo_atual.id %}selected{% endif %}>{{ g.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nome do Grupo:</label>
+                    <input type="text" name="grupo_nome" id="grupo_nome" class="form-control"
+                           value="{% if grupo_atual %}{{ grupo_atual.name }}{% endif %}" required>
+                </div>
+
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label mb-0">Permissões do Grupo:</label>
+                        <div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="marcarTodasGrupo(true)">Marcar Todas</button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="marcarTodasGrupo(false)">Desmarcar Todas</button>
+                        </div>
+                    </div>
+                    <div class="row">
+                        {% for p in permissoes %}
+                        <div class="col-md-4 mb-2">
+                            <div class="form-check">
+                                <input class="form-check-input perm-grupo" type="checkbox" name="permissoes_grupo" value="{{ p.id }}"
+                                       id="perm_grupo_{{ p.id }}"
+                                       {% if p.id in group_perms %}checked{% endif %}>
+                                <label class="form-check-label" for="perm_grupo_{{ p.id }}">{{ p.name }}</label>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success">Salvar Grupo</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function editarUsuario(uid, nome) {
+    document.getElementById('usuario-id').value = uid;
+    document.getElementById('usuario-nome').textContent = nome;
+    document.getElementById('formulario-edicao').style.display = 'block';
+    document.getElementById('novo-grupo-container').style.display = 'none';
+
+    // Carregar grupo atual
+    fetch(`/get_usuario_grupo/${uid}/`)
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('grupo-atual-nome').textContent = data.grupo_nome;
+
+            const permAtual = document.getElementById('permissoes-atual');
+            if (data.permissoes.length > 0) {
+                permAtual.innerHTML = '<ul class="mb-0"><li>' + data.permissoes.join('</li><li>') + '</li></ul>';
+            } else {
+                permAtual.innerHTML = '<em>Nenhuma permissão.</em>';
+            }
+        });
+}
+
+function mostrarNovoGrupo(gid) {
+    const container = document.getElementById('novo-grupo-container');
+    const permNovo = document.getElementById('permissoes-novo');
+
+    if (!gid) {
+        container.style.display = 'none';
+        return;
+    }
+
+    fetch(`/get_grupo/${gid}/`)
+        .then(r => r.json())
+        .then(data => {
+            container.style.display = 'block';
+            if (data.permissoes.length > 0) {
+                permNovo.innerHTML = '<ul class="mb-0"><li>' + data.permissoes.join('</li><li>') + '</li></ul>';
+            } else {
+                permNovo.innerHTML = '<em>Nenhuma permissão.</em>';
+            }
+        });
+}
+
+function fecharEdicao() {
+    document.getElementById('formulario-edicao').style.display = 'none';
+}
+
+function marcarTodasGrupo(checked) {
+    document.querySelectorAll('input[name="permissoes_grupo"]').forEach(cb => cb.checked = checked);
+}
+
+function carregarGrupo(gid) {
+    const nome = document.getElementById('grupo_nome');
+    if (!gid) { nome.value = ''; return; }
+    fetch(`/get_grupo/${gid}/`)
+        .then(r => r.json())
+        .then(data => {
+            nome.value = data.name;
+            document.querySelectorAll('input[name="permissoes_grupo"]').forEach(cb => {
+                cb.checked = data.perms.includes(+cb.value);
+            });
+        });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const gid = document.getElementById('grupo_id').value;
+    carregarGrupo(gid);
+});
+</script>
+{% endblock %}

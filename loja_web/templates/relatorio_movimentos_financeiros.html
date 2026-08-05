@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Relatório de Movimentos Financeiros{% endblock %}
+
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+    body {
+        background-color: #eef2f7;
+        color: #2c3e50;
+    }
+    .table {
+        color: #2c3e50;
+        background-color: #ffffff;
+    }
+    .table th {
+        background-color: #2e4a7a;
+        color: #ffffff;
+    }
+    .table td {
+        background-color: #ffffff;
+        color: #2c3e50;
+    }
+    .form-control, .form-select {
+        background-color: #f8fafd;
+        color: #2c3e50;
+        border: 1px solid #d1dce8;
+    }
+    .form-control:focus, .form-select:focus {
+        background-color: #f8fafd;
+        color: #2c3e50;
+        border-color: #3d7bc4;
+    }
+    .btn-primary {
+        background-color: #3d7bc4;
+        border: none;
+    }
+    .btn-secondary {
+        background-color: #6c7a8d;
+        border: none;
+    }
+    .btn-success {
+        background-color: #198754;
+        border: none;
+    }
+    /* Estilização do status */
+    .status-pago {
+        color: #198754 !important; /* Verde para Pago */
+        font-weight: bold;
+    }
+    .status-vencido {
+        color: #dc3545 !important; /* Vermelho para Vencido */
+        font-weight: bold;
+    }
+    .status-aberto {
+        color: #ffc107 !important; /* Amarelo para Aberto */
+        font-weight: bold;
+    }
+    /* CSS para impressão */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        #conteudo-para-imprimir, #conteudo-para-imprimir * {
+            visibility: visible;
+        }
+        #conteudo-para-imprimir {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+        }
+        .no-print {
+            display: none !important;
+        }
+        .table td {
+            background-color: #ffffff; /* Fundo branco para impressão */
+        }
+        .status-pago {
+            color: #008000 !important; /* Verde escuro para impressão */
+        }
+        .status-vencido {
+            color: #ff0000 !important; /* Vermelho para impressão */
+        }
+        .status-aberto {
+            color: #ffa500 !important; /* Laranja para impressão */
+        }
+    }
+</style>
+
+<div class="no-print mb-3">
+    <button onclick="window.print()" class="btn btn-success">🖨️ Imprimir</button>
+    <a href="{% url 'relatorios' %}" class="btn btn-secondary">🔙 Voltar</a>
+</div>
+
+<div class="no-print">
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <label class="form-label">Ordenar por:</label>
+            <select name="ordenacao" class="form-select">
+                <option value="-id" {% if ordenacao == '-id' %}selected{% endif %}>Mais recentes primeiro</option>
+                <option value="id" {% if ordenacao == 'id' %}selected{% endif %}>Mais antigos primeiro</option>
+                <option value="data_vencimento" {% if ordenacao == 'data_vencimento' %}selected{% endif %}>Data de vencimento mais antiga</option>
+                <option value="-data_vencimento" {% if ordenacao == '-data_vencimento' %}selected{% endif %}>Data de vencimento mais recente</option>
+                <option value="valor_parcela" {% if ordenacao == 'valor_parcela' %}selected{% endif %}>Valor menor primeiro</option>
+                <option value="-valor_parcela" {% if ordenacao == '-valor_parcela' %}selected{% endif %}>Valor maior primeiro</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <label class="form-label">ID inicial:</label>
+            <input type="number" name="id_inicial" class="form-control" value="{{ id_inicial }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">ID final:</label>
+            <input type="number" name="id_final" class="form-control" value="{{ id_final }}">
+        </div>
+        <div class="col-md-3">
+            <label class="form-label">Descrição:</label>
+            <input type="text" name="descricao" class="form-control" value="{{ filtro_descricao }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Status:</label>
+            <select name="status" class="form-select">
+                <option value="">Todos</option>
+                <option value="pago" {% if filtro_status == 'pago' %}selected{% endif %}>Pago</option>
+                <option value="vencido" {% if filtro_status == 'vencido' %}selected{% endif %}>Vencido</option>
+                <option value="aberto" {% if filtro_status == 'aberto' %}selected{% endif %}>Aberto</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Tipo:</label>
+            <select name="tipo" class="form-select">
+                <option value="">Todos</option>
+                <option value="DESPESA" {% if filtro_tipo == 'DESPESA' %}selected{% endif %}>Despesa</option>
+                <option value="RECEITA" {% if filtro_tipo == 'RECEITA' %}selected{% endif %}>Receita</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Vencimento Inicial:</label>
+            <input type="date" name="vencimento_inicial" class="form-control" value="{{ filtro_vencimento_inicial }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Vencimento Final:</label>
+            <input type="date" name="vencimento_final" class="form-control" value="{{ filtro_vencimento_final }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Pagamento Inicial:</label>
+            <input type="date" name="pagamento_inicial" class="form-control" value="{{ filtro_pagamento_inicial }}">
+        </div>
+        <div class="col-md-2">
+            <label class="form-label">Pagamento Final:</label>
+            <input type="date" name="pagamento_final" class="form-control" value="{{ filtro_pagamento_final }}">
+        </div>
+        <div class="col-md-12 text-end">
+            <button type="submit" class="btn btn-primary">Filtrar</button>
+            <a href="{% url 'relatorio_movimentos_financeiros' %}" class="btn btn-secondary">Limpar</a>
+        </div>
+    </form>
+</div>
+
+<!-- CONTEÚDO A SER IMPRESSO -->
+<div id="conteudo-para-imprimir">
+    <h2 class="mb-4">Relatório de Movimentos Financeiros</h2>
+
+    <!-- Filtros utilizados -->
+    <div class="mb-3">
+        <strong>Filtros Aplicados:</strong><br>
+        {% if id_inicial and id_final %}
+            IDs de {{ id_inicial }} até {{ id_final }}<br>
+        {% elif id_inicial %}
+            ID a partir de {{ id_inicial }}<br>
+        {% elif id_final %}
+            Até ID {{ id_final }}<br>
+        {% endif %}
+
+        {% if filtro_descricao %}
+            Descrição contendo: "{{ filtro_descricao }}"<br>
+        {% endif %}
+
+        {% if filtro_status %}
+            Status: {{ filtro_status|title }}<br>
+        {% endif %}
+
+        {% if filtro_tipo %}
+            Tipo: {{ filtro_tipo|title }}<br>
+        {% endif %}
+
+        {% if filtro_vencimento_inicial %}
+            Vencimento a partir de: {{ filtro_vencimento_inicial|date:"d/m/Y" }}<br>
+        {% endif %}
+        {% if filtro_vencimento_final %}
+            Vencimento até: {{ filtro_vencimento_final|date:"d/m/Y" }}<br>
+        {% endif %}
+
+        {% if filtro_pagamento_inicial %}
+            Pagamento a partir de: {{ filtro_pagamento_inicial|date:"d/m/Y" }}<br>
+        {% endif %}
+        {% if filtro_pagamento_final %}
+            Pagamento até: {{ filtro_pagamento_final|date:"d/m/Y" }}<br>
+        {% endif %}
+
+        {% if not id_inicial and not id_final and not filtro_descricao and not filtro_status and not filtro_tipo and not filtro_vencimento_inicial and not filtro_vencimento_final and not filtro_pagamento_inicial and not filtro_pagamento_final %}
+            Nenhum filtro aplicado. (Mostrando todos os registros)<br>
+        {% endif %}
+    </div>
+
+    <table class="table table-bordered table-sm">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Descrição</th>
+                <th>Tipo</th>
+                <th>Parcela</th>
+                <th>Valor Parcela (R$)</th>
+                <th>Data Vencimento</th>
+                <th>Data Pagamento</th>
+                <th>Status</th>
+                <th>Origem</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movimento in movimentos %}
+                <tr>
+                    <td>{{ movimento.id }}</td>
+                    <td>{{ movimento.descricao }}</td>
+                    <td>{{ movimento.get_tipo_display }}</td>
+                    <td>{{ movimento.parcela }}/{{ movimento.total_parcelas }}</td>
+                    <td>R$ {{ movimento.valor_parcela|floatformat:2 }}</td>
+                    <td>{{ movimento.data_vencimento|date:"d/m/Y" }}</td>
+                    <td>{{ movimento.data_pagamento|date:"d/m/Y"|default:"-" }}</td>
+                    <td class="{% if movimento.status == 'Pago' %}status-pago{% elif movimento.status == 'Vencido' %}status-vencido{% else %}status-aberto{% endif %}">
+                        {{ movimento.status }}
+                    </td>
+                    <td>
+                        {% if movimento.pedido %}
+                            Pedido {{ movimento.pedido.id }}
+                        {% elif movimento.pedido_compra %}
+                            Pedido Compra {{ movimento.pedido_compra.id }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center">Nenhum movimento financeiro encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <footer class="mt-4">
+        <div class="fw-bold">
+            Gerado em: {{ data_atual }}<br>
+            Total de movimentos filtrados: {{ quantidade_registros }}<br>
+            Valor total das parcelas: <strong>R$ {{ total_geral|floatformat:2 }}</strong>
+        </div>
+    </footer>
+</div>
+
+{% endblock %}

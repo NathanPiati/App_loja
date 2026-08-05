@@ -1,0 +1,692 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style>
+#tabelaItens thead th {
+background-color: #2e4a7a;
+color: #ffffff;
+}
+
+#tabelaItens tbody tr:hover {
+background-color: #e8f0fb;
+}
+</style>
+
+<div class="container-fluid mt-3">
+
+
+
+<div class="card shadow-sm mb-3">
+<div class="card-body d-flex justify-content-between align-items-center">
+
+<div>
+<strong>Venda Atual:</strong>
+<span class="badge bg-primary fs-6">
+#{{ venda_atual.id }}
+</span>
+</div>
+
+<div>
+<a href="{% url 'nova_venda' %}?nova=1" class="btn btn-warning">
+Nova Venda
+</a>
+</div>
+
+</div>
+</div>    
+
+<form id="vendaForm" method="POST" action="{% url 'nova_venda' %}">
+{% csrf_token %}
+
+<div class="row">
+<div class="col-md-8">
+
+<div class="row">
+
+<div class="col-md-6 mb-3 position-relative">
+
+<label class="fw-bold">Cliente</label>
+
+<input type="text"
+       id="buscaClienteInput"
+       class="form-control"
+       placeholder="Digite nome ou código do cliente"
+       autocomplete="off">
+
+<div id="sugestoesCliente"
+     class="list-group position-absolute w-100"
+     style="z-index:1000;">
+</div>
+
+<input type="hidden" id="id_cliente" name="cliente" value="{{ cliente_padrao.id }}">
+
+<div id="info_cliente"
+     class="mt-2 p-2 bg-light border rounded"
+     {% if cliente_padrao %}style="display:block;"{% else %}style="display:none;"{% endif %}>
+
+<small id="cliente_nome_info" class="text-dark fw-bold">
+{% if cliente_padrao %}{{ cliente_padrao.id }} - {{ cliente_padrao.nome }}{% endif %}
+</small>
+
+</div>
+
+</div>
+
+<div class="col-md-6">
+
+<label class="fw-bold">Condição Pagamento</label>
+
+<select id="id_condicao_pagamento"
+        name="condicao_pagamento"
+        class="form-control">
+
+{% for cond in condicoes %}
+<option value="{{ cond.id }}" {% if condicao_padrao and cond.id == condicao_padrao.id %}selected{% endif %}>
+{{ cond.nome }}
+</option>
+{% endfor %}
+
+</select>
+
+</div>
+
+</div>
+
+
+<!-- BUSCA PRODUTO -->
+<div class="card shadow-sm mb-3">
+<div class="card-body">
+
+<label>Buscar Produto</label>
+
+<input type="text"
+       id="busca_produto"
+       class="form-control"
+       placeholder="Código ou nome do produto">
+
+<ul id="resultados" class="list-group mt-2"></ul>
+
+</div>
+</div>
+
+
+<!-- PRODUTO SELECIONADO -->
+<div class="card shadow-sm mb-3">
+<div class="card-body">
+
+<div class="row">
+
+<input type="hidden" id="id_produto_id">
+
+<div class="col-md-4">
+<label>Produto</label>
+<input type="text" id="produto_nome" class="form-control" readonly>
+</div>
+
+<div class="col-md-2">
+<label>Qtd</label>
+<input type="number" id="id_quantidade" class="form-control" value="1" min="1" step="1">
+</div>
+
+<div class="col-md-3">
+<label>Preço</label>
+<input type="number" step="0.01" min="0" id="preco_produto" class="form-control">
+</div>
+
+<div class="col-md-3 d-flex align-items-end">
+<button id="adicionar_item" class="btn btn-primary w-100">
+Adicionar
+</button>
+</div>
+
+</div>
+
+</div>
+</div>
+
+
+{% if segmento_atual == 'sorveteria' and acompanhamentos_ativos %}
+<div class="card shadow-sm mb-3" id="painelAcompanhamentos">
+  <div class="card-header py-2" style="background:#2e4a7a; color:#fff;">
+    <i class="bi bi-stars"></i> Acompanhamentos
+    <small class="ms-2 opacity-75">Selecione antes de clicar em Adicionar</small>
+  </div>
+  <div class="card-body py-2">
+    <div class="d-flex flex-wrap gap-2">
+      {% for a in acompanhamentos_ativos %}
+      <div class="d-flex align-items-center border rounded px-2 py-1 bg-white">
+        <span class="me-2 small fw-semibold">{{ a.nome }}</span>
+        <small class="text-muted me-2">R$&nbsp;{{ a.preco }}</small>
+        <button type="button" class="btn btn-outline-secondary btn-sm px-1 py-0" onclick="alterarQtdAcomp({{ a.id }}, -1)">&minus;</button>
+        <input type="number" id="acomp_{{ a.id }}" class="form-control form-control-sm text-center mx-1 qtd-acomp"
+               min="0" value="0" style="width:52px;"
+               data-id="{{ a.id }}" data-nome="{{ a.nome|escapejs }}" data-preco="{{ a.preco }}"
+               oninput="atualizarPreviewAcomp()">
+        <button type="button" class="btn btn-outline-secondary btn-sm px-1 py-0" onclick="alterarQtdAcomp({{ a.id }}, 1)">&plus;</button>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="mt-2 small text-muted">Adicional: <strong class="text-dark">R$&nbsp;<span id="totalAdicionais">0,00</span></strong></div>
+  </div>
+</div>
+{% endif %}
+
+<!-- TABELA ITENS -->
+<div class="card shadow-sm">
+<div class="card-body p-0">
+
+<table id="tabelaItens" class="table table-bordered table-hover mb-0">
+
+<thead>
+<tr>
+<th>Produto</th>
+<th width="80">Qtd</th>
+<th width="120">Preço</th>
+<th width="120">Total</th>
+<th width="60"></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td colspan="5" class="text-center">Carrinho vazio</td>
+</tr>
+</tbody>
+
+</table>
+
+</div>
+</div>
+
+</div>
+
+
+<!-- COLUNA DIREITA -->
+<div class="col-md-4">
+
+<div class="card shadow-sm mb-3">
+<div class="card-body">
+
+<label>Subtotal</label>
+<input type="text" id="valor_total_display" class="form-control form-control-lg text-success fw-bold" readonly>
+
+<input type="hidden" id="valor_total_hidden" name="valor_total">
+
+</div>
+</div>
+
+
+<div class="card shadow-sm mb-3">
+<div class="card-body">
+
+{% comment %} <label>Custo Total</label>
+<input type="text" id="custo_total" class="form-control" readonly> {% endcomment %}
+
+<label class="mt-2">Lucro</label>
+<input type="text" id="lucro" class="form-control" readonly>
+
+</div>
+</div>
+
+
+<div class="card shadow-sm mb-3">
+<div class="card-body">
+
+<label>Desconto (%)</label>
+<input type="number" id="desconto" class="form-control" value="0">
+
+<h4 class="mt-3">
+Total Final: <span id="total_final">R$ 0.00</span>
+</h4>
+
+</div>
+</div>
+
+
+<div class="card shadow-sm">
+<div class="card-body">
+
+{% comment %} <button id="btnFinalizar" class="btn btn-success w-100 mb-2">
+Finalizar Venda
+</button> {% endcomment %}
+
+<button type="submit" name="salvar_venda" class="btn btn-secondary w-100">
+Finalizar Venda
+</button><br>
+<button type="submit" name="cancelar_venda" class="btn btn-danger w-100 mt-2">
+Cancelar Venda
+</button>
+
+</div>
+</div>
+
+</div>
+
+</div>
+
+</form>
+
+</div><br>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/css/select2.min.css" rel="stylesheet"/>
+
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0/dist/js/select2.min.js"></script>
+
+<script>
+// 🔹 lista de clientes vinda do Django
+const clientes = [
+
+{% for cliente in clientes %}
+
+{
+    id: "{{ cliente.id }}",
+    nome: "{{ cliente.nome|escapejs }}",
+    telefone: "{{ cliente.telefone|default:''|escapejs }}"
+},
+
+{% endfor %}
+
+];
+
+console.log('clientes array:', clientes);
+console.log('cliente_padrao id (template):', "{{ cliente_padrao.id }}");
+
+
+const buscaClienteInput = document.getElementById("buscaClienteInput");
+const sugestoesCliente = document.getElementById("sugestoesCliente");
+const idClienteInput = document.getElementById("id_cliente");
+const clienteNomeInfo = document.getElementById("cliente_nome_info");
+const infoCliente = document.getElementById("info_cliente");
+
+
+// CLIENTE PADRÃO = ID 1 (Consumidor)
+// exibe informação assim que o DOM for carregado
+// similar ao comportamento usado em pedidos_teste.html
+document.addEventListener("DOMContentLoaded", function(){
+    let consumidor = clientes.find(c => c.id == "{{ cliente_padrao.id }}");
+    if (consumidor) {
+        idClienteInput.value = consumidor.id;
+        clienteNomeInfo.innerText = consumidor.id + " - " + consumidor.nome;
+        infoCliente.style.display = "block";
+    } else {
+        // caso não exista, manter comportamento padrão
+        infoCliente.style.display = "none";
+    }
+});
+
+
+// BUSCA CLIENTE
+buscaClienteInput.addEventListener("input", function(){
+    let busca = this.value.toLowerCase();
+    sugestoesCliente.innerHTML = "";
+
+    // se campo vazio, esconde info e limpa id
+    if (busca.length === 0) {
+        infoCliente.style.display = "none";
+        idClienteInput.value = "";
+        return;
+    }
+
+let resultados = clientes.filter(c =>
+
+c.nome.toLowerCase().includes(busca) ||
+c.id.includes(busca) ||
+(c.telefone || "").includes(busca)
+
+);
+
+resultados.forEach(cliente => {
+
+const item = document.createElement("a");
+item.classList.add("list-group-item", "list-group-item-action");
+item.href = "#";
+item.textContent = `${cliente.id} - ${cliente.nome} - ${cliente.telefone || '-'} `;
+item.addEventListener('click', (event) => {
+
+event.preventDefault();
+
+idClienteInput.value = cliente.id;
+
+clienteNomeInfo.innerText =
+cliente.id + " - " + cliente.nome;
+
+infoCliente.style.display = "block";
+
+
+    // depois de selecionar, limpa campo texto e sugestões
+    buscaClienteInput.value = "";
+    sugestoesCliente.innerHTML = "";
+});
+
+    sugestoesCliente.appendChild(item);
+
+});
+
+});
+
+let itens = [
+{% for item in carrinho %}
+{
+    id: "{{ item.id }}",
+    nome: "{{ item.nome|escapejs }}",
+    quantidade: {{ item.quantidade }},
+    preco: "{{ item.preco|floatformat:2|escapejs }}",
+    total: "{{ item.total|floatformat:2|escapejs }}",
+    garantia_dias: {{ item.garantia_dias|default:0 }},
+    valor_pago: "{{ item.custo|floatformat:2|escapejs }}",
+    custo: "{{ item.custo|floatformat:2|escapejs }}"
+},
+{% endfor %}
+];
+
+const segmentoAtual = "{{ segmento_atual }}";
+
+let precoSelecionado = 0;
+let valorPagoSelecionado = 0;
+
+function alterarQtdAcomp(id, delta) {
+    const input = document.getElementById('acomp_' + id);
+    if (!input) return;
+    input.value = Math.max(0, (parseInt(input.value) || 0) + delta);
+    atualizarPreviewAcomp();
+}
+
+function atualizarPreviewAcomp() {
+    let total = 0;
+    document.querySelectorAll('.qtd-acomp').forEach(function(input) {
+        total += (parseInt(input.value) || 0) * parseFloat(input.dataset.preco || 0);
+    });
+    const el = document.getElementById('totalAdicionais');
+    if (el) el.textContent = total.toFixed(2).replace('.', ',');
+}
+
+function coletarAcompanhamentos() {
+    const lista = [];
+    document.querySelectorAll('.qtd-acomp').forEach(function(input) {
+        const qtd = parseInt(input.value) || 0;
+        if (qtd > 0) lista.push({ id: input.dataset.id, qtd: qtd });
+    });
+    return lista;
+}
+
+function limparAcompanhamentos() {
+    document.querySelectorAll('.qtd-acomp').forEach(function(input) { input.value = 0; });
+    atualizarPreviewAcomp();
+}
+
+function parseNumero(valor){
+    if (valor === null || valor === undefined || valor === "") return 0;
+    if (typeof valor === "number") return valor;
+    const valorTexto = String(valor).trim();
+    if (valorTexto.includes(',')) {
+        return parseFloat(valorTexto.replace(/\./g, '').replace(',', '.')) || 0;
+    }
+    return parseFloat(valorTexto) || 0;
+}
+
+
+$(document).ready(function(){
+    console.log("PDV carregado");
+    // FOCO AUTOMÁTICO
+    $("#busca_produto").focus();
+
+
+    // BUSCA PRODUTO
+    $("#busca_produto").on("keyup", function(){
+
+        let termo = $(this).val().trim();
+        console.log("Buscando:", termo);
+
+        if (termo.length < 1){
+            $("#resultados").empty();
+            return;
+        }
+
+        console.log("AJAX buscando em", "{% url 'busca_produtosVenda' %}");
+
+        $.ajax({
+
+            url: "{% url 'busca_produtosVenda' %}",
+            type: "GET",
+            data: { term: termo },
+            dataType: "json",
+
+            success: function(data){
+                console.log("Resposta da busca:", data);
+
+                let lista = "";
+
+                if (!data.length){
+                    $("#resultados").html('<li class="list-group-item">Nenhum produto encontrado</li>');
+                    return;
+                }
+
+                data.forEach(function(prod){
+
+                    lista += `
+                    <li class="list-group-item list-group-item-action"
+                        data-id="${prod.id}"
+                        data-nome="${prod.nome}"
+                        data-preco="${prod.preco}"
+                        data-valor_pago="${prod.valor_pago}"
+                        data-unidade="${prod.unidade_medida || 'un'}"
+                        data-unidade-label="${prod.unidade_label || 'Unidade'}">
+                        ${prod.id} - ${prod.nome} (R$ ${prod.preco})
+                    </li>`;
+
+                });
+
+                $("#resultados").html(lista);
+
+            },
+
+            error: function(xhr, status, error){
+                console.log("Erro na busca de produtos", status, error, xhr.responseText);
+            }
+
+        });
+
+    });
+
+
+    // SELECIONAR PRODUTO
+    $(document).on("click", "#resultados li", function(){
+
+        let id = $(this).data("id");
+        let nome = $(this).data("nome");
+        let preco = parseFloat($(this).data("preco")) || 0;
+        let valor_pago = parseFloat($(this).data("valor_pago")) || 0;
+        let unidade = $(this).data("unidade") || 'un';
+
+        $("#id_produto_id").val(id);
+        $("#produto_nome").val(nome);
+        $("#preco_produto").val(preco);
+        $("#id_quantidade").val(1);
+
+        if (unidade === 'un') {
+            $("#id_quantidade").attr("step", "1").attr("min", "1").attr("placeholder", "Ex.: 1, 2, 3");
+        } else {
+            $("#id_quantidade").attr("step", "0.001").attr("min", "0.001").attr("placeholder", "Ex.: 0.250");
+        }
+
+        precoSelecionado = preco;
+        valorPagoSelecionado = valor_pago;
+
+        $("#resultados").empty();
+
+    });
+
+
+    // ADICIONAR ITEM
+    $("#adicionar_item").click(function(e){
+
+        e.preventDefault();
+
+        let id = $("#id_produto_id").val();
+        let nome = $("#produto_nome").val();
+        let quantidade = parseFloat($("#id_quantidade").val());
+        let preco = parseFloat($("#preco_produto").val());
+
+        if (!id){
+            alert("Selecione um produto.");
+            return;
+        }
+
+        if (!quantidade || quantidade <= 0){
+            alert("Informe uma quantidade valida.");
+            return;
+        }
+
+        if (isNaN(preco) || preco < 0){
+            alert("Informe um preco valido.");
+            return;
+        }
+
+        $.ajax({
+
+            url: "{% url 'nova_venda' %}",
+            method: "POST",
+
+            data: {
+
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+                cliente: $("#id_cliente").val(),
+                condicao_pagamento: $("#id_condicao_pagamento").val(),
+                produto_id: id,
+                quantidade: quantidade,
+                preco_produto: preco,
+                adicionar_item: 1,
+                acompanhamentos_json: JSON.stringify(coletarAcompanhamentos())
+
+            },
+
+            success: function(response){
+
+                itens = response.carrinho || [];
+
+                atualizarTabela();
+                limparAcompanhamentos();
+
+                $("#busca_produto").val("").focus();
+                $("#produto_nome").val("");
+                $("#preco_produto").val("");
+                $("#id_quantidade").val(1);
+
+            },
+
+            error: function(xhr){
+                const erro = xhr?.responseJSON?.error || "Erro ao adicionar item.";
+                alert(erro);
+            }
+
+        });
+
+    });
+
+
+    // ATUALIZAR TABELA
+    function atualizarTabela(){
+
+        let tbody = $("#tabelaItens tbody");
+
+        tbody.empty();
+
+        let valorTotal = 0;
+        let valorPagoTotal = 0;
+
+        itens.forEach(function(item){
+
+            const totalItem = parseNumero(item.total);
+            const custoItem = parseNumero(item.valor_pago ?? item.custo);
+            const quantidadeItem = parseNumero(item.quantidade);
+
+            valorTotal += totalItem;
+            valorPagoTotal += custoItem * quantidadeItem;
+
+            let acompTexto = '';
+            if (segmentoAtual === 'sorveteria' && item.acompanhamentos && item.acompanhamentos.length) {
+                acompTexto = '<br><small class="text-muted">' +
+                    item.acompanhamentos.map(function(a) { return a.qtd + '\u00d7 ' + a.nome; }).join(', ') +
+                    '</small>';
+            }
+            let garantiaTexto = '';
+            if ((parseInt(item.garantia_dias) || 0) > 0) {
+                garantiaTexto = '<br><small class="text-primary">Garantia: ' + item.garantia_dias + ' dias</small>';
+            }
+
+            tbody.append(`
+                <tr>
+                    <td>${item.nome}${acompTexto}${garantiaTexto}</td>
+                    <td>${item.quantidade}</td>
+                    <td>R$ ${parseNumero(item.preco).toFixed(2)}</td>
+                    <td>R$ ${totalItem.toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm"
+                        onclick="removerItem('${item.id}')">X</button>
+                    </td>
+                </tr>
+            `);
+
+        });
+
+        if (itens.length === 0){
+            tbody.append('<tr><td colspan="5" class="text-center">Carrinho vazio</td></tr>');
+        }
+
+        $("#valor_total_display").val("R$ " + valorTotal.toFixed(2));
+        $("#custo_total").val("R$ " + valorPagoTotal.toFixed(2));
+        $("#lucro").val("R$ " + (valorTotal - valorPagoTotal).toFixed(2));
+
+        let desconto = parseFloat($("#desconto").val()) || 0;
+
+        let totalFinal = valorTotal - (valorTotal * (desconto / 100));
+
+        $("#total_final").text("R$ " + totalFinal.toFixed(2));
+
+    }
+
+
+    // REMOVER ITEM
+    window.removerItem = function(itemId){
+
+        $.ajax({
+
+            url: "{% url 'nova_venda' %}",
+            method: "POST",
+
+            data: {
+                csrfmiddlewaretoken: "{{ csrf_token }}",
+                remover_item: itemId
+            },
+
+            success: function(response){
+
+                itens = response.carrinho || [];
+
+                atualizarTabela();
+
+                $("#busca_produto").focus();
+
+            },
+
+            error: function(xhr){
+                const erro = xhr?.responseJSON?.error || "Erro ao remover item.";
+                alert(erro);
+            }
+
+        });
+
+    };
+
+
+    $("#desconto").on("input", atualizarTabela);
+
+    atualizarTabela();
+
+});
+
+</script>
+{% endblock %}

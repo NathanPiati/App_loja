@@ -1,0 +1,298 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Movimentos Financeiros{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <h2><i class="bi bi-cash-coin"></i> Movimentos Financeiros</h2><hr>
+
+    <style>
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-custom {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(61, 123, 196, 0.1);
+            transition: transform 0.3s ease;
+            color: #2c3e50;
+            border: 1px solid #d1dce8;
+        }
+
+        .card-custom:hover {
+            transform: scale(1.01);
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .btn-custom {
+            background: linear-gradient(to right, #3d7bc4, #5a9fd4);
+            color: white;
+            border: none;
+            transition: background 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background: linear-gradient(to right, #2a65aa, #3d7bc4);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+        }
+
+        .table thead th {
+            background-color: #2e4a7a;
+            color: #ffffff;
+        }
+
+        .table thead th a {
+            color: rgba(255,255,255,0.9);
+            text-decoration: none;
+        }
+
+        .table thead th a:hover {
+            color: #ffffff;
+            text-decoration: underline;
+        }
+
+        .table tbody tr:hover {
+            background-color: #e8f0fb;
+        }
+
+        .badge-dot {
+            display: inline-block !important;
+            width: 14px !important;
+            height: 14px !important;
+            border-radius: 50% !important;
+            margin-right: 8px !important;
+            vertical-align: middle !important;
+            background-color: #6c757d !important; /* Cinza como fallback */
+        }
+
+        .badge-dot.bg-primary {
+            background-color: #0d6efd !important; /* Azul para vendas */
+        }
+
+        .badge-dot.bg-success {
+            background-color: #198754 !important; /* Verde para compras */
+        }
+
+        .badge-dot.bg-secondary {
+            background-color: #6c757d !important; /* Cinza para N/A */
+        }
+    </style>
+
+    <!-- Elemento de teste para verificar Bootstrap e CSS -->
+    <div class="fade-in mb-3">
+        <a>Observação da legenda de tipos de pedido:  </a> 
+            <span class="badge bg-primary badge-dot" title="Venda"></span>Vendas (Azul) 
+            <span class="badge bg-success badge-dot" title="Compra"></span>Compras (Verde) 
+            <span class="badge bg-secondary badge-dot" title="N/A"></span>N/A (Cinza)
+        </p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} fade-in" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Filtro -->
+    <div class="fade-in mb-4">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-2 form-group">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" class="form-control form-select" id="status">
+                    <option value="">Todos</option>
+                    <option value="aberto" {% if status_filtro == 'aberto' %}selected{% endif %}>Em Aberto</option>
+                    <option value="vencido" {% if status_filtro == 'vencido' %}selected{% endif %}>Vencidos</option>
+                    <option value="pago" {% if status_filtro == 'pago' %}selected{% endif %}>Pagos</option>
+                </select>
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="cliente_fornecedor" class="form-label">Cliente/Fornecedor</label>
+                <select name="cliente_fornecedor" class="form-control form-select" id="cliente_fornecedor">
+                    <option value="">Todos</option>
+                    <optgroup label="Clientes">
+                        {% for cliente in clientes %}
+                            <option value="{{ cliente.id }}" {% if cliente_fornecedor_filtro == cliente.id|stringformat:"s" %}selected{% endif %}>{{ cliente.nome }} (Cliente)</option>
+                        {% endfor %}
+                    </optgroup>
+                    <optgroup label="Fornecedores">
+                        {% for fornecedor in fornecedores %}
+                            <option value="{{ fornecedor.id }}" {% if cliente_fornecedor_filtro == fornecedor.id|stringformat:"s" %}selected{% endif %}>{{ fornecedor.nome }} (Fornecedor)</option>
+                        {% endfor %}
+                    </optgroup>
+                </select>
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="tipo_pedido" class="form-label">Tipo de Pedido</label>
+                <select name="tipo_pedido" class="form-control form-select" id="tipo_pedido">
+                    <option value="">Todos</option>
+                    <option value="venda" {% if tipo_pedido_filtro == 'venda' %}selected{% endif %}>Venda</option>
+                    <option value="compra" {% if tipo_pedido_filtro == 'compra' %}selected{% endif %}>Compra</option>
+                </select>
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="pedido" class="form-label">ID Pedido</label>
+                <input type="text" name="pedido" class="form-control" id="pedido" placeholder="ID Pedido" value="{{ pedido_filtro|default_if_none:'' }}">
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="condicao" class="form-label">Condição de Pagamento</label>
+                <select name="condicao" class="form-control form-select" id="condicao">
+                    <option value="">Todas</option>
+                    {% for condicao in condicoes %}
+                        <option value="{{ condicao.id }}" {% if condicao_filtro == condicao.id|stringformat:"s" %}selected{% endif %}>{{ condicao.nome }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="data_inicio" class="form-label">Data Início</label>
+                <input type="date" name="data_inicio" class="form-control" id="data_inicio" value="{{ data_inicio|default_if_none:'' }}">
+            </div>
+            <div class="col-md-2 form-group">
+                <label for="data_fim" class="form-label">Data Fim</label>
+                <input type="date" name="data_fim" class="form-control" id="data_fim" value="{{ data_fim|default_if_none:'' }}">
+            </div>
+            <div class="col-md-1 form-group">
+                <button type="submit" class="btn btn-custom w-100"><i class="bi bi-search"></i> Filtrar</button>
+            </div>
+            <div class="col-md-1 form-group">
+                <a href="{% url 'lista_financeiro' %}" class="btn btn-custom w-100" title="Limpar Filtros"><i class="bi bi-arrow-counterclockwise"></i> Limpar</a>
+            </div>
+            <div class="col-md-2 form-group">
+                <a href="{% url 'imprimir_financeiro' %}?status={{ status_filtro|urlencode }}&cliente_fornecedor={{ cliente_fornecedor_filtro|urlencode }}&tipo_pedido={{ tipo_pedido_filtro|urlencode }}&pedido={{ pedido_filtro|urlencode }}&condicao={{ condicao_filtro|urlencode }}&data_inicio={{ data_inicio|urlencode }}&data_fim={{ data_fim|urlencode }}" 
+                   class="btn btn-custom w-100" target="_blank"><i class="bi bi-printer"></i> Imprimir Relatório</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Tabela -->
+    <div class="card-custom fade-in">
+        <table class="table table-bordered table-hover align-middle">
+            <thead>
+                <tr>
+                    <th><a href="?{% if order_by == 'id' and direction == 'asc' %}order_by=id&direction=desc{% else %}order_by=id&direction=asc{% endif %}&status={{ status_filtro|urlencode }}&cliente_fornecedor={{ cliente_fornecedor_filtro|urlencode }}&tipo_pedido={{ tipo_pedido_filtro|urlencode }}&pedido={{ pedido_filtro|urlencode }}&condicao={{ condicao_filtro|urlencode }}&data_inicio={{ data_inicio|urlencode }}&data_fim={{ data_fim|urlencode }}">ID Movimento</a></th>
+                    <th>Tipo</th>
+                    <th><a href="?{% if order_by == 'pedido' and direction == 'asc' %}order_by=pedido&direction=desc{% else %}order_by=pedido&direction=asc{% endif %}&status={{ status_filtro|urlencode }}&cliente_fornecedor={{ cliente_fornecedor_filtro|urlencode }}&tipo_pedido={{ tipo_pedido_filtro|urlencode }}&pedido={{ pedido_filtro|urlencode }}&condicao={{ condicao_filtro|urlencode }}&data_inicio={{ data_inicio|urlencode }}&data_fim={{ data_fim|urlencode }}">Pedido</a></th>
+                    <th>Cliente/Fornecedor</th>
+                    <th>Condição de Pagamento</th>
+                    <th>Descrição</th>
+                    <th>Parcela</th>
+                    <th><a href="?{% if order_by == 'data_vencimento' and direction == 'asc' %}order_by=data_vencimento&direction=desc{% else %}order_by=data_vencimento&direction=asc{% endif %}&status={{ status_filtro|urlencode }}&cliente_fornecedor={{ cliente_fornecedor_filtro|urlencode }}&tipo_pedido={{ tipo_pedido_filtro|urlencode }}&pedido={{ pedido_filtro|urlencode }}&condicao={{ condicao_filtro|urlencode }}&data_inicio={{ data_inicio|urlencode }}&data_fim={{ data_fim|urlencode }}">Vencimento</a></th>
+                    <th><a href="?{% if order_by == 'valor_parcela' and direction == 'asc' %}order_by=valor_parcela&direction=desc{% else %}order_by=valor_parcela&direction=asc{% endif %}&status={{ status_filtro|urlencode }}&cliente_fornecedor={{ cliente_fornecedor_filtro|urlencode }}&tipo_pedido={{ tipo_pedido_filtro|urlencode }}&pedido={{ pedido_filtro|urlencode }}&condicao={{ condicao_filtro|urlencode }}&data_inicio={{ data_inicio|urlencode }}&data_fim={{ data_fim|urlencode }}">Valor</a></th>
+                    <th>Status</th>
+                    <th>Pagamento</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for f in financeiro %}
+                <tr>
+                    <td>
+                        <!-- Depuração: Verificando tipo de movimento -->
+                        {% if f.pedido %}
+                            <span class="badge bg-primary badge-dot" title="Venda"></span> {{ f.id }} <!-- Venda: Azul -->
+                        {% elif f.pedido_compra %}
+                            <span class="badge bg-success badge-dot" title="Compra"></span> {{ f.id }} <!-- Compra: Verde -->
+                        {% else %}
+                            <span class="badge bg-secondary badge-dot" title="Sem tipo"></span> {{ f.id }} <!-- N/A: Cinza -->
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if f.pedido %}Venda{% elif f.pedido_compra %}Compra{% else %}N/A{% endif %}
+                    </td>
+                    <td>
+                        {% if f.pedido %}
+                            {{ f.pedido.id }}
+                        {% elif f.pedido_compra %}
+                            {{ f.pedido_compra.id }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if f.pedido and f.pedido.cliente %}
+                            {{ f.pedido.cliente.nome }} (Cliente)
+                        {% elif f.pedido_compra and f.pedido_compra.fornecedor %}
+                            {{ f.pedido_compra.fornecedor.nome }} (Fornecedor)
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if f.condicao_id %}
+                            {{ f.condicao_id.nome }}
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>{{ f.descricao }}</td>
+                    <td>{{ f.parcela }}/{{ f.total_parcelas }}</td>
+                    <td>{{ f.data_vencimento|date:"d/m/Y" }}</td>
+                    <td>R$ {{ f.valor_parcela|floatformat:2 }}</td>
+                    <td>
+                        {% if f.pago %}
+                            <span class="badge bg-primary"><i class="bi bi-check-circle-fill"></i> Pago</span>
+                        {% elif f.data_vencimento < today %}
+                            <span class="badge bg-danger"><i class="bi bi-x-circle-fill"></i> Vencido</span>
+                        {% else %}
+                            <span class="badge bg-warning"><i class="bi bi-exclamation-triangle-fill"></i> Em aberto</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if f.data_pagamento %}
+                            {{ f.data_pagamento|date:"d/m/Y" }}
+                        {% else %}
+                            ---
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if not f.pago %}
+                            <a href="{% url 'pagar_parcela' f.id %}" class="btn btn-custom btn-sm"><i class="bi bi-check-circle"></i> Quitar</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="12" class="text-center">Nenhum movimento financeiro encontrado</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if financeiro %}
+    <div class="alert alert-info fade-in">
+        Foram encontrados <strong>{{ financeiro.count }}</strong> movimentos financeiros.
+    </div>
+    {% else %}
+    <div class="alert alert-info fade-in" role="alert">
+        Nenhum movimento financeiro encontrado com os filtros aplicados.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

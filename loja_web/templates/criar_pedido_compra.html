@@ -1,0 +1,194 @@
+{% extends 'pedidos_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Criar Pedido de Compra</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" id="pedido-form">
+        {% csrf_token %}
+        <div class="card mb-3">
+            <div class="card-header">Informações do Pedido</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="busca_fornecedor" class="form-label">Buscar Fornecedor (ID, Nome ou CNPJ)</label>
+                    <input type="text" class="form-control" id="busca_fornecedor" placeholder="Digite o ID, nome ou CNPJ do fornecedor" autocomplete="off">
+                    <ul id="resultados_fornecedor" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
+                    <input type="hidden" id="id_fornecedor" name="fornecedor" value="">
+                </div>
+                <div id="info_fornecedor" class="mb-3" style="display:none;">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title" id="fornecedor_nome_info"></h5>
+                            <p class="card-text mb-1"><strong>CNPJ:</strong> <span id="fornecedor_cnpj_info"></span></p>
+                            <p class="card-text mb-1"><strong>Email:</strong> <span id="fornecedor_email_info"></span></p>
+                            <p class="card-text mb-1"><strong>Telefone:</strong> <span id="fornecedor_telefone_info"></span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.numero_nota_fiscal.id_for_label }}" class="form-label">Número NF</label>
+                    {{ form.numero_nota_fiscal }}
+                    {% if form.numero_nota_fiscal.errors %}
+                        <div class="invalid-feedback d-block">{{ form.numero_nota_fiscal.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.condicao_pagamento.id_for_label }}" class="form-label">Condição de Pagamento</label>
+                    {{ form.condicao_pagamento }}
+                    {% if form.condicao_pagamento.errors %}
+                        <div class="invalid-feedback d-block">{{ form.condicao_pagamento.errors|striptags }}</div>
+                    {% endif %}
+                    <small class="form-text text-muted">Escolha a condição de pagamento para definir parcelas e vencimentos.</small>
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.observacao.id_for_label }}" class="form-label">Observação</label>
+                    {{ form.observacao }}
+                    {% if form.observacao.errors %}
+                        <div class="invalid-feedback d-block">{{ form.observacao.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">Itens do Pedido</div>
+            <div class="card-body">
+                {{ formset.management_form }}
+                {% for form in formset %}
+                    <div class="item-formset mb-3 border p-3 rounded">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Produto</label>
+                                {{ form.produto }}
+                                {% if form.produto.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.produto.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Quantidade</label>
+                                {{ form.quantidade }}
+                                {% if form.quantidade.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.quantidade.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Custo Unitário (R$)</label>
+                                {{ form.custo_unitario }}
+                                {% if form.custo_unitario.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.custo_unitario.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                <button type="button" class="btn btn-secondary btn-sm" id="add-item">Adicionar Item</button>
+                <div class="mt-3">
+                    <h5>Total do Pedido: R$ <span id="total-pedido">0.00</span></h5>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success">Criar Pedido</button>
+        <a href="{% url 'produtos_geral' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function(){
+    // Existing supplier search functionality
+    $("#busca_fornecedor").on("keyup", function(){
+        let termo = $(this).val().trim();
+        if (termo.length < 1) {
+            $("#resultados_fornecedor").empty();
+            $("#info_fornecedor").hide();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'buscar_fornecedores' %}",
+            data: { term: termo },
+            dataType: "json",
+            success: function(data){
+                let lista = "";
+                if (data.length === 0) {
+                    lista = '<li class="list-group-item">Nenhum fornecedor encontrado</li>';
+                } else {
+                    data.forEach(function(forn){
+                        lista += `<li class="list-group-item list-group-item-action"
+                                    data-id="${forn.id}"
+                                    data-nome="${forn.nome}"
+                                    data-cnpj="${forn.cnpj || ''}"
+                                    data-email="${forn.email || ''}"
+                                    data-telefone="${forn.telefone || ''}">
+                                    ${forn.id} - ${forn.nome} (${forn.cnpj || 'Sem CNPJ'})
+                                  </li>`;
+                    });
+                }
+                $("#resultados_fornecedor").html(lista);
+            },
+            error: function(){
+                $("#resultados_fornecedor").html('<li class="list-group-item">Erro ao buscar fornecedores</li>');
+            }
+        });
+    });
+
+    $(document).on("click", "#resultados_fornecedor li", function(){
+        let id = $(this).data("id");
+        let nome = $(this).data("nome");
+        let cnpj = $(this).data("cnpj");
+        let email = $(this).data("email");
+        let telefone = $(this).data("telefone");
+
+        $("#id_fornecedor").val(id);
+        $("#fornecedor_nome_info").text(`${id} - ${nome}`);
+        $("#fornecedor_cnpj_info").text(cnpj || 'N/A');
+        $("#fornecedor_email_info").text(email || 'N/A');
+        $("#fornecedor_telefone_info").text(telefone || 'N/A');
+        $("#info_fornecedor").show();
+        $("#resultados_fornecedor").empty();
+        $("#busca_fornecedor").val("");
+    });
+
+    // Add new item to formset
+    $("#add-item").click(function(){
+        let formIdx = $("#id_form-TOTAL_FORMS").val();
+        let newForm = $(".item-formset:first").clone(true);
+        newForm.find(":input").each(function(){
+            let name = $(this).attr("name").replace("-0-", "-" + formIdx + "-");
+            let id = "id_" + name;
+            $(this).attr({"name": name, "id": id}).val("");
+        });
+        $("#id_form-TOTAL_FORMS").val(parseInt(formIdx) + 1);
+        newForm.insertBefore($(this));
+        updateTotal();
+    });
+
+    // Calculate and update total dynamically
+    function updateTotal() {
+        let total = 0;
+        $(".item-formset").each(function(){
+            let quantidade = parseFloat($(this).find("input[name$='quantidade']").val()) || 0;
+            let custo_unitario = parseFloat($(this).find("input[name$='custo_unitario']").val()) || 0;
+            total += quantidade * custo_unitario;
+        });
+        $("#total-pedido").text(total.toFixed(2));
+    }
+
+    // Update total on input change
+    $(document).on("input", "input[name$='quantidade'], input[name$='custo_unitario']", updateTotal);
+
+    // Initial total calculation
+    updateTotal();
+});
+</script>
+{% endblock %}

@@ -1,0 +1,200 @@
+{% extends 'produtos_base.html' %}
+
+{% block title %}Lista de Produtos{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <h2><i class="bi bi-boxes"></i> Lista de Produtos</h2><hr>
+
+    <style>
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-custom {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(61, 123, 196, 0.1);
+            transition: transform 0.3s ease;
+            color: #2c3e50;
+            border: 1px solid #d1dce8;
+        }
+
+        .card-custom:hover {
+            transform: scale(1.01);
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+  
+        .btn-custom {
+            background: linear-gradient(to right, #3d7bc4, #5a9fd4);
+            color: white;
+            border: none;
+            transition: background 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background: linear-gradient(to right, #2a65aa, #3d7bc4);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: 500;
+        }
+
+        .form-control {
+            border-radius: 8px;
+        }
+
+        .produtos-table thead th {
+            background-color: #2e4a7a;
+            color: #ffffff;
+        }
+
+        .produtos-table tbody tr:hover {
+            background-color: #e8f0fb;
+        }
+    </style>
+
+    {# Formulário de Filtro #}
+    <div class="fade-in mb-4 d-flex justify-content-between align-items-end">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-1 form-group">
+                {{ filter_form.id.label_tag }}
+                {{ filter_form.id }}
+            </div>
+            <div class="col-md-2 form-group">
+                {{ filter_form.nome.label_tag }}
+                {{ filter_form.nome }}
+            </div>
+            <div class="col-md-2 form-group">
+                {{ filter_form.marca.label_tag }}
+                {{ filter_form.marca }}
+            </div>
+            <div class="col-md-2 form-group">
+                {{ filter_form.num_fabricante.label_tag }}
+                {{ filter_form.num_fabricante }}
+            </div>
+            <div class="col-md-2 form-group">
+                {{ filter_form.num_original.label_tag }}
+                {{ filter_form.num_original }}
+            </div>
+            <div class="col-md-2 form-group">
+                {{ filter_form.categoria.label_tag }}
+                {{ filter_form.categoria }}
+            </div>
+            <div class="col-md-1 form-group">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+            </div>
+        </form>
+    </div>
+
+    {# Tabela de Produtos #}
+    {% if produtos %}
+    <div class="card-custom mt-4">
+        <table class="table table-bordered table-hover align-middle produtos-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Marca</th>
+                    <th>Número do Fabricante</th>
+                    <th>Número Original</th>
+                    <th>Categoria</th>
+                    <th>Preço</th>
+                    <th>Valor Pago</th>
+                    <th>Estoque</th>
+                    <th>Unidade</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for produto in produtos %}
+                <tr>
+                    <td>{{ produto.id }}</td>
+                    <td>{{ produto.nome }}</td>
+                    <td>{{ produto.marca|default:"-" }}</td>
+                    <td>{{ produto.num_fabricante|default:"-" }}</td>
+                    <td>{{ produto.num_original|default:"-" }}</td>
+                    <td>{{ produto.categoria.nome }}</td>
+                    <td>R$ {{ produto.preco|default:"0.00" }}</td>
+                    <td>R$ {{ produto.valor_pago|default:"0.00" }}</td>
+                    <td>{{ produto.estoque_exibicao }}</td>
+                    <td>{{ produto.get_unidade_medida_display }}</td>
+                    <td>
+                        <a href="{% url 'produto_editar' produto.id %}" class="btn btn-sm btn-warning me-1" title="Editar Produto">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalExcluir{{ produto.id }}" title="Excluir Produto">
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if busca_realizada %}
+    <div class="alert alert-info">
+        Foram encontrados <strong>{{ total_produtos }}</strong> produtos.
+    </div>
+    {% endif %}
+
+    {% if produtos.has_other_pages %}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if produtos.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Primeira Página">&laquo;&laquo;</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ produtos.previous_page_number }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Anterior">&laquo;</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;&laquo;</span></li>
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+            {% endif %}
+
+            {% for num in produtos.paginator.page_range %}
+            {% if produtos.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num >= produtos.number|add:'-2' and num <= produtos.number|add:'2' %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}">{{ num }}</a></li>
+            {% endif %}
+            {% endfor %}
+
+            {% if produtos.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ produtos.next_page_number }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Próxima">&raquo;</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ produtos.paginator.num_pages }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Última Página">&raquo;&raquo;</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+            <li class="page-item disabled"><span class="page-link">&raquo;&raquo;</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        Nenhum produto encontrado com os filtros aplicados.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

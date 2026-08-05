@@ -1,0 +1,282 @@
+{% extends 'pedidos_base.html' %}
+
+{% block title %}Novo Pedido{% endblock %}
+
+{% block content %}
+<h2>Novo Pedido</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <div class="row mb-3">
+        <div class="col-md-6">
+            <label>Cliente</label>
+            {{ form.cliente }}
+        </div>
+        <div class="col-md-3">
+            <label>Data</label>
+            <input type="text" class="form-control" value="{{ data_atual }}" readonly>
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <label>Condição de Pagamento</label>
+            {{ form.condicao_pagamento }}
+        </div>
+        <div class="col-md-4">
+            <label>Status</label>
+            {{ form.status }}
+        </div>
+        <div class="col-md-4">
+            <label>{{ form.desconto_percentual.label }}</label>
+            {{ form.desconto_percentual }}
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label>Observações</label>
+        {{ form.observacoes }}
+    </div>
+
+    <hr>
+
+    <h4>Itens do Pedido (Produtos)</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID/Produto</th>
+                <th>Qtd</th>
+                <th>Preço Unitário</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaProdutosBody"></tbody>
+    </table>
+    <button type="button" class="btn btn-primary mb-3" onclick="abrirModalProduto()">Adicionar Produto</button>
+    {{ formset.management_form }}
+
+    <h4>Itens do Pedido (Serviços)</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Descrição</th>
+                <th>Qtd</th>
+                <th>Preço Unitário</th>
+                <th>Ação</th>
+            </tr>
+        </thead>
+        <tbody id="tabelaServicosBody"></tbody>
+    </table>
+    <button type="button" class="btn btn-info mb-3" onclick="abrirModalServico()">Adicionar Serviço</button>
+{{ formset_servicos.management_form }}
+
+    <div class="row justify-content-end">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body text-end">
+                    <p>Subtotal Produtos: <strong>R$ <span id="subtotalProdutos">0.00</span></strong></p>
+                    <p>Subtotal Serviços: <strong>R$ <span id="subtotalServicos">0.00</span></strong></p>
+                    <p>Desconto (<span id="descontoPercentualDisplay">{{ form.instance.desconto_percentual|default:"0.00" }}</span>%):
+                        <strong>R$ <span id="valorDesconto">0.00</span></strong>
+                    </p>
+                    <hr>
+                    <h5>Total do Pedido: R$ <span id="totalPedido">0.00</span></h5>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <button type="submit" class="btn btn-success">Salvar Pedido</button>
+    </div>
+</form>
+
+<!-- 🔵 Modal Produto -->
+<div class="modal fade" id="modalProduto">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Selecionar Produto</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="buscaProduto" class="form-control mb-2" placeholder="Buscar produto...">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr><th>ID</th><th>Produto</th><th>Preço</th><th>Ação</th></tr>
+                    </thead>
+                    <tbody id="resultadoBuscaProduto"></tbody>
+                </table>
+                <div>
+                    <label>Quantidade</label>
+                    <input type="number" id="quantidadeProduto" class="form-control" value="1" min="1">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🟧 Modal Serviço -->
+<div class="modal fade" id="modalServico">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Selecionar Serviço</h5>
+                <button class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="buscaServico" class="form-control mb-2" placeholder="Buscar serviço...">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr><th>ID</th><th>Serviço</th><th>Preço</th><th>Ação</th></tr>
+                    </thead>
+                    <tbody id="resultadoBuscaServico"></tbody>
+                </table>
+                <div>
+                    <label>Quantidade</label>
+                    <input type="number" id="quantidadeServico" class="form-control" value="1" min="1">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 🔥 Script Total -->
+<script>
+const tabelaProdutosBody = document.getElementById('tabelaProdutosBody');
+const tabelaServicosBody = document.getElementById('tabelaServicosBody');
+
+const subtotalProdutosSpan = document.getElementById('subtotalProdutos');
+const subtotalServicosSpan = document.getElementById('subtotalServicos');
+const descontoPercentualInput = document.getElementById('id_{{ form.desconto_percentual.name }}');
+const descontoPercentualDisplaySpan = document.getElementById('descontoPercentualDisplay');
+const valorDescontoSpan = document.getElementById('valorDesconto');
+const totalPedidoSpan = document.getElementById('totalPedido');
+
+// 🔵 Produto
+function abrirModalProduto() {
+    const modal = new bootstrap.Modal(document.getElementById('modalProduto'));
+    modal.show();
+}
+function buscarProdutos() {
+    const termo = document.getElementById('buscaProduto').value.trim();
+    fetch(`/buscar-produtos/?term=${encodeURIComponent(termo)}`)
+    .then(r => r.json())
+    .then(data => {
+        const resultado = document.getElementById('resultadoBuscaProduto');
+        resultado.innerHTML = '';
+        if (data.length === 0) {
+            resultado.innerHTML = `<tr><td colspan="4">Nenhum produto encontrado</td></tr>`;
+            return;
+        }
+        data.forEach(p => {
+            resultado.innerHTML += `
+            <tr>
+                <td>${p.id}</td>
+                <td>${p.nome}</td>
+                <td>R$ ${parseFloat(p.preco).toFixed(2)}</td>
+                <td>
+                    <button type="button" class="btn btn-success btn-sm"
+                        onclick="adicionarProduto(${p.id}, '${p.nome}', ${p.preco})">
+                        Selecionar
+                    </button>
+                </td>
+            </tr>`;
+        });
+    });
+}
+function adicionarProduto(id, nome, preco) {
+    const qtd = document.getElementById('quantidadeProduto').value;
+    const row = `<tr>
+        <td>${id} - ${nome}</td>
+        <td><input type="number" class="form-control form-control-sm item-quantidade" value="${qtd}" min="1" onchange="atualizarTotal()"></td>
+        <td><input type="number" class="form-control form-control-sm item-preco" value="${preco}" min="0" step="0.01" onchange="atualizarTotal()"></td>
+        <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove(); atualizarTotal();">Remover</button></td>
+    </tr>`;
+    tabelaProdutosBody.insertAdjacentHTML('beforeend', row);
+    bootstrap.Modal.getInstance(document.getElementById('modalProduto')).hide();
+    atualizarTotal();
+}
+
+// 🟧 Serviço
+function abrirModalServico() {
+    const modal = new bootstrap.Modal(document.getElementById('modalServico'));
+    modal.show();
+}
+function buscarServicos() {
+    const termo = document.getElementById('buscaServico').value.trim();
+    fetch(`/buscar-servicos/?term=${encodeURIComponent(termo)}`)
+    .then(r => r.json())
+    .then(data => {
+        const resultado = document.getElementById('resultadoBuscaServico');
+        resultado.innerHTML = '';
+        if (data.length === 0) {
+            resultado.innerHTML = `<tr><td colspan="4">Nenhum serviço encontrado</td></tr>`;
+            return;
+        }
+        data.forEach(s => {
+            resultado.innerHTML += `
+            <tr>
+                <td>${s.id}</td>
+                <td>${s.nome}</td>
+                <td>R$ ${parseFloat(s.preco).toFixed(2)}</td>
+                <td>
+                    <button type="button" class="btn btn-success btn-sm"
+                        onclick="adicionarServico(${s.id}, '${s.nome}', ${s.preco})">
+                        Selecionar
+                    </button>
+                </td>
+            </tr>`;
+        });
+    });
+}
+function adicionarServico(id, nome, preco) {
+    const qtd = document.getElementById('quantidadeServico').value;
+    const row = `<tr>
+        <td>${nome}</td>
+        <td><input type="number" class="form-control form-control-sm item-quantidade" value="${qtd}" min="1" onchange="atualizarTotal()"></td>
+        <td><input type="number" class="form-control form-control-sm item-preco" value="${preco}" min="0" step="0.01" onchange="atualizarTotal()"></td>
+        <td><button type="button" class="btn btn-danger btn-sm" onclick="this.closest('tr').remove(); atualizarTotal();">Remover</button></td>
+    </tr>`;
+    tabelaServicosBody.insertAdjacentHTML('beforeend', row);
+    bootstrap.Modal.getInstance(document.getElementById('modalServico')).hide();
+    atualizarTotal();
+}
+
+// 🔥 Cálculo Total
+function atualizarTotal() {
+    let subtotalProdutos = 0;
+    let subtotalServicos = 0;
+
+    tabelaProdutosBody.querySelectorAll('tr').forEach(tr => {
+        const qtd = Number(tr.querySelector('.item-quantidade')?.value) || 0;
+        const preco = Number(tr.querySelector('.item-preco')?.value) || 0;
+        subtotalProdutos += qtd * preco;
+    });
+
+    tabelaServicosBody.querySelectorAll('tr').forEach(tr => {
+        const qtd = Number(tr.querySelector('.item-quantidade')?.value) || 0;
+        const preco = Number(tr.querySelector('.item-preco')?.value) || 0;
+        subtotalServicos += qtd * preco;
+    });
+
+    const subtotalGeral = subtotalProdutos + subtotalServicos;
+    const descontoPercentual = Number(descontoPercentualInput.value) || 0;
+    const valorDesconto = (subtotalGeral * descontoPercentual) / 100;
+    const totalFinal = subtotalGeral - valorDesconto;
+
+    subtotalProdutosSpan.textContent = subtotalProdutos.toFixed(2);
+    subtotalServicosSpan.textContent = subtotalServicos.toFixed(2);
+    descontoPercentualDisplaySpan.textContent = descontoPercentual.toFixed(2);
+    valorDescontoSpan.textContent = valorDesconto.toFixed(2);
+    totalPedidoSpan.textContent = totalFinal.toFixed(2);
+}
+
+// 🔥 Eventos
+document.getElementById('buscaProduto').addEventListener('input', buscarProdutos);
+document.getElementById('buscaServico').addEventListener('input', buscarServicos);
+descontoPercentualInput.addEventListener('input', atualizarTotal);
+</script>
+
+{% endblock %}

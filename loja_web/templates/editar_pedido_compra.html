@@ -1,0 +1,296 @@
+{% extends 'pedidos_base.html' %}
+{% load static %}
+
+{% block title %}Editar Pedido de Compra #{{ pedido.id }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2><i class="bi bi-pencil-square"></i> Editar Pedido de Compra #{{ pedido.id }}</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if form.errors or formset.errors %}
+        <div class="alert alert-danger">
+            <strong>Erro ao salvar:</strong> Corrija os erros abaixo.
+            <ul>
+                {% for field in form %}
+                    {% if field.errors %}
+                        <li>{{ field.label }}: {{ field.errors|striptags }}</li>
+                    {% endif %}
+                {% endfor %}
+                {% for form in formset %}
+                    {% for field in form %}
+                        {% if field.errors %}
+                            <li>Item {{ forloop.parentloop.counter }} - {{ field.label }}: {{ field.errors|striptags }}</li>
+                        {% endif %}
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="post" id="pedido-form">
+        {% csrf_token %}
+        <div class="card mb-3">
+            <div class="card-header">Informações do Pedido</div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label for="busca_fornecedor" class="form-label">Buscar Fornecedor (ID, Nome ou CNPJ)</label>
+                    <input type="text" class="form-control" id="busca_fornecedor" placeholder="Digite o ID, nome ou CNPJ do fornecedor" autocomplete="off" value="{% if pedido.fornecedor %}{{ pedido.fornecedor.id }} - {{ pedido.fornecedor.nome }}{% endif %}">
+                    <ul id="resultados_fornecedor" class="list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
+                    <input type="hidden" id="id_fornecedor" name="fornecedor" value="{{ pedido.fornecedor.id|default:'' }}">
+                    {% if form.fornecedor.errors %}
+                        <div class="invalid-feedback d-block">{{ form.fornecedor.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+                <div id="info_fornecedor" class="mb-3" {% if not pedido.fornecedor %}style="display:none;"{% endif %}>
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title" id="fornecedor_nome_info">{% if pedido.fornecedor %}{{ pedido.fornecedor.id }} - {{ pedido.fornecedor.nome }}{% endif %}</h5>
+                            <p class="card-text mb-1"><strong>CNPJ:</strong> <span id="fornecedor_cnpj_info">{% if pedido.fornecedor %}{{ pedido.fornecedor.cnpj|default:'N/A' }}{% endif %}</span></p>
+                            <p class="card-text mb-1"><strong>Email:</strong> <span id="fornecedor_email_info">{% if pedido.fornecedor %}{{ pedido.fornecedor.email|default:'N/A' }}{% endif %}</span></p>
+                            <p class="card-text mb-1"><strong>Telefone:</strong> <span id="fornecedor_telefone_info">{% if pedido.fornecedor %}{{ pedido.fornecedor.telefone|default:'N/A' }}{% endif %}</span></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.numero_nota_fiscal.id_for_label }}" class="form-label">Número NF</label>
+                    {{ form.numero_nota_fiscal }}
+                    {% if form.numero_nota_fiscal.errors %}
+                        <div class="invalid-feedback d-block">{{ form.numero_nota_fiscal.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.condicao_pagamento.id_for_label }}" class="form-label">Condição de Pagamento</label>
+                    {{ form.condicao_pagamento }}
+                    {% if form.condicao_pagamento.errors %}
+                        <div class="invalid-feedback d-block">{{ form.condicao_pagamento.errors|striptags }}</div>
+                    {% endif %}
+                    <small class="form-text text-muted">Escolha a condição de pagamento para definir parcelas e vencimentos.</small>
+                </div>
+                <div class="mb-3">
+                    <label for="{{ form.observacao.id_for_label }}" class="form-label">Observação</label>
+                    {{ form.observacao }}
+                    {% if form.observacao.errors %}
+                        <div class="invalid-feedback d-block">{{ form.observacao.errors|striptags }}</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">Itens do Pedido</div>
+            <div class="card-body">
+                {{ formset.management_form }}
+                {% for form in formset %}
+                    <div class="item-formset mb-3 border p-3 rounded">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="form-label">Produto</label>
+                                {% if form.instance.pk %}
+                                    <input type="text" class="form-control" value="{{ form.instance.produto.id }} - {{ form.instance.produto.nome }}" readonly>
+                                    {{ form.produto }}
+                                    {{ form.id }}
+                                {% else %}
+                                    <input type="text" class="form-control busca_produto" placeholder="Digite o ID, nome, nº fabricante ou nº original" autocomplete="off">
+                                    <ul class="resultados_produto list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>
+                                    {{ form.produto }}
+                                {% endif %}
+                                {% if form.produto.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.produto.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Quantidade</label>
+                                {{ form.quantidade }}
+                                {% if form.quantidade.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.quantidade.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Custo Unitário (R$)</label>
+                                {{ form.custo_unitario }}
+                                {% if form.custo_unitario.errors %}
+                                    <div class="invalid-feedback d-block">{{ form.custo_unitario.errors|striptags }}</div>
+                                {% endif %}
+                            </div>
+                            {% if formset.can_delete and form.instance.pk %}
+                                <div class="col-md-12 mt-2">
+                                    <input type="checkbox" name="{{ form.DELETE.name }}" id="{{ form.DELETE.id_for_label }}" class="form-check-input"> <label class="form-check-label" for="{{ form.DELETE.id_for_label }}">Excluir</label>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+                <button type="button" class="btn btn-secondary btn-sm" id="add-item">Adicionar Item</button>
+                <div class="mt-3">
+                    <h5>Total do Pedido: R$ <span id="total-pedido">{{ pedido.total|floatformat:2 }}</span></h5>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-success">Salvar Alterações do Pedido</button>
+        <a href="{% url 'pedidos_compra_lista' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(function(){
+    // Supplier search
+    $("#busca_fornecedor").on("keyup", function(){
+        let termo = $(this).val().trim();
+        if (termo.length < 1) {
+            $("#resultados_fornecedor").empty();
+            $("#info_fornecedor").hide();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'buscar_fornecedores' %}",
+            data: { term: termo },
+            dataType: "json",
+            success: function(data){
+                let lista = "";
+                if (data.length === 0) {
+                    lista = '<li class="list-group-item">Nenhum fornecedor encontrado</li>';
+                } else {
+                    data.forEach(function(forn){
+                        lista += `<li class="list-group-item list-group-item-action"
+                                    data-id="${forn.id}"
+                                    data-nome="${forn.nome}"
+                                    data-cnpj="${forn.cnpj || ''}"
+                                    data-email="${forn.email || ''}"
+                                    data-telefone="${forn.telefone || ''}">
+                                    ${forn.id} - ${forn.nome} (${forn.cnpj || 'Sem CNPJ'})
+                                  </li>`;
+                    });
+                }
+                $("#resultados_fornecedor").html(lista);
+            },
+            error: function(){
+                $("#resultados_fornecedor").html('<li class="list-group-item">Erro ao buscar fornecedores</li>');
+            }
+        });
+    });
+
+    $(document).on("click", "#resultados_fornecedor li", function(){
+        let id = $(this).data("id");
+        let nome = $(this).data("nome");
+        let cnpj = $(this).data("cnpj");
+        let email = $(this).data("email");
+        let telefone = $(this).data("telefone");
+
+        $("#id_fornecedor").val(id);
+        $("#fornecedor_nome_info").text(`${id} - ${nome}`);
+        $("#fornecedor_cnpj_info").text(cnpj || 'N/A');
+        $("#fornecedor_email_info").text(email || 'N/A');
+        $("#fornecedor_telefone_info").text(telefone || 'N/A');
+        $("#info_fornecedor").show();
+        $("#resultados_fornecedor").empty();
+        $("#busca_fornecedor").val("");
+    });
+
+    // Product search for new items
+    $(document).on("keyup", ".busca_produto", function(){
+        let termo = $(this).val().trim();
+        let $resultados = $(this).siblings(".resultados_produto");
+        let $produtoSelect = $(this).siblings("select[name$='produto']");
+        if (termo.length < 1) {
+            $resultados.empty();
+            return;
+        }
+        $.ajax({
+            url: "{% url 'buscar_produtos' %}",
+            data: { term: termo },
+            dataType: "json",
+            success: function(data){
+                let lista = "";
+                if (data.length === 0) {
+                    lista = '<li class="list-group-item">Nenhum produto encontrado</li>';
+                } else {
+                    data.forEach(function(prod){
+                        lista += `<li class="list-group-item list-group-item-action"
+                                    data-id="${prod.id}"
+                                    data-nome="${prod.nome}"
+                                    data-preco="${prod.preco}"
+                                    data-num_fabricante="${prod.num_fabricante || ''}"
+                                    data-num_original="${prod.num_original || ''}">
+                                    ${prod.id} - ${prod.nome} (${prod.num_fabricante || 'Sem Nº Fabr.'})
+                                  </li>`;
+                    });
+                }
+                $resultados.html(lista);
+            },
+            error: function(){
+                $resultados.html('<li class="list-group-item">Erro ao buscar produtos</li>');
+            }
+        });
+    });
+
+    $(document).on("click", ".resultados_produto li", function(){
+        let id = $(this).data("id");
+        let nome = $(this).data("nome");
+        let preco = $(this).data("preco");
+        let $input = $(this).closest(".row").find(".busca_produto");
+        let $select = $(this).closest(".row").find("select[name$='produto']");
+        let $custoUnitario = $(this).closest(".row").find("input[name$='custo_unitario']");
+
+        $select.val(id);
+        $input.val(`${id} - ${nome}`);
+        $custoUnitario.val(preco);
+        $(this).parent().empty();
+        updateTotal();
+    });
+
+    // Add new item to formset
+    $("#add-item").click(function(){
+        let formIdx = $("#id_form-TOTAL_FORMS").val();
+        let newForm = $(".item-formset:first").clone(true);
+        newForm.find(":input").each(function(){
+            let name = $(this).attr("name").replace(/-\d+-/, "-" + formIdx + "-");
+            let id = "id_" + name;
+            $(this).attr({"name": name, "id": id}).val("");
+        });
+        newForm.find(".busca_produto").val("");
+        newForm.find(".resultados_produto").empty();
+        newForm.find("input[readonly]").replaceWith('<input type="text" class="form-control busca_produto" placeholder="Digite o ID, nome, nº fabricante ou nº original" autocomplete="off">');
+        newForm.find(".resultados_produto").remove();
+        newForm.find("select[name$='produto']").after('<ul class="resultados_produto list-group position-absolute w-100" style="z-index: 1000; max-height: 200px; overflow-y: auto;"></ul>');
+        newForm.find("input[name$='DELETE']").remove();
+        newForm.find("label[for$='DELETE']").remove();
+        newForm.find("input[name$='id']").remove();
+        $("#id_form-TOTAL_FORMS").val(parseInt(formIdx) + 1);
+        newForm.insertBefore($(this));
+        updateTotal();
+    });
+
+    // Calculate and update total dynamically
+    function updateTotal() {
+        let total = 0;
+        $(".item-formset").each(function(){
+            let quantidade = parseFloat($(this).find("input[name$='quantidade']").val()) || 0;
+            let custo_unitario = parseFloat($(this).find("input[name$='custo_unitario']").val()) || 0;
+            let deleteChecked = $(this).find("input[name$='DELETE']").is(":checked");
+            if (!deleteChecked) {
+                total += quantidade * custo_unitario;
+            }
+        });
+        $("#total-pedido").text(total.toFixed(2));
+    }
+
+    // Update total on input change or delete checkbox
+    $(document).on("input", "input[name$='quantidade'], input[name$='custo_unitario']", updateTotal);
+    $(document).on("change", "input[name$='DELETE']", updateTotal);
+
+    // Initial total calculation
+    updateTotal();
+});
+</script>
+{% endblock %}

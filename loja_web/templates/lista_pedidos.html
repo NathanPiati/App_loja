@@ -1,0 +1,181 @@
+{% extends 'pedidos_base.html' %}
+
+{% block title %}Lista de Pedidos{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <style>
+        .pedidos-table thead th {
+            background-color: #2e4a7a;
+            color: #ffffff;
+        }
+
+        .pedidos-table tbody tr:hover {
+            background-color: #e8f0fb;
+        }
+    </style>
+
+    <div class="alert alert-warning mb-3">
+        <i class="bi bi-exclamation-triangle-fill"></i> <strong style="color: #dc3545">Aviso:</strong> Pedidos com status <strong>"Concluído"</strong> não podem ser alterados! <i>
+    </div>
+    <h2 class="mb-4"><i class="bi bi-receipt"></i> Lista de Pedidos</h2><hr>
+
+    <!-- 🔎 Formulário de Filtro -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-2">
+            <label>ID Pedido</label>
+            <input type="text" name="id" class="form-control" value="{{ request.GET.id }}">
+        </div>
+        <div class="col-md-3">
+            <label>Cliente</label>
+            <select name="cliente" class="form-select">
+                <option value="">---------</option>
+                {% for cliente in clientes %}
+                <option value="{{ cliente.id }}" {% if request.GET.cliente == cliente.id|stringformat:"s" %}selected{% endif %}>
+                    {{ cliente.nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Status</label>
+            <select name="status" class="form-select">
+                <option value="">---------</option>
+                <option value="pendente" {% if request.GET.status == 'pendente' %}selected{% endif %}>Pendente</option>
+                <option value="concluido" {% if request.GET.status == 'concluido' %}selected{% endif %}>Concluído</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <label>Data Início</label>
+            <input type="date" name="data_inicio" class="form-control" value="{{ request.GET.data_inicio }}">
+        </div>
+        <div class="col-md-2">
+            <label>Data Fim</label>
+            <input type="date" name="data_fim" class="form-control" value="{{ request.GET.data_fim }}">
+        </div>
+        <div class="col-md-1 d-flex align-items-end gap-2">
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-search"></i> Filtrar
+            </button>
+            <a href="{% url 'lista_pedidos' %}" class="btn btn-secondary w-100">
+                <i class="bi bi-x-circle"></i> Limpar
+            </a>
+        </div>
+    </form>
+
+    <!-- 📄 Tabela de Resultados -->
+    {% if pedidos %}
+    <div class="card-custom mt-4">
+        <table class="table table-bordered table-hover align-middle pedidos-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Cliente</th>
+                    <th>Data</th>
+                    <th>Status</th>
+                    <th>Condição Pgto</th>
+                    <th>Desconto (%)</th>
+                    <th>Juros (%)</th>
+                    <th>Valor Total</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                <tr>
+                    <td>{{ pedido.id }}</td>
+                    <td>{{ pedido.cliente.nome }}</td>
+                    <td>{{ pedido.data|date:"d/m/Y H:i" }}</td>
+                    <td>
+                        <span class="{% if pedido.get_status_display == 'Concluído' %}text-success{% else %}text-danger{% endif %}">
+                            {{ pedido.get_status_display }}
+                        </span>
+                    </td>
+                    <td>{{ pedido.condicao_pagamento }}</td>
+                    <td>{{ pedido.desconto_percentual }}%</td>
+                    <td>{{ pedido.juros }}%</td>
+                    <td>R$ {{ pedido.valor_total|floatformat:2 }}</td>
+                    <td>
+                        {% comment %} {% if pedido.status == 'concluido' %}
+                        <button class="btn btn-sm btn-warning" disabled title="Pedido já concluído, não pode ser editado" data-bs-toggle="tooltip">
+                            <i class="bi bi-pencil"></i> Editar
+                        </button>
+                        {% else %} {% endcomment %}
+                        <a href="{% url 'editar_pedido' pedido.id %}" class="btn btn-sm btn-warning" title="Editar pedido" data-bs-toggle="tooltip">
+                            <i class="bi bi-pencil"></i> Editar/Visualizar
+                        </a>
+                        {% comment %} {% endif %} {% endcomment %}
+                        
+                        <a href="{% url 'PedidoDeleteView' pedido.id %}" class="btn btn-sm btn-danger" onclick="return confirm('Tem certeza que deseja excluir o pedido #{{ pedido.id }}?');">
+                            <i class="bi bi-trash"></i> Excluir
+                        </a>
+                        <a href="{% url 'pedido_imprimir' pedido.id %}" class="btn btn-sm btn-success" target="_blank">
+                            <i class="bi bi-printer"></i> Imprimir
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="table-secondary fw-bold">
+                    <td colspan="4" class="text-start">
+                        Total de pedidos encontrados: {{ quantidade_registros }}
+                    </td>
+                    <td class="text-end">Totais:</td>
+                    <td>{{ total_geral.total_desconto|floatformat:2 }}%</td>
+                    <td></td>
+                    <td>R$ {{ total_geral.total_valor|floatformat:2 }}</td>
+                    <td colspan="2"></td>
+                </tr>
+            </tfoot>
+
+        </table>
+    </div>
+
+    <!-- 📑 Paginação -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.previous_page_number }}">
+                    &laquo;
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ num }}">{{ num }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?{% if request.GET %}{{ request.GET.urlencode }}&{% endif %}page={{ page_obj.next_page_number }}">
+                    &raquo;
+                </a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>

@@ -1,0 +1,180 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Logs de Auditoria{% endblock %}
+
+{% block content %}
+<style>
+    .logs-table thead th {
+        background-color: #2e4a7a;
+        color: #ffffff;
+    }
+    .logs-table tbody tr:hover {
+        background-color: #e8f0fb;
+    }
+    .badge-login     { background-color: #198754; }
+    .badge-logout    { background-color: #6c757d; }
+    .badge-criar     { background-color: #0d6efd; }
+    .badge-editar    { background-color: #fd7e14; }
+    .badge-excluir   { background-color: #dc3545; }
+    .badge-venda     { background-color: #6f42c1; }
+    .badge-estoque   { background-color: #20c997; }
+    .badge-financeiro{ background-color: #0dcaf0; color: #000 !important; }
+    .badge-caixa     { background-color: #ffc107; color: #000 !important; }
+    .badge-pedido    { background-color: #2e4a7a; }
+    .badge-outro     { background-color: #adb5bd; color: #000 !important; }
+</style>
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0" style="color:#2c3e50;">
+            <i class="bi bi-journal-text me-2"></i>Logs de Auditoria
+        </h2>
+        <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Voltar
+        </a>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card card-custom mb-4">
+        <div class="card-header" style="background-color:#2e4a7a; color:#fff;">
+            <i class="bi bi-funnel me-1"></i> Filtros
+        </div>
+        <div class="card-body">
+            <form method="GET">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label" style="color:#2c3e50;">Ação</label>
+                        <select name="acao" class="form-select">
+                            <option value="">Todas</option>
+                            {% for valor, label in acoes %}
+                            <option value="{{ valor }}" {% if filtro_acao == valor %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="color:#2c3e50;">Usuário</label>
+                        <select name="usuario" class="form-select">
+                            <option value="">Todos</option>
+                            {% for u in usuarios %}
+                            <option value="{{ u.id }}" {% if filtro_usuario == u.id|stringformat:"s" %}selected{% endif %}>
+                                {{ u.username }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="color:#2c3e50;">Data Início</label>
+                        <input type="date" name="data_inicio" value="{{ filtro_data_inicio }}" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="color:#2c3e50;">Data Fim</label>
+                        <input type="date" name="data_fim" value="{{ filtro_data_fim }}" class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="color:#2c3e50;">Busca</label>
+                        <input type="text" name="q" value="{{ filtro_q }}" class="form-control" placeholder="Entidade ou detalhes...">
+                    </div>
+                    <div class="col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i> Filtrar
+                        </button>
+                        <a href="{% url 'visualizar_logs' %}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i>
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Total -->
+    <div class="mb-3">
+        <span class="text-muted small">
+            <i class="bi bi-info-circle me-1"></i>
+            {{ page_obj.paginator.count }} registro{{ page_obj.paginator.count|pluralize }} encontrado{{ page_obj.paginator.count|pluralize }}
+        </span>
+    </div>
+
+    <!-- Tabela -->
+    <div class="card card-custom">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle mb-0 logs-table">
+                    <thead>
+                        <tr>
+                            <th style="width:5%">#</th>
+                            <th style="width:14%">Data / Hora</th>
+                            <th style="width:10%">Usuário</th>
+                            <th style="width:9%">Ação</th>
+                            <th style="width:14%">Entidade</th>
+                            <th>Detalhes</th>
+                            <th style="width:10%">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in logs %}
+                        <tr>
+                            <td class="text-muted small">{{ log.id }}</td>
+                            <td class="small">{{ log.created_at|date:"d/m/Y H:i:s" }}</td>
+                            <td>
+                                {% if log.usuario %}
+                                    <i class="bi bi-person-fill me-1 text-primary"></i>
+                                    {{ log.usuario.username }}
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ log.acao }} text-white rounded-pill px-2">
+                                    {{ log.get_acao_display }}
+                                </span>
+                            </td>
+                            <td class="small fw-semibold">{{ log.entidade|default:"—" }}</td>
+                            <td class="small text-muted">{{ log.detalhes|default:"—" }}</td>
+                            <td class="small text-muted">{{ log.ip_address|default:"—" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-4 d-block mb-1"></i>
+                                Nenhum log encontrado.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paginação -->
+    {% if page_obj.has_other_pages %}
+    <nav class="mt-3">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.previous_page_number }}&acao={{ filtro_acao }}&usuario={{ filtro_usuario }}&data_inicio={{ filtro_data_inicio }}&data_fim={{ filtro_data_fim }}&q={{ filtro_q }}">
+                    &laquo; Anterior
+                </a>
+            </li>
+            {% endif %}
+            <li class="page-item disabled">
+                <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            </li>
+            {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ page_obj.next_page_number }}&acao={{ filtro_acao }}&usuario={{ filtro_usuario }}&data_inicio={{ filtro_data_inicio }}&data_fim={{ filtro_data_fim }}&q={{ filtro_q }}">
+                    Próxima &raquo;
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+{% endblock %}

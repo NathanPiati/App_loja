@@ -1,0 +1,709 @@
+{% extends 'pedidos_base.html' %}
+{% load static pedido_filters %}
+{% block title %}Editar Pedido #{{ pedido.id }}{% endblock %}
+{% block content %}
+
+<div class="container-fluid mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Editar Pedido #{{ pedido.id }}</h3>
+        <a href="{% url 'lista_pedidos' %}" class="btn btn-outline-secondary">Voltar</a>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% if form.errors or formset_itens.errors or formset_servicos.errors %}
+        <div class="alert alert-danger">
+            <strong>Erros no formulario:</strong>
+            <ul class="mb-0 mt-2">
+                {% for field, errors in form.errors.items %}
+                    <li>{{ field }}: {{ errors|join:", " }}</li>
+                {% endfor %}
+                {% for item_form in formset_itens %}
+                    {% for field, errors in item_form.errors.items %}
+                        <li>Item {{ forloop.parentloop.counter }} ({{ field }}): {{ errors|join:", " }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for servico_form in formset_servicos %}
+                    {% for field, errors in servico_form.errors.items %}
+                        <li>Servico {{ forloop.parentloop.counter }} ({{ field }}): {{ errors|join:", " }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'editar_pedido' pedido.id %}" id="pedidoForm">
+        {% csrf_token %}
+        {{ formset_itens.management_form }}
+        {{ formset_servicos.management_form }}
+
+        <div class="card card-custom mb-3">
+            <div class="card-header" style="background:#2e4a7a;color:#fff;">Dados do Pedido</div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Cliente</label>
+                        <select name="cliente" class="form-select" required {% if pedido.status == 'concluido' %}disabled{% endif %}>
+                            <option value="">Selecione...</option>
+                            {% for cliente in clientes %}
+                                <option value="{{ cliente.id }}" {% if cliente.id == pedido.cliente.id %}selected{% endif %}>{{ cliente.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Data</label>
+                        <input type="text" class="form-control" value="{{ pedido.data|date:'d/m/Y' }}" readonly>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select" required {% if pedido.status == 'concluido' %}disabled{% endif %}>
+                            <option value="pendente" {% if pedido.status == 'pendente' %}selected{% endif %}>Pendente</option>
+                            <option value="concluido" {% if pedido.status == 'concluido' %}selected{% endif %}>Concluido</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Condicao de Pagamento</label>
+                        <select name="condicao_pagamento" class="form-select" id="condicao_pagamento" {% if pedido.status == 'concluido' %}disabled{% endif %}>
+                            <option value="">Selecione...</option>
+                            {% for cond in condicoes_pagamento %}
+                                <option value="{{ cond.id }}" {% if cond.id == pedido.condicao_pagamento.id %}selected{% endif %}>{{ cond.nome }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Juros (%)</label>
+                        <input type="text" name="juros" id="juros" class="form-control" value="{{ pedido.juros|clean_number }}" {% if pedido.status == 'concluido' %}disabled{% endif %}>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Desconto (%)</label>
+                        <input type="text" name="desconto_percentual" id="id_desconto_percentual" class="form-control" value="{{ form.desconto_percentual.value|default:pedido.desconto_percentual|clean_number }}" {% if pedido.status == 'concluido' %}disabled{% endif %}>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Observacoes</label>
+                        <textarea name="observacoes" class="form-control" rows="2" {% if pedido.status == 'concluido' %}disabled{% endif %}>{{ form.observacoes.value|default:pedido.observacoes|default:'' }}</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-custom mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background:#2e4a7a;color:#fff;">
+                <span>Itens do Pedido (Produtos)</span>
+                <button type="button" class="btn btn-sm btn-light" onclick="abrirModalProduto()" {% if pedido.status == 'concluido' %}disabled{% endif %}>Adicionar Produto</button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0" id="tabelaProdutos">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cod</th>
+                                <th>Produto</th>
+                                <th>Num Fabricante</th>
+                                <th>Num Original</th>
+                                <th>Descricao</th>
+                                <th>Quantidade</th>
+                                <th>Preco Unitario</th>
+                                {% if segmento_atual == 'sorveteria' %}<th>Acompanhamentos</th>{% endif %}
+                                <th>Subtotal</th>
+                                <th>Acao</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaProdutosBody">
+                            {% for item in formset_itens %}
+                                <tr>
+                                    <td>{{ item.instance.produto.id|default:'-' }}</td>
+                                    <td>
+                                        {{ item.instance.produto.nome|default:'Produto' }}
+                                        <input type="hidden" name="{{ item.prefix }}-produto" value="{{ item.instance.produto.id|default:'' }}">
+                                        {{ item.id }}
+                                    </td>
+                                    <td>{{ item.instance.produto.num_fabricante|default:'-' }}</td>
+                                    <td>{{ item.instance.produto.num_original|default:'-' }}</td>
+                                    <td><input type="text" name="{{ item.prefix }}-descricao" class="form-control" value="{{ item.descricao.value|default:item.instance.descricao|default:'' }}" {% if pedido.status == 'concluido' %}disabled{% endif %}></td>
+                                    <td><input type="number" name="{{ item.prefix }}-quantidade" class="form-control item-quantidade" value="{{ item.quantidade.value|default:item.instance.quantidade }}" min="0.001" step="0.001" {% if pedido.status == 'concluido' %}disabled{% endif %}></td>
+                                    <td><input type="text" name="{{ item.prefix }}-preco_unitario" class="form-control item-preco" value="{{ item.preco_unitario.value|default:item.instance.preco_unitario|clean_number }}" {% if pedido.status == 'concluido' %}disabled{% endif %}></td>
+                                    {% if segmento_atual == 'sorveteria' %}
+                                    <td>
+                                        <input type="hidden" name="{{ item.prefix }}-acompanhamentos_json" class="acompanhamentos-json" value='[{% for rel in item.instance.acompanhamentos.all %}{"id":"{{ rel.acompanhamento_id }}","qtd":{{ rel.quantidade }}}{% if not forloop.last %},{% endif %}{% endfor %}]'>
+                                        <div class="small text-muted acompanhamentos-resumo">
+                                            {% if item.instance.acompanhamentos.all %}
+                                                {% for rel in item.instance.acompanhamentos.all %}
+                                                    {{ rel.quantidade }}x {{ rel.acompanhamento.nome }}{% if not forloop.last %}, {% endif %}
+                                                {% endfor %}
+                                            {% else %}
+                                                Nenhum
+                                            {% endif %}
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary mt-1 configurar-acomp" {% if pedido.status == 'concluido' %}disabled{% endif %}>
+                                            <i class="bi bi-stars"></i> Configurar
+                                        </button>
+                                    </td>
+                                    {% endif %}
+                                    <td class="subtotal">0,00</td>
+                                    <td>
+                                        {{ item.DELETE }}
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="removerLinha(this)" {% if pedido.status == 'concluido' %}disabled{% endif %}>Remover</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="card card-custom mb-3">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background:#2e4a7a;color:#fff;">
+                <span>Itens do Pedido (Servicos)</span>
+                <button type="button" class="btn btn-sm btn-light" onclick="abrirModalServico()" {% if pedido.status == 'concluido' %}disabled{% endif %}>Adicionar Servico</button>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover mb-0" id="tabelaServicos">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cod</th>
+                                <th>Servico</th>
+                                <th>Descricao</th>
+                                <th>Quantidade</th>
+                                <th>Preco Unitario</th>
+                                <th>Subtotal</th>
+                                <th>Acao</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaServicosBody">
+                            {% for servico in formset_servicos %}
+                                <tr>
+                                    <td>{{ servico.instance.servico_id.id|default:'-' }}</td>
+                                    <td>
+                                        {{ servico.instance.servico_id.nome|default:'Servico' }}
+                                        <input type="hidden" name="{{ servico.prefix }}-servico_id" value="{{ servico.instance.servico_id.id|default:'' }}">
+                                        {{ servico.id }}
+                                    </td>
+                                    <td><input type="text" name="{{ servico.prefix }}-descricao" class="form-control" value="{{ servico.descricao.value|default:servico.instance.descricao|default:'' }}" {% if pedido.status == 'concluido' %}disabled{% endif %}></td>
+                                    <td><input type="number" name="{{ servico.prefix }}-quantidade" class="form-control item-quantidade" value="{{ servico.quantidade.value|default:servico.instance.quantidade }}" min="1" {% if pedido.status == 'concluido' %}disabled{% endif %}></td>
+                                    <td><input type="text" name="{{ servico.prefix }}-preco_unitario" class="form-control item-preco" value="{{ servico.preco_unitario.value|default:servico.instance.preco_unitario|clean_number }}" {% if pedido.status == 'concluido' %}disabled{% endif %}></td>
+                                    <td class="subtotal">0,00</td>
+                                    <td>
+                                        {{ servico.DELETE }}
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="removerLinha(this)" {% if pedido.status == 'concluido' %}disabled{% endif %}>Remover</button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-end">
+            <div class="col-md-4">
+                <div class="card card-custom">
+                    <div class="card-body text-end">
+                        <p>Subtotal Produtos: <strong>R$ <span id="subtotalProdutos">0,00</span></strong></p>
+                        <p>Subtotal Servicos: <strong>R$ <span id="subtotalServicos">0,00</span></strong></p>
+                        <p>Juros (<span id="jurosDisplay">{{ pedido.juros|clean_number }}</span>%): <strong>R$ <span id="valorJuros">{{ valor_juros|clean_number }}</span></strong></p>
+                        <p>Desconto (<span id="descontoPercentualDisplay">{{ form.desconto_percentual.value|default:pedido.desconto_percentual|clean_number }}</span>%): <strong>R$ <span id="valorDesconto">{{ desconto|clean_number }}</span></strong></p>
+                        <hr>
+                        <h5>Total do Pedido: R$ <span id="totalPedido">{{ valor_total|clean_number }}</span></h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <button type="submit" class="btn btn-success" {% if pedido.status == 'concluido' %}disabled{% endif %}>Salvar Pedido</button>
+            <a href="{% url 'lista_pedidos' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+<div class="modal fade" id="modalProduto" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark">Selecionar Produto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="buscaProduto" class="form-control mb-2" placeholder="Digite ID, Nome, Numero do Fabricante ou Numero Original" {% if pedido.status == 'concluido' %}disabled{% endif %}>
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Cod</th>
+                                <th>Produto</th>
+                                <th>Descricao</th>
+                                <th>Numero Fabricante</th>
+                                <th>Numero Original</th>
+                                <th>Preco</th>
+                                <th>Acao</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultadoBuscaProduto"></tbody>
+                    </table>
+                </div>
+                <div class="mt-3">
+                    <label class="form-label text-dark">Quantidade</label>
+                    <input type="number" id="quantidadeProduto" class="form-control" value="1" min="0.001" step="0.001" {% if pedido.status == 'concluido' %}disabled{% endif %}>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modalServico" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-dark">Selecionar Servico</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="buscaServico" class="form-control mb-2" placeholder="Digite ID ou Nome do Servico" {% if pedido.status == 'concluido' %}disabled{% endif %}>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Servico</th>
+                            <th>Preco</th>
+                            <th>Acao</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultadoBuscaServico"></tbody>
+                </table>
+                <div>
+                    <label class="form-label text-dark">Quantidade</label>
+                    <input type="number" id="quantidadeServico" class="form-control" value="1" min="1" {% if pedido.status == 'concluido' %}disabled{% endif %}>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if segmento_atual == 'sorveteria' %}
+<div class="modal fade" id="modalAcompanhamentos" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header" style="background:#2e4a7a; color:#fff;">
+                <h5 class="modal-title"><i class="bi bi-stars"></i> Acompanhamentos</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="max-height:60vh; overflow-y:auto;">
+                <div id="listaModalAcompanhamentos"></div>
+            </div>
+            <div class="modal-footer d-flex justify-content-between align-items-center">
+                <div class="text-muted small">
+                    Total: <strong class="text-dark">R$ <span id="totalModalAcompanhamentos">0,00</span></strong>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmarAcompanhamentosBtn">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<script>
+const isConcluido = "{{ pedido.status }}" === "concluido";
+const segmentoAtual = "{{ segmento_atual }}";
+
+function escapeHtml(texto) {
+    if (!texto) return '';
+    return texto
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+}
+
+const produtos = [
+{% for produto in produtos %}
+    {
+        id: "{{ produto.id|escapejs }}",
+        nome: "{{ produto.nome|escapejs }}",
+        descricao: "{{ produto.descricao|escapejs }}",
+        preco: "{{ produto.preco|clean_number }}",
+        unidade_medida: "{{ produto.unidade_medida|default_if_none:'un'|escapejs }}",
+        unidade_label: "{{ produto.get_unidade_medida_display|default_if_none:'Unidade'|escapejs }}",
+        num_fabricante: "{{ produto.num_fabricante|default_if_none:''|escapejs }}",
+        num_original: "{{ produto.num_original|default_if_none:''|escapejs }}"
+    },
+{% endfor %}
+];
+
+const acompanhamentosAtivos = [
+{% for acompanhamento in acompanhamentos_ativos %}
+    {
+        id: "{{ acompanhamento.id|escapejs }}",
+        nome: "{{ acompanhamento.nome|escapejs }}",
+        preco: "{{ acompanhamento.preco|clean_number }}"
+    },
+{% endfor %}
+];
+
+const tabelaProdutosBody = document.getElementById('tabelaProdutosBody');
+const tabelaServicosBody = document.getElementById('tabelaServicosBody');
+const subtotalProdutosSpan = document.getElementById('subtotalProdutos');
+const subtotalServicosSpan = document.getElementById('subtotalServicos');
+const descontoPercentualInput = document.getElementById('id_desconto_percentual');
+const descontoPercentualDisplaySpan = document.getElementById('descontoPercentualDisplay');
+const valorDescontoSpan = document.getElementById('valorDesconto');
+const totalPedidoSpan = document.getElementById('totalPedido');
+const jurosInput = document.getElementById('juros');
+const jurosDisplaySpan = document.getElementById('jurosDisplay');
+const valorJurosSpan = document.getElementById('valorJuros');
+let produtoIndex = {{ formset_itens.total_form_count }};
+let servicoIndex = {{ formset_servicos.total_form_count }};
+
+function valorNumerico(valor) {
+    return parseFloat((valor || '0').toString().replace('.', '').replace(',', '.')) || 0;
+}
+
+function atualizarTotal() {
+    let subtotalProdutos = 0;
+    let subtotalServicos = 0;
+
+    tabelaProdutosBody.querySelectorAll('tr').forEach(tr => {
+        if (tr.style.display === 'none') return;
+        const qtd = parseFloat(tr.querySelector('.item-quantidade')?.value || 0) || 0;
+        const preco = valorNumerico(tr.querySelector('.item-preco')?.value || 0);
+        const subtotalBase = qtd * preco;
+        const subtotalAcompanhamentos = calcularSubtotalAcompanhamentosLinha(tr);
+        const subtotal = subtotalBase + subtotalAcompanhamentos;
+        const subtotalCell = tr.querySelector('.subtotal');
+        if (subtotalCell) subtotalCell.textContent = subtotal.toFixed(2).replace('.', ',');
+        subtotalProdutos += subtotal;
+    });
+
+    tabelaServicosBody.querySelectorAll('tr').forEach(tr => {
+        if (tr.style.display === 'none') return;
+        const qtd = parseFloat(tr.querySelector('.item-quantidade')?.value || 0) || 0;
+        const preco = valorNumerico(tr.querySelector('.item-preco')?.value || 0);
+        const subtotal = qtd * preco;
+        const subtotalCell = tr.querySelector('.subtotal');
+        if (subtotalCell) subtotalCell.textContent = subtotal.toFixed(2).replace('.', ',');
+        subtotalServicos += subtotal;
+    });
+
+    let jurosPercent = valorNumerico(jurosInput?.value || 0);
+    jurosPercent = Math.min(Math.max(jurosPercent, 0), 100);
+
+    let descontoPercent = valorNumerico(descontoPercentualInput?.value || 0);
+    descontoPercent = Math.min(Math.max(descontoPercent, 0), 100);
+
+    const subtotalGeral = subtotalProdutos + subtotalServicos;
+    const valorJuros = (subtotalGeral * jurosPercent) / 100;
+    const totalComJuros = subtotalGeral + valorJuros;
+    const valorDesconto = (totalComJuros * descontoPercent) / 100;
+    const totalFinal = totalComJuros - valorDesconto;
+
+    subtotalProdutosSpan.textContent = subtotalProdutos.toFixed(2).replace('.', ',');
+    subtotalServicosSpan.textContent = subtotalServicos.toFixed(2).replace('.', ',');
+    jurosDisplaySpan.textContent = jurosPercent.toFixed(2).replace('.', ',');
+    valorJurosSpan.textContent = valorJuros.toFixed(2).replace('.', ',');
+    descontoPercentualDisplaySpan.textContent = descontoPercent.toFixed(2).replace('.', ',');
+    valorDescontoSpan.textContent = valorDesconto.toFixed(2).replace('.', ',');
+    totalPedidoSpan.textContent = totalFinal.toFixed(2).replace('.', ',');
+}
+
+function calcularSubtotalAcompanhamentosLinha(linha) {
+    let subtotalAcompanhamentos = 0;
+    try {
+        const lista = JSON.parse(linha.querySelector('.acompanhamentos-json')?.value || '[]');
+        subtotalAcompanhamentos = lista.reduce((acc, item) => {
+            const acompanhamento = acompanhamentosAtivos.find(a => a.id === String(item.id));
+            const precoAcompanhamento = acompanhamento ? valorNumerico(acompanhamento.preco) : 0;
+            const quantidade = parseInt(item.qtd, 10) || 1;
+            return acc + (precoAcompanhamento * quantidade);
+        }, 0);
+    } catch (e) {
+        subtotalAcompanhamentos = 0;
+    }
+    return subtotalAcompanhamentos;
+}
+
+function parseAcompanhamentosTexto(texto) {
+    if (!texto || !texto.trim()) return [];
+
+    return texto
+        .split(',')
+        .map(parte => parte.trim())
+        .filter(Boolean)
+        .map(parte => {
+            const [idRaw, qtdRaw] = parte.split(':').map(v => v.trim());
+            const qtd = parseInt(qtdRaw || '1', 10);
+            if (!idRaw || Number.isNaN(qtd) || qtd < 1) return null;
+            return { id: idRaw, qtd };
+        })
+        .filter(Boolean);
+}
+
+function resumoAcompanhamentos(lista) {
+    if (!lista.length) return 'Nenhum';
+    return lista.map(item => {
+        const acompanhamento = acompanhamentosAtivos.find(a => a.id === String(item.id));
+        if (!acompanhamento) return null;
+        return `${item.qtd}x ${acompanhamento.nome}`;
+    }).filter(Boolean).join(', ') || 'Nenhum';
+}
+
+let _linhaAcompAtual = null;
+
+function abrirConfiguracaoAcompanhamentos(linha) {
+    if (isConcluido) return;
+    if (!acompanhamentosAtivos.length) {
+        alert('Não há acompanhamentos ativos cadastrados.');
+        return;
+    }
+
+    _linhaAcompAtual = linha;
+
+    const hidden = linha.querySelector('.acompanhamentos-json');
+    let atuais = [];
+    try {
+        atuais = JSON.parse(hidden.value || '[]');
+    } catch (e) {
+        atuais = [];
+    }
+
+    const lista = document.getElementById('listaModalAcompanhamentos');
+    lista.innerHTML = '';
+
+    acompanhamentosAtivos.forEach(a => {
+        const qtdAtual = (atuais.find(x => String(x.id) === String(a.id)) || {qtd: 0}).qtd;
+        const item = document.createElement('div');
+        item.className = 'd-flex justify-content-between align-items-center py-2 border-bottom';
+        item.innerHTML = `
+            <div>
+                <div class="fw-semibold">${escapeHtml(a.nome)}</div>
+                <small class="text-muted">R$ ${valorNumerico(a.preco).toFixed(2).replace('.', ',')}</small>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-2" onclick="_alterarQtdAcomp(this, -1)">&#8722;</button>
+                <input type="number" class="form-control form-control-sm text-center _qtd-acomp" min="0" value="${qtdAtual}" style="width:64px;" data-id="${escapeHtml(a.id)}" data-preco="${a.preco}" oninput="_atualizarTotalModalAcomp()">
+                <button type="button" class="btn btn-outline-secondary btn-sm px-2" onclick="_alterarQtdAcomp(this, 1)">&#43;</button>
+            </div>`;
+        lista.appendChild(item);
+    });
+
+    _atualizarTotalModalAcomp();
+    new bootstrap.Modal(document.getElementById('modalAcompanhamentos')).show();
+}
+
+function _alterarQtdAcomp(btn, delta) {
+    const input = btn.parentElement.querySelector('._qtd-acomp');
+    input.value = Math.max(0, (parseInt(input.value) || 0) + delta);
+    _atualizarTotalModalAcomp();
+}
+
+function _atualizarTotalModalAcomp() {
+    let total = 0;
+    document.querySelectorAll('#listaModalAcompanhamentos ._qtd-acomp').forEach(input => {
+        total += (parseInt(input.value) || 0) * valorNumerico(input.dataset.preco || 0);
+    });
+    document.getElementById('totalModalAcompanhamentos').textContent = total.toFixed(2).replace('.', ',');
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    const btnConfirmar = document.getElementById('confirmarAcompanhamentosBtn');
+    if (btnConfirmar) {
+        btnConfirmar.addEventListener('click', function() {
+            if (!_linhaAcompAtual) return;
+            const novaLista = [];
+            document.querySelectorAll('#listaModalAcompanhamentos ._qtd-acomp').forEach(input => {
+                const qtd = parseInt(input.value) || 0;
+                if (qtd > 0) novaLista.push({ id: input.dataset.id, qtd });
+            });
+            const hidden = _linhaAcompAtual.querySelector('.acompanhamentos-json');
+            hidden.value = JSON.stringify(novaLista);
+            _linhaAcompAtual.querySelector('.acompanhamentos-resumo').textContent = resumoAcompanhamentos(novaLista);
+            atualizarTotal();
+            bootstrap.Modal.getInstance(document.getElementById('modalAcompanhamentos')).hide();
+            _linhaAcompAtual = null;
+        });
+    }
+});
+
+function adicionarEventosLinha(linha) {
+    linha.querySelectorAll('.item-quantidade, .item-preco').forEach(input => {
+        input.addEventListener('input', atualizarTotal);
+    });
+}
+
+function abrirModalProduto() {
+    if (isConcluido) return;
+    new bootstrap.Modal(document.getElementById('modalProduto')).show();
+}
+
+function abrirModalServico() {
+    if (isConcluido) return;
+    new bootstrap.Modal(document.getElementById('modalServico')).show();
+}
+
+function buscarProdutos() {
+    const termo = document.getElementById('buscaProduto').value.trim().toLowerCase();
+    const resultado = document.getElementById('resultadoBuscaProduto');
+    resultado.innerHTML = '';
+
+    if (!termo) {
+        resultado.innerHTML = '<tr><td colspan="7">Digite um termo para buscar</td></tr>';
+        return;
+    }
+
+    const encontrados = produtos.filter(p =>
+        p.id.toLowerCase().includes(termo) ||
+        p.nome.toLowerCase().includes(termo) ||
+        (p.num_fabricante && p.num_fabricante.toLowerCase().includes(termo)) ||
+        (p.num_original && p.num_original.toLowerCase().includes(termo))
+    );
+
+    if (!encontrados.length) {
+        resultado.innerHTML = '<tr><td colspan="7">Nenhum produto encontrado</td></tr>';
+        return;
+    }
+
+    encontrados.forEach(p => {
+        resultado.innerHTML += `
+            <tr>
+                <td>${p.id}</td>
+                <td>${escapeHtml(p.nome)}</td>
+                <td>${escapeHtml(p.descricao) || '-'}</td>
+                <td>${escapeHtml(p.num_fabricante) || '-'}</td>
+                <td>${escapeHtml(p.num_original) || '-'}</td>
+                <td>R$ ${valorNumerico(p.preco).toFixed(2).replace('.', ',')}</td>
+                <td><button type="button" class="btn btn-success btn-sm" onclick="adicionarProduto('${p.id}','${escapeHtml(p.nome)}','${p.preco}','${escapeHtml(p.num_fabricante)}','${escapeHtml(p.num_original)}','${escapeHtml(p.descricao)}','${escapeHtml(p.unidade_medida)}','${escapeHtml(p.unidade_label)}')">Selecionar</button></td>
+            </tr>`;
+    });
+}
+
+function adicionarProduto(id, nome, preco, numFabricante, numOriginal, descricao, unidadeMedida = 'un', unidadeLabel = 'Unidade') {
+    const qtd = parseFloat(document.getElementById('quantidadeProduto').value || 1) || 1;
+    const stepQuantidade = (unidadeMedida === 'un') ? '1' : '0.001';
+    const minQuantidade = (unidadeMedida === 'un') ? '1' : '0.001';
+    const linha = document.createElement('tr');
+    const subtotal = (qtd * valorNumerico(preco)).toFixed(2).replace('.', ',');
+
+    linha.innerHTML = `
+        <td>${id}</td>
+        <td>${nome}<input type="hidden" name="itens-${produtoIndex}-produto" value="${id}"><input type="hidden" name="itens-${produtoIndex}-id" value=""></td>
+        <td>${numFabricante || '-'}</td>
+        <td>${numOriginal || '-'}</td>
+        <td><input type="text" name="itens-${produtoIndex}-descricao" class="form-control" value="${descricao || nome}"></td>
+        <td>
+            <input type="number" name="itens-${produtoIndex}-quantidade" class="form-control item-quantidade" value="${qtd}" min="${minQuantidade}" step="${stepQuantidade}">
+            <small class="text-muted">${unidadeLabel}</small>
+        </td>
+        <td><input type="text" name="itens-${produtoIndex}-preco_unitario" class="form-control item-preco" value="${valorNumerico(preco).toFixed(2).replace('.', ',')}"></td>
+        ${segmentoAtual === 'sorveteria' ? `
+        <td>
+            <input type="hidden" name="itens-${produtoIndex}-acompanhamentos_json" class="acompanhamentos-json" value="[]">
+            <div class="small text-muted acompanhamentos-resumo">Nenhum</div>
+            <button type="button" class="btn btn-sm btn-outline-secondary mt-1 configurar-acomp"><i class="bi bi-stars"></i> Configurar</button>
+        </td>` : ''}
+        <td class="subtotal">${subtotal}</td>
+        <td><input type="checkbox" name="itens-${produtoIndex}-DELETE" style="display:none;"><button type="button" class="btn btn-sm btn-danger" onclick="removerLinha(this)">Remover</button></td>`;
+
+    tabelaProdutosBody.appendChild(linha);
+    document.getElementById('id_itens-TOTAL_FORMS').value = produtoIndex + 1;
+    produtoIndex += 1;
+    adicionarEventosLinha(linha);
+    atualizarTotal();
+    bootstrap.Modal.getInstance(document.getElementById('modalProduto')).hide();
+}
+
+function buscarServicos() {
+    const termo = document.getElementById('buscaServico').value.trim();
+    fetch(`/buscar-servicos/?term=${encodeURIComponent(termo)}`)
+        .then(r => r.json())
+        .then(data => {
+            const resultado = document.getElementById('resultadoBuscaServico');
+            resultado.innerHTML = '';
+            if (!data.length) {
+                resultado.innerHTML = '<tr><td colspan="4">Nenhum servico encontrado</td></tr>';
+                return;
+            }
+            data.forEach(s => {
+                resultado.innerHTML += `
+                    <tr>
+                        <td>${s.id}</td>
+                        <td>${escapeHtml(s.nome)}</td>
+                        <td>R$ ${valorNumerico(s.preco).toFixed(2).replace('.', ',')}</td>
+                        <td><button type="button" class="btn btn-success btn-sm" onclick="adicionarServico('${s.id}','${escapeHtml(s.nome)}','${s.preco}')">Selecionar</button></td>
+                    </tr>`;
+            });
+        });
+}
+
+function adicionarServico(id, nome, preco) {
+    const qtd = parseFloat(document.getElementById('quantidadeServico').value || 1) || 1;
+    const linha = document.createElement('tr');
+    const subtotal = (qtd * valorNumerico(preco)).toFixed(2).replace('.', ',');
+
+    linha.innerHTML = `
+        <td>${id}</td>
+        <td>${nome}<input type="hidden" name="servicos-${servicoIndex}-servico_id" value="${id}"><input type="hidden" name="servicos-${servicoIndex}-id" value=""></td>
+        <td><input type="text" name="servicos-${servicoIndex}-descricao" class="form-control" value="${nome}"></td>
+        <td><input type="number" name="servicos-${servicoIndex}-quantidade" class="form-control item-quantidade" value="${qtd}" min="1"></td>
+        <td><input type="text" name="servicos-${servicoIndex}-preco_unitario" class="form-control item-preco" value="${valorNumerico(preco).toFixed(2).replace('.', ',')}"></td>
+        <td class="subtotal">${subtotal}</td>
+        <td><input type="checkbox" name="servicos-${servicoIndex}-DELETE" style="display:none;"><button type="button" class="btn btn-sm btn-danger" onclick="removerLinha(this)">Remover</button></td>`;
+
+    tabelaServicosBody.appendChild(linha);
+    document.getElementById('id_servicos-TOTAL_FORMS').value = servicoIndex + 1;
+    servicoIndex += 1;
+    adicionarEventosLinha(linha);
+    atualizarTotal();
+    bootstrap.Modal.getInstance(document.getElementById('modalServico')).hide();
+}
+
+function removerLinha(btn) {
+    const tr = btn.closest('tr');
+    const idInput = tr.querySelector('input[name$="-id"]');
+    if (idInput && idInput.value) {
+        const deleteCheckbox = tr.querySelector('input[name$="-DELETE"]');
+        if (deleteCheckbox) deleteCheckbox.checked = true;
+        tr.style.display = 'none';
+    } else {
+        tr.remove();
+    }
+    atualizarTotal();
+}
+
+document.getElementById('buscaProduto').addEventListener('input', buscarProdutos);
+document.getElementById('buscaServico').addEventListener('input', buscarServicos);
+
+if (descontoPercentualInput) descontoPercentualInput.addEventListener('input', atualizarTotal);
+if (jurosInput) jurosInput.addEventListener('input', atualizarTotal);
+
+document.querySelectorAll('.item-quantidade, .item-preco').forEach(input => {
+    input.addEventListener('input', atualizarTotal);
+});
+
+tabelaProdutosBody.addEventListener('click', function(evento) {
+    if (evento.target.classList.contains('configurar-acomp')) {
+        abrirConfiguracaoAcompanhamentos(evento.target.closest('tr'));
+    }
+});
+
+document.getElementById('pedidoForm').addEventListener('submit', function() {
+    document.querySelectorAll('.item-preco, #id_desconto_percentual, #juros').forEach(input => {
+        if (input.value) input.value = input.value.replace(',', '.');
+    });
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+    atualizarTotal();
+});
+</script>
+
+{% endblock %}

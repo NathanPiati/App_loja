@@ -1,0 +1,195 @@
+{% extends 'pedidos_base.html' %}
+
+{% block title %}Lista de Pedidos de Compra{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <h2><i class="bi bi-cart-check"></i> Lista de Pedidos de Compra</h2><hr>
+
+    <style>
+        .fade-in {
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-custom {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 2px 12px rgba(61, 123, 196, 0.1);
+            transition: transform 0.3s ease;
+            color: #2c3e50;
+            border: 1px solid #d1dce8;
+        }
+
+        .card-custom:hover {
+            transform: scale(1.01);
+        }
+
+        h2 {
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .btn-custom {
+            background: linear-gradient(to right, #3d7bc4, #5a9fd4);
+            color: white;
+            border: none;
+            transition: background 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            background: linear-gradient(to right, #2a65aa, #3d7bc4);
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            font-weight: 500;
+        }
+
+        .form-control {
+            border-radius: 8px;
+        }
+
+        .pedidos-compra-table thead th {
+            background-color: #2e4a7a;
+            color: #ffffff;
+        }
+
+        .pedidos-compra-table tbody tr:hover {
+            background-color: #e8f0fb;
+        }
+    </style>
+
+    {# Formulário de Filtro #}
+    <div class="fade-in mb-4 d-flex justify-content-between align-items-end">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-2 form-group">
+                {{ filter_form.id.label_tag }}
+                {{ filter_form.id }}
+            </div>
+            <div class="col-md-3 form-group">
+                {{ filter_form.fornecedor.label_tag }}
+                {{ filter_form.fornecedor }}
+            </div>
+            <div class="col-md-2 form-group">
+                {{ filter_form.numero_nota_fiscal.label_tag }}
+                {{ filter_form.numero_nota_fiscal }}
+            </div>
+            <div class="col-md-2 form-group">
+                {{ filter_form.data_criacao.label_tag }}
+                {{ filter_form.data_criacao }}
+            </div>
+            <div class="col-md-2 form-group">
+                {{ filter_form.condicao_pagamento.label_tag }}
+                {{ filter_form.condicao_pagamento }}
+            </div>
+            <div class="col-md-1 form-group">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i></button>
+            </div>
+        </form>
+        <a href="{% url 'criar_pedido_compra' %}" class="btn btn-custom">Novo Pedido</a>
+    </div>
+
+    {# Tabela de Pedidos de Compra #}
+    {% if pedidos %}
+    <div class="card-custom mt-4">
+        <table class="table table-bordered table-hover align-middle pedidos-compra-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Fornecedor</th>
+                    <th>Número NF</th>
+                    <th>Data Criação</th>
+                    <th>Condição Pagamento</th>
+                    <th>Itens</th>
+                    <th>Total (R$)</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pedido in pedidos %}
+                <tr>
+                    <td>{{ pedido.id }}</td>
+                    <td>{{ pedido.fornecedor.nome|default:"-" }}</td>
+                    <td>{{ pedido.numero_nota_fiscal|default:"-" }}</td>
+                    <td>{{ pedido.data_criacao|date:"d/m/Y" }}</td>
+                    <td>{{ pedido.condicao_pagamento.nome|default:"-" }}</td>
+                    <td>{{ pedido.itens.count }}</td>
+                    <td>R$ {{ pedido.total|floatformat:2 }}</td>
+                    <td>
+                        <a href="{% url 'editar_pedido_compra' pedido.id %}" class="btn btn-sm btn-warning me-1" title="Editar Pedido">
+                            <i class="bi bi-pencil-square"></i>
+                        </a>
+                        <button type="button" class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#modalExcluir{{ pedido.id }}" title="Excluir Pedido">
+                            <i class="bi bi-trash-fill"></i>
+                        </button>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="alert alert-success mt-3">
+    <strong>Total Geral:</strong> R$ {{ total_geral|floatformat:2 }}
+    </div>
+
+    {% if busca_realizada %}
+    <div class="alert alert-info">
+        Foram encontrados <strong>{{ total_pedidos }}</strong> pedidos de compra.
+    </div>
+    {% endif %}
+
+    {% if pedidos.has_other_pages %}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if pedidos.has_previous %}
+            <li class="page-item">
+                <a class="page-link" href="?page=1{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Primeira Página">&laquo;&laquo;</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ pedidos.previous_page_number }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Anterior">&laquo;</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&laquo;&laquo;</span></li>
+            <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+            {% endif %}
+
+            {% for num in pedidos.paginator.page_range %}
+            {% if pedidos.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num >= pedidos.number|add:'-2' and num <= pedidos.number|add:'2' %}
+            <li class="page-item"><a class="page-link" href="?page={{ num }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}">{{ num }}</a></li>
+            {% endif %}
+            {% endfor %}
+
+            {% if pedidos.has_next %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ pedidos.next_page_number }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Próxima">&raquo;</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link" href="?page={{ pedidos.paginator.num_pages }}{{ request.GET.urlencode|cut:'page='|yesno:'&,' }}" title="Última Página">&raquo;&raquo;</a>
+            </li>
+            {% else %}
+            <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+            <li class="page-item disabled"><span class="page-link">&raquo;&raquo;</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+    {% else %}
+    <div class="alert alert-info" role="alert">
+        Nenhum pedido de compra encontrado com os filtros aplicados.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

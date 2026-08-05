@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Excluir Condição de Pagamento</h2>
+    <p>Tem certeza que deseja excluir a condição "<strong>{{ condicao.nome }}</strong>"?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Confirmar Exclusão</button>
+        <a href="{% url 'lista_condicoes_pagamento' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

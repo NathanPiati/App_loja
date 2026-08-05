@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório Financeiro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            color: #333;
+            background-color: #f4f7fa;
+        }
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        .info {
+            margin-bottom: 20px;
+        }
+        .info p {
+            margin: 4px 0;
+            font-size: 14px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 8px 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #3498db;
+            color: white;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #e8f4f9;
+        }
+        tr:nth-child(odd) {
+            background-color: #f5f5f5;
+        }
+        .text-right {
+            text-align: right;
+        }
+        .status-pago {
+            background-color: #dff0d8;
+        }
+        .status-vencido {
+            background-color: #f2dede;
+        }
+        .status-aberto {
+            background-color: #fff3cd;
+        }
+        .no-print {
+            margin-bottom: 20px;
+            padding: 8px 15px;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .no-print:hover {
+            background-color: #0d47a1;
+        }
+        @media print {
+            .no-print {
+                display: none;
+            }
+        }
+
+        .totais {
+            margin-top: 20px;
+            font-size: 14px;
+            border-top: 2px solid #3498db;
+            padding-top: 10px;
+        }
+        .totais p {
+            margin: 4px 0;
+        }
+        .totais strong {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <button class="no-print" onclick="window.print()">🖨️ Imprimir</button>
+    <h2>Relatório Financeiro</h2>
+    <div class="info">
+        {% if not status_filtro and not cliente_filtro and not pedido_filtro and not condicao_filtro and not descricao_filtro and not data_inicio and not data_fim %}
+            <p><strong>Filtros:</strong> Todos</p>
+        {% else %}
+            <p><strong>Status:</strong> {{ status_filtro|title }}</p>
+            {% if cliente_filtro %}
+                <p><strong>Cliente:</strong> {% for c in clientes %}{% if c.id|stringformat:"s" == cliente_filtro %}{{ c.nome }}{% endif %}{% endfor %}</p>
+            {% endif %}
+            {% if pedido_filtro %}<p><strong>Pedido:</strong> {{ pedido_filtro }}</p>{% endif %}
+            {% if condicao_filtro %}
+                <p><strong>Condição:</strong> {% for c in condicoes %}{% if c.id|stringformat:"s" == condicao_filtro %}{{ c.nome }}{% endif %}{% endfor %}</p>
+            {% endif %}
+            {% if descricao_filtro %}<p><strong>Descrição:</strong> {{ descricao_filtro }}</p>{% endif %}
+            {% if data_inicio and data_fim %}
+                <p><strong>Período:</strong> de {{ data_inicio|date:"d/m/Y" }} até {{ data_fim|date:"d/m/Y" }}</p>
+            {% elif data_inicio or data_fim %}
+                {% if data_inicio %}<p><strong>Data Início:</strong> {{ data_inicio|date:"d/m/Y" }}</p>{% endif %}
+                {% if data_fim %}<p><strong>Data Fim:</strong> {{ data_fim|date:"d/m/Y" }}</p>{% endif %}
+            {% endif %}
+        {% endif %}
+        <p><strong>Data de Geração:</strong> {{ data_hora_impressao|date:"d/m/Y H:i" }}</p>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Pedido</th>
+                <th>Cliente</th>
+                <th>Condição</th>
+                <th>Descrição</th>
+                <th>Parcela</th>
+                <th>Vencimento</th>
+                <th>Valor</th>
+                <th>Status</th>
+                <th>Pagamento</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for f in financeiro %}
+            <tr class="{% if f.pago %}status-pago{% elif f.data_vencimento < today %}status-vencido{% else %}status-aberto{% endif %}">
+                <td>{{ f.id }}</td>
+                <td>{{ f.pedido.id }}</td>
+                <td>{{ f.pedido.cliente.nome }}</td>
+                <td>{{ f.condicao_id.nome }}</td>
+                <td>{{ f.descricao }}</td>
+                <td>{{ f.parcela }}/{{ f.total_parcelas }}</td>
+                <td>{{ f.data_vencimento|date:"d/m/Y" }}</td>
+                <td class="text-right">R$ {{ f.valor_parcela|floatformat:2 }}</td>
+                <td>
+                    {% if f.pago %}
+                        <span style="color: #2e7d32;">Pago</span>
+                    {% elif f.data_vencimento < today %}
+                        <span style="color: #d32f2f;">Vencido</span>
+                    {% else %}
+                        <span style="color: #f57c00;">Em aberto</span>
+                    {% endif %}
+                </td>
+                <td>{{ f.data_pagamento|date:"d/m/Y"|default:"---" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="totais">
+        <p><strong>Total Geral:</strong> R$ {{ total_geral|floatformat:2 }}</p>
+        <p><strong>Total Pago:</strong> R$ {{ total_pago|floatformat:2 }}</p>
+        <p><strong>Total Vencido:</strong> R$ {{ total_vencido|floatformat:2 }}</p>
+        <p><strong>Total Em Aberto:</strong> R$ {{ total_aberto|floatformat:2 }}</p>
+    </div>
+</body>
+</html>

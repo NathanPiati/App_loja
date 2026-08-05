@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load base64_filters %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">⚙️ Configuração da Empresa</h2>
+    <form method="post" enctype="multipart/form-data" class="card p-4 shadow rounded">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label for="id_nome" class="form-label fw-bold">Nome da Empresa:</label>
+            {{ form.nome|add_class:"form-control" }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_segmento" class="form-label fw-bold">Segmento do Negócio:</label>
+            {{ form.segmento|add_class:"form-select" }}
+            <small class="text-muted">Os nomes dos módulos e textos principais da interface serão ajustados conforme o segmento, sem quebrar o uso em outros ramos.</small>
+        </div>
+
+        <div class="mb-3">
+            <label for="id_cnpj" class="form-label fw-bold">CNPJ:</label>
+            {{ form.cnpj|add_class:"form-control" }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_endereco" class="form-label fw-bold">Endereço:</label>
+            {{ form.endereco|add_class:"form-control"|attr:"rows:3" }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_telefone" class="form-label fw-bold">Telefone:</label>
+            {{ form.telefone|add_class:"form-control" }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_email" class="form-label fw-bold">E-mail:</label>
+            {{ form.email|add_class:"form-control" }}
+        </div>
+
+        <!-- CAMPOS DE LICENÇA -->
+       
+        <hr class="my-4">
+        <h5 class="mb-3">Configuração de Licença</h5>
+
+        <div class="mb-3">
+            <label for="id_server_url" class="form-label fw-bold">URL do Servidor de Licença:</label>
+            {{ form.server_url|add_class:"form-control"|attr:"placeholder:http://127.0.0.1:8000/api/verificar_licenca" }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_cliente_id" class="form-label fw-bold">ID do Cliente:</label>
+            {{ form.cliente_id|add_class:"form-control"|attr:"placeholder:1" }}
+        </div>
+
+        <div class="mb-3">
+            <label for="id_chave_licenca" class="form-label fw-bold">Chave de Licença:</label>
+            {{ form.chave_licenca|add_class:"form-control"|attr:"placeholder:uuid-da-licenca" }}
+        </div>
+
+        <!-- LOGO -->
+        <hr class="my-4">
+        <div class="mb-3">
+            <label class="form-label fw-bold">Logo:</label><br>
+            {% if form.instance.logo %}
+                <img src="data:{{ form.instance.logo_tipo }};base64,{{ form.instance.logo|b64encode }}" 
+                     alt="Logo atual" height="100" class="mb-2 rounded shadow border"><br>
+            {% endif %}
+            {{ form.logo_file|add_class:"form-control" }}
+            <small class="text-muted">Substitua para alterar o logo</small>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary px-4">
+                <i class="bi bi-save"></i> Salvar Configurações
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

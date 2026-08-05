@@ -1,0 +1,13 @@
+{% extends 'base_servicos.html' %}
+{% block title %}Excluir Serviço{% endblock %}
+{% block content %}
+<div class="card card-custom fade-slide-in">
+    <h2>Excluir Serviço</h2>
+    <p>Tem certeza que deseja excluir <strong>{{ servico.nome }}</strong>?</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Confirmar</button>
+        <a href="{% url 'listar_servicos' %}" class="btn btn-secondary"><i class="bi bi-arrow-left"></i> Cancelar</a>
+    </form>
+</div>
+{% endblock %}

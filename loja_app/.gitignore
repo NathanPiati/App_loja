@@ -1,0 +1,43 @@
+# ==========================================
+# Padrão Django + Python
+# ==========================================
+
+# Compilados Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Arquivos temporários
+*.log
+*.pot
+*.pyc
+
+# Banco SQLite (nunca versionar em produção)
+*.sqlite3
+systemdb.sqlite3
+
+# Virtualenv
+venv/
+.env/
+
+# Pastas de build
+build/
+dist/
+*.egg-info/
+
+# Staticfiles coletados (Django gera sozinho)
+staticfiles/
+media/
+
+# Configuração local (não subir para prod)
+.env.local
+.env.dev
+.env.prod
+
+# IDEs / Editores
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db

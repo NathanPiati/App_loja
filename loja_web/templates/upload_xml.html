@@ -1,0 +1,31 @@
+<!-- upload_xml.html -->
+{% extends 'produtos_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Upload XML NF-e</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="mb-3">
+            {{ form.xml_file }}
+            {% if form.xml_file.errors %}
+                <div class="invalid-feedback d-block">{{ form.xml_file.errors|striptags }}</div>
+            {% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Processar XML</button>
+    </form>
+
+    <a href="{% url 'produtos_geral' %}" class="btn btn-secondary mt-3">Voltar</a>
+</div>
+{% endblock %}

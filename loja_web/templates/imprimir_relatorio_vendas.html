@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Vendas Diretas</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 11pt;
+            color: #000;
+            padding: 12mm;
+            background: #fff;
+        }
+
+        .report-header {
+            text-align: center;
+            border-bottom: 2px solid #2e4a7a;
+            padding-bottom: 6mm;
+            margin-bottom: 6mm;
+        }
+        .report-header h1 {
+            font-size: 16pt;
+            color: #2e4a7a;
+            margin-bottom: 2mm;
+        }
+        .report-header p {
+            font-size: 9pt;
+            color: #555;
+        }
+
+        .resumo {
+            display: flex;
+            gap: 8mm;
+            margin-bottom: 6mm;
+        }
+        .resumo-item {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 3mm 6mm;
+            flex: 1;
+            text-align: center;
+        }
+        .resumo-item .label {
+            font-size: 8pt;
+            color: #666;
+            text-transform: uppercase;
+        }
+        .resumo-item .valor {
+            font-size: 13pt;
+            font-weight: bold;
+            color: #2e4a7a;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 9pt;
+            margin-bottom: 6mm;
+        }
+        thead th {
+            background-color: #2e4a7a;
+            color: #fff;
+            padding: 2.5mm 3mm;
+            text-align: left;
+            font-size: 9pt;
+        }
+        tbody td {
+            border: 1px solid #d0d0d0;
+            padding: 2mm 3mm;
+            vertical-align: top;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #f5f8ff;
+        }
+
+        .itens-cell {
+            font-size: 8pt;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        tfoot td {
+            border-top: 2px solid #2e4a7a;
+            background-color: #eef2f7;
+            font-weight: bold;
+            padding: 2.5mm 3mm;
+            font-size: 10pt;
+        }
+
+        .report-footer {
+            border-top: 1px solid #ccc;
+            padding-top: 4mm;
+            text-align: center;
+            font-size: 8pt;
+            color: #777;
+            margin-top: 8mm;
+        }
+
+        .sem-dados {
+            text-align: center;
+            color: #888;
+            padding: 8mm;
+            font-size: 10pt;
+        }
+
+        @page {
+            size: A4;
+            margin: 10mm;
+        }
+    </style>
+</head>
+<body onload="window.print()">
+
+    <div class="report-header">
+        <h1>Relatório de Vendas Diretas</h1>
+        <p>Gerado em: {{ data_atual }}
+            {% if data_inicio or data_fim %}
+                &nbsp;|&nbsp; Período:
+                {% if data_inicio %}{{ data_inicio }}{% else %}início{% endif %}
+                até
+                {% if data_fim %}{{ data_fim }}{% else %}hoje{% endif %}
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="resumo">
+        <div class="resumo-item">
+            <div class="label">Total de Vendas</div>
+            <div class="valor">{{ quantidade_vendas }}</div>
+        </div>
+        <div class="resumo-item">
+            <div class="label">Valor Total</div>
+            <div class="valor">R$ {{ total_geral|floatformat:2 }}</div>
+        </div>
+        <div class="resumo-item">
+            <div class="label">Ticket Médio</div>
+            <div class="valor">
+                {% if quantidade_vendas > 0 %}
+                    R$ {% widthratio total_geral quantidade_vendas 1 %}
+                {% else %}
+                    R$ 0,00
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% if vendas %}
+    <table>
+        <thead>
+            <tr>
+                <th style="width:5%">#</th>
+                <th style="width:14%">Data / Hora</th>
+                <th style="width:15%">Cliente</th>
+                <th style="width:16%">Cond. Pagamento</th>
+                <th style="width:35%">Itens</th>
+                <th style="width:15%; text-align:right;">Total (R$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for venda in vendas %}
+            <tr>
+                <td>{{ venda.id }}</td>
+                <td>{{ venda.datavenda|date:"d/m/Y H:i" }}</td>
+                <td>{{ venda.cliente|default:"—" }}</td>
+                <td>{{ venda.condicao_pagamento|default:"—" }}</td>
+                <td class="itens-cell">
+                    {% for item in venda.itens.all %}
+                        {{ item.quantidade }}x {{ item.produto.nome }} — R$ {{ item.preco_unitario|floatformat:2 }}<br>
+                    {% empty %}
+                        —
+                    {% endfor %}
+                </td>
+                <td style="text-align:right; font-weight:600;">{{ venda.valortotal|floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="5" style="text-align:right;">Total Geral:</td>
+                <td style="text-align:right;">R$ {{ total_geral|floatformat:2 }}</td>
+            </tr>
+        </tfoot>
+    </table>
+    {% else %}
+    <p class="sem-dados">Nenhuma venda encontrada para o período selecionado.</p>
+    {% endif %}
+
+    <div class="report-footer">
+        Relatório gerado automaticamente &mdash; {{ data_atual }}
+    </div>
+
+</body>
+</html>

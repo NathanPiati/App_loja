@@ -1,0 +1,34 @@
+<div class="modal fade" id="modalServico" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-dark">Selecionar Serviço</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="text" id="buscaServico" class="form-control mb-3" placeholder="Buscar serviço...">
+        <div id="loadingBuscaServico" class="text-center mb-2" style="display: none;">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>
+        <table class="table table-sm table-bordered">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Serviço</th>
+              <th>Preço</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+          <tbody id="resultadoBuscaServico"></tbody>
+        </table>
+        <div class="mt-2 text-dark">
+          <label>Quantidade:</label>
+          <input type="number" id="quantidadeServico" class="form-control" value="1" min="1">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>

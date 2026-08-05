@@ -1,0 +1,73 @@
+{% extends 'base_servicos.html' %}
+{% block title %}Listar Serviços{% endblock %}
+{% block extrahead %}
+    <style>
+        .input-group {
+            max-width: 400px;
+        }
+        .form-control {
+            background-color: #f8fafd;
+            color: #2c3e50;
+            border: 1px solid #d1dce8;
+        }
+        .form-control::placeholder {
+            color: #6c7a8d;
+        }
+
+        .servicos-table thead th {
+            background-color: #2e4a7a;
+            color: #ffffff;
+        }
+
+        .servicos-table tbody tr:hover {
+            background-color: #e8f0fb;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+<div class="card card-custom fade-slide-in p-4">
+    <h2>Serviços Cadastrados</h2>
+    
+    <!-- Formulário de pesquisa -->
+    <form method="get" class="mb-3">
+        <div class="input-group">
+            <input type="text" name="q" class="form-control" placeholder="Buscar por ID ou nome do serviço" value="{{ termo_busca }}">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Buscar</button>
+        </div>
+    </form>
+
+    <table class="table table-bordered table-hover mt-3 align-middle servicos-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nome</th>
+                <th>Preço</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for servico in servicos %}
+            <tr>
+                <td>{{ servico.id }}</td>
+                <td>{{ servico.nome }}</td>
+                <td>R$ {{ servico.preco|floatformat:2 }}</td>
+                <td>
+                    <a href="{% url 'editar_servico' servico.id %}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-pencil-square"></i> Editar
+                    </a>
+                    <a href="{% url 'excluir_servico' servico.id %}" 
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('Tem certeza que deseja excluir o serviço {{ servico.nome }}?');">
+                        <i class="bi bi-trash"></i> Excluir
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">Nenhum serviço encontrado.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

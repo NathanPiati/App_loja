@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assine um plano</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f8fafc; margin: 0; color: #0f172a; }
+        .wrap { width: min(1100px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+        .card { background: #fff; border-radius: 20px; padding: 24px; box-shadow: 0 14px 32px rgba(15, 23, 42, 0.08); }
+        .button { display: inline-block; padding: 10px 16px; background: #c2410c; color: #fff; text-decoration: none; border-radius: 999px; }
+    </style>
+</head>
+<body>
+    <div class="wrap">
+        <h1>Escolha seu plano</h1>
+        <p>O checkout real pode ser integrado depois com Stripe, Asaas, Mercado Pago ou Pagar.me.</p>
+        <div class="grid">
+            {% for plano in planos %}
+            <div class="card">
+                <h2>{{ plano.nome }}</h2>
+                <p><strong>R$ {{ plano.valor_mensal }}/mes</strong></p>
+                <p>{{ plano.descricao }}</p>
+                <a class="button" href="{% url 'billing:iniciar_assinatura' plano.id %}">Continuar</a>
+            </div>
+            {% empty %}
+            <div class="card">
+                <p>Nenhum plano ativo disponivel.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>

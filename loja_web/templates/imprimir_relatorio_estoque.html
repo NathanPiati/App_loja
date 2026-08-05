@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Relatório de Estoque</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12pt;
+            color: #000;
+            padding: 10mm;
+        }
+        .report-header {
+            text-align: center;
+            margin-bottom: 20mm;
+            border-bottom: 2px solid #000;
+            padding-bottom: 5mm;
+        }
+        .report-header h1 {
+            font-size: 18pt;
+            margin: 0;
+        }
+        .report-header p {
+            font-size: 10pt;
+            color: #555;
+            margin: 5mm 0 0 0;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20mm;
+        }
+        .table th, .table td {
+            border: 1px solid #000;
+            padding: 3mm;
+            text-align: left;
+            font-size: 10pt;
+        }
+        .table th {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+        .table tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .totals {
+            font-size: 11pt;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 10mm;
+        }
+        .totals span {
+            margin-left: 10mm;
+        }
+        .report-footer {
+            text-align: center;
+            font-size: 10pt;
+            color: #555;
+            border-top: 1px solid #000;
+            padding-top: 5mm;
+            position: running(footer);
+        }
+        @page {
+            @bottom-center {
+                content: element(footer);
+            }
+        }
+    </style>
+</head>
+<body onload="window.print()">
+    {% load pedido_filters %}
+    <header class="report-header">
+        <h1>Relatório de Estoque</h1>
+        <p>Gerado em: {{ data_atual }}</p>
+    </header>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Produto</th>
+                <th>Categoria</th>
+                <th>Marca</th>
+                <th>Número do Fabricante</th>
+                <th>Número Original</th>
+                <th>Preço (R$)</th>
+                <th>Estoque</th>
+                <th>Valor Total (R$)</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for produto in produtos %}
+                <tr>
+                    <td>{{ produto.id }}</td>
+                    <td>{{ produto.nome }}</td>
+                    <td>{{ produto.categoria.nome|default:"Sem categoria" }}</td>
+                    <td>{{ produto.marca|default:"Sem marca" }}</td>
+                    <td>{{ produto.num_fabricante|default:"-" }}</td>
+                    <td>{{ produto.num_original|default:"-" }}</td>
+                    <td>R$ {{ produto.preco|default:0|floatformat:2 }}</td>
+                    <td>{{ produto.estoque_exibicao }}</td>
+                    <td>R$ {{ produto.preco|default:0|multiply:produto.estoque|floatformat:2 }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="9" class="text-center">Nenhum produto encontrado.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="totals">
+        <p>Valor Total do Estoque: R$ {{ total_estoque|floatformat:2 }}</p>
+        <p>Total de Itens em Estoque: {{ total_itens_estoque|default:0 }}</p>
+        <p>Total de Produtos Encontrados: {{ quantidade_registros }}</p>
+    </div>
+
+    <footer class="report-footer">
+        <p>Gerado em: {{ data_atual }}</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Cadastro de Condição de Pagamento{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <h2 class="mb-4"><i class="bi bi-credit-card"></i> Cadastrar Condição de Pagamento</h2>
+
+    <div class="card-custom">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    {{ form.nome.label_tag }}
+                    {{ form.nome }}
+                </div>
+                <div class="col-md-8">
+                    {{ form.descricao.label_tag }}
+                    {{ form.descricao }}
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-4">
+                    {{ form.numero_parcelas.label_tag }}
+                    {{ form.numero_parcelas }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.intervalo_dias.label_tag }}
+                    {{ form.intervalo_dias }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.entrada.label_tag }}
+                    {{ form.entrada }}
+                </div>
+            </div>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    {{ form.juros.label_tag }}
+                    {{ form.juros }}
+                </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'lista_condicoes_pagamento' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save"></i> Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

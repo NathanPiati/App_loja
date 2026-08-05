@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Relatório de Vendas Diretas{% endblock %}
+
+{% block content %}
+<style>
+    .vendas-table thead th {
+        background-color: #2e4a7a;
+        color: #ffffff;
+    }
+    .vendas-table tbody tr:hover {
+        background-color: #e8f0fb;
+    }
+    .resumo-card {
+        border-left: 4px solid #2e4a7a;
+    }
+    @media print {
+        .no-print { display: none !important; }
+        body { background: #fff !important; }
+        .card { box-shadow: none !important; border: 1px solid #dee2e6 !important; }
+    }
+</style>
+
+<div class="container-fluid mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <h2 class="mb-0" style="color:#2c3e50;">
+            <i class="bi bi-receipt me-2"></i>Relatório de Vendas Diretas
+        </h2>
+        <div class="d-flex gap-2">
+            <a href="{% url 'relatorios' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-1"></i> Voltar
+            </a>
+            <a href="{% url 'imprimir_relatorio_vendas' %}?{{ request.GET.urlencode }}"
+               target="_blank" class="btn btn-outline-secondary">
+                <i class="bi bi-printer me-1"></i> Imprimir
+            </a>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="card card-custom mb-4 no-print">
+        <div class="card-header" style="background-color:#2e4a7a; color:#fff;">
+            <i class="bi bi-funnel me-1"></i> Filtrar Vendas
+        </div>
+        <div class="card-body">
+            <form method="GET">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label" style="color:#2c3e50;">Data Início</label>
+                        <input type="date" name="data_inicio"
+                            value="{{ form.data_inicio.value|default:'' }}"
+                            class="form-control">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label" style="color:#2c3e50;">Data Fim</label>
+                        <input type="date" name="data_fim"
+                            value="{{ form.data_fim.value|default:'' }}"
+                            class="form-control">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="color:#2c3e50;">Total Mínimo (R$)</label>
+                        <input type="number" step="0.01" name="total_min"
+                            value="{{ form.total_min.value|default:'' }}"
+                            class="form-control" placeholder="0,00">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label" style="color:#2c3e50;">Total Máximo (R$)</label>
+                        <input type="number" step="0.01" name="total_max"
+                            value="{{ form.total_max.value|default:'' }}"
+                            class="form-control" placeholder="0,00">
+                    </div>
+                    <div class="col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-1"></i> Filtrar
+                        </button>
+                        <a href="{% url 'relatorio_vendas' %}" class="btn btn-outline-secondary w-100">
+                            <i class="bi bi-x-circle"></i> Limpar
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Resumo -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card card-custom resumo-card p-3">
+                <div class="text-muted small">Total de Vendas</div>
+                <div class="fs-4 fw-bold" style="color:#2e4a7a;">{{ quantidade_vendas }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-custom resumo-card p-3">
+                <div class="text-muted small">Valor Total</div>
+                <div class="fs-4 fw-bold" style="color:#2e4a7a;">R$ {{ total_geral|floatformat:2 }}</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-custom resumo-card p-3">
+                <div class="text-muted small">Ticket Médio</div>
+                <div class="fs-4 fw-bold" style="color:#2e4a7a;">
+                    {% if quantidade_vendas > 0 %}
+                        R$ {% widthratio total_geral quantidade_vendas 1 %}
+                    {% else %}
+                        R$ 0,00
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="card card-custom">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle mb-0 vendas-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Data / Hora</th>
+                            <th>Cliente</th>
+                            <th>Condição de Pagamento</th>
+                            <th>Itens</th>
+                            <th class="text-end">Total (R$)</th>
+                            <th class="text-center no-print">Detalhes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for venda in vendas %}
+                        <tr>
+                            <td><span class="badge" style="background-color:#2e4a7a;">{{ venda.id }}</span></td>
+                            <td>{{ venda.datavenda|date:"d/m/Y H:i" }}</td>
+                            <td>{{ venda.cliente|default:"—" }}</td>
+                            <td>{{ venda.condicao_pagamento|default:"—" }}</td>
+                            <td>
+                                {% for item in venda.itens.all %}
+                                    <small class="d-block text-muted">
+                                        {{ item.quantidade }}x {{ item.produto.nome }}
+                                        <span class="text-secondary">(R$ {{ item.preco_unitario|floatformat:2 }})</span>
+                                    </small>
+                                {% endfor %}
+                            </td>
+                            <td class="text-end fw-semibold">{{ venda.valortotal|floatformat:2 }}</td>
+                            <td class="text-center no-print">
+                                <button class="btn btn-sm btn-outline-primary"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#detalhe-{{ venda.id }}"
+                                    title="Ver itens">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr class="collapse no-print" id="detalhe-{{ venda.id }}">
+                            <td colspan="7" class="p-0">
+                                <div class="p-3" style="background:#f4f8ff;">
+                                    <strong style="color:#2e4a7a;">Itens da Venda #{{ venda.id }}</strong>
+                                    <table class="table table-sm table-bordered mt-2 mb-0">
+                                        <thead style="background:#d1dce8;">
+                                            <tr>
+                                                <th>Produto</th>
+                                                <th class="text-center">Qtd</th>
+                                                <th class="text-end">Preço Unit.</th>
+                                                <th class="text-end">Subtotal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in venda.itens.all %}
+                                            <tr>
+                                                <td>{{ item.produto.nome }}</td>
+                                                <td class="text-center">{{ item.quantidade }}</td>
+                                                <td class="text-end">R$ {{ item.preco_unitario|floatformat:2 }}</td>
+                                                <td class="text-end">R$ {{ item.subtotal|floatformat:2 }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-4 d-block mb-1"></i>
+                                Nenhuma venda encontrada para o período selecionado.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    {% if vendas %}
+                    <tfoot>
+                        <tr style="background:#eef2f7; font-weight:600;">
+                            <td colspan="5" class="text-end" style="color:#2c3e50;">Total Geral:</td>
+                            <td class="text-end" style="color:#2e4a7a; font-size:1.05rem;">
+                                R$ {{ total_geral|floatformat:2 }}
+                            </td>
+                            <td class="no-print"></td>
+                        </tr>
+                    </tfoot>
+                    {% endif %}
+                </table>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
