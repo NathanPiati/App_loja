@@ -29,8 +29,10 @@
             background-color: var(--bg-page);
             color: var(--text-main);
             font-family: 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
             padding-top: 72px;
-            padding-bottom: 120px;
             animation: fadeInBody 0.7s ease-in-out;
         }
 
@@ -92,11 +94,13 @@
             padding: 20px;
             text-align: center;
             font-size: 0.9em;
-            position: fixed;
-            bottom: 0;
-            left: 0;
             width: 100%;
-            z-index: 1020;
+            flex-shrink: 0;
+        }
+
+        body > .container {
+            flex: 1 0 auto;
+            width: 100%;
         }
 
         /* Dropdown */
@@ -306,6 +310,19 @@
                         {% if perms.core.fechamento_caixa or user.is_superuser %}
                         <li><a class="dropdown-item" href="{% url 'fechamento_caixa' %}"><i class="bi bi-plus-circle"></i> Fechamento de caixa</a></li>
                         {% endif %}
+                    </ul>
+                </li>
+                {% endif %}
+
+                <!-- COBRANÇA WHATSAPP -->
+                {% if perms.core.gerenciar_cobranca_whatsapp or perms.core.ver_cobranca_whatsapp or user.is_superuser %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="cobrancaWhatsappDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-whatsapp"></i> Cobrança WhatsApp
+                    </a>
+                    <ul class="dropdown-menu" aria-labelledby="cobrancaWhatsappDropdown">
+                        <li><a class="dropdown-item" href="{% url 'lista_regras_cobranca_whatsapp' %}"><i class="bi bi-list-check"></i> Regras de Cobrança</a></li>
+                        <li><a class="dropdown-item" href="{% url 'historico_cobranca_whatsapp' %}"><i class="bi bi-clock-history"></i> Histórico de Envios</a></li>
                     </ul>
                 </li>
                 {% endif %}

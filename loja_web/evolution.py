@@ -14,6 +14,13 @@ from django.views.decorators.http import require_GET, require_POST
 logger = logging.getLogger(__name__)
 
 
+def _numero_log(numero):
+    numero = str(numero or '')
+    if len(numero) <= 4:
+        return '****'
+    return f'{numero[:4]}***{numero[-2:]}'
+
+
 class EvolutionClient:
     def __init__(self):
         self.base_url = settings.EVOLUTION_BASE_URL.rstrip('/')
@@ -32,6 +39,11 @@ class EvolutionClient:
         return urljoin(f'{self.base_url}/', path)
 
     def send_text(self, number: str, text: str, delay: int = 1200):
+        url = self._send_text_url()
+        logger.info(
+            'Evolution envio iniciado | url=%s | instance=%s | numero=%s | caracteres=%s',
+            url, self.instance, _numero_log(number), len(text or '')
+        )
         payload = {
             'number': number,
             'text': text,
@@ -48,6 +60,11 @@ class EvolutionClient:
             body = response.json()
         except Exception:
             body = {'raw': response.text}
+
+        logger.info(
+            'Evolution resposta recebida | status=%s | numero=%s | resposta=%s',
+            response.status_code, _numero_log(number), str(body)[:500]
+        )
 
         return response.status_code, body
 

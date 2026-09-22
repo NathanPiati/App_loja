@@ -10,15 +10,26 @@
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
         .card { background: #fff; border-radius: 18px; padding: 24px; box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08); }
         .button { display: inline-block; padding: 10px 16px; background: #0f766e; color: #fff; text-decoration: none; border-radius: 999px; }
+        .systems { display: flex; flex-wrap: wrap; gap: 10px; margin: 24px 0; }
+        .system { display: inline-block; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 14px; color: #334155; text-decoration: none; }
+        .system.selected, .system:hover { background: #0f766e; border-color: #0f766e; color: #fff; }
+        .system-name { color: #0f766e; font-size: 0.8rem; font-weight: 700; text-transform: uppercase; }
     </style>
 </head>
 <body>
     <div class="wrap">
         <h1>Planos</h1>
-        <p>Escolha um plano e siga para o onboarding da assinatura.</p>
+        <p>Escolha o sistema e depois o plano que melhor atende a sua operação.</p>
+        <div class="systems" aria-label="Escolha o sistema">
+            <a class="system{% if not sistema_selecionado %} selected{% endif %}" href="{% url 'site_publico:planos' %}">Todos os sistemas</a>
+            {% for sistema in sistemas %}
+            <a class="system{% if sistema_selecionado.id == sistema.id %} selected{% endif %}" href="{% url 'site_publico:planos' %}?sistema={{ sistema.slug }}">{{ sistema.nome }}</a>
+            {% endfor %}
+        </div>
         <div class="grid">
             {% for plano in planos %}
             <div class="card">
+                {% if plano.sistema %}<p class="system-name">{{ plano.sistema.nome }}</p>{% endif %}
                 <h2>{{ plano.nome }}</h2>
                 <p><strong>R$ {{ plano.valor_mensal }}/mes</strong></p>
                 <p>{{ plano.descricao }}</p>

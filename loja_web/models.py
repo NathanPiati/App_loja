@@ -708,6 +708,9 @@ class PermissaoSistema(models.Model):
              "Pode gerenciar condições de pagamento"),
             ("ver_condicoes_pagamento", "Pode ver condições de pagamento"),
             ("criar_condicao_pagamento", "Pode criar condição de pagamento"),
+            ("gerenciar_cobranca_whatsapp",
+             "Pode gerenciar regras de cobrança via WhatsApp"),
+            ("ver_cobranca_whatsapp", "Pode ver cobranças via WhatsApp"),
         ]
         verbose_name = "Permissão do Sistema"
         verbose_name_plural = "Permissões do Sistema"
@@ -816,3 +819,83 @@ class UsuarioEmpresa(models.Model):
 
     def __str__(self):
         return f'{self.user.username} -> {self.empresa.nome}'
+
+
+# ---------------------------------------------------------------------------
+# Cobrança automática de clientes via WhatsApp (pedidos de produtos e/ou
+# serviços em aberto), com regras configuráveis de recorrência em dias.
+# ---------------------------------------------------------------------------
+
+class RegraCobrancaWhatsApp(models.Model):
+    APLICAR_TODOS = 'todos'
+    APLICAR_PRODUTOS = 'produtos'
+    APLICAR_SERVICOS = 'servicos'
+    APLICAR_CHOICES = [
+        (APLICAR_TODOS, 'Pedidos e Serviços'),
+        (APLICAR_PRODUTOS, 'Somente Pedidos (produtos)'),
+        (APLICAR_SERVICOS, 'Somente Serviços'),
+    ]
+
+    empresa = models.ForeignKey(
+        'Empresa', on_delete=models.CASCADE, null=True, blank=True, related_name='regras_cobranca_whatsapp'
+    )
+    nome = models.CharField(max_length=100, verbose_name='Nome da regra')
+    aplicar_a = models.CharField(
+        max_length=10, choices=APLICAR_CHOICES, default=APLICAR_TODOS,
+        verbose_name='Aplicar a'
+    )
+    dias_referencia = models.IntegerField(
+        default=1,
+        verbose_name='Disparar (dias)',
+        help_text='Negativo = dias antes do vencimento. 0 = no dia do vencimento. Positivo = dias após o vencimento (atraso).'
+    )
+    repetir_a_cada_dias = models.PositiveIntegerField(
+        default=0,
+        verbose_name='Repetir a cada (dias)',
+        help_text='Deixe 0 para enviar apenas uma vez. Ex: 5 = reenvia a cada 5 dias enquanto estiver em aberto.'
+    )
+    mensagem = models.TextField(
+        verbose_name='Mensagem',
+        default=(
+            'Qualquer dúvida sobre este lançamento, estamos à disposição. '
+            'Empresa: {empresa}.'
+        ),
+        help_text=('A cobrança já inclui os dados do financeiro. Use como complemento. '
+                   'Placeholders: {cliente}, {valor}, {vencimento}, {pedido}, {empresa}, '
+                   '{descricao}, {parcela}, {total_parcelas}, {status}, {observacao}')
+    )
+    ativo = models.BooleanField(default=True)
+    criado_em = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Regra de Cobrança WhatsApp'
+        verbose_name_plural = 'Regras de Cobrança WhatsApp'
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
+
+
+class EnvioCobrancaWhatsApp(models.Model):
+    empresa = models.ForeignKey(
+        'Empresa', on_delete=models.CASCADE, null=True, blank=True, related_name='envios_cobranca_whatsapp'
+    )
+    regra = models.ForeignKey(
+        RegraCobrancaWhatsApp, on_delete=models.SET_NULL, null=True, blank=True, related_name='envios'
+    )
+    movimento = models.ForeignKey(
+        MovimentoFinanceiro, on_delete=models.CASCADE, related_name='envios_cobranca_whatsapp'
+    )
+    numero_destino = models.CharField(max_length=30, blank=True)
+    mensagem_enviada = models.TextField(blank=True)
+    sucesso = models.BooleanField(default=False)
+    resposta_api = models.TextField(blank=True)
+    data_envio = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = 'Envio de Cobrança WhatsApp'
+        verbose_name_plural = 'Envios de Cobrança WhatsApp'
+        ordering = ['-data_envio']
+
+    def __str__(self):
+        return f'Envio #{self.id} - Movimento {self.movimento_id} - {"OK" if self.sucesso else "Falha"}'

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Regra de Cobrança WhatsApp{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <h2 class="mb-4"><i class="bi bi-whatsapp"></i> Regra de Cobrança via WhatsApp</h2>
+
+    <div class="card-custom">
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    {{ form.nome.label_tag }}
+                    {{ form.nome }}
+                </div>
+                <div class="col-md-6">
+                    {{ form.aplicar_a.label_tag }}
+                    {{ form.aplicar_a }}
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-md-6">
+                    {{ form.dias_referencia.label_tag }}
+                    {{ form.dias_referencia }}
+                    <small class="text-muted d-block mt-1">{{ form.dias_referencia.help_text }}</small>
+                </div>
+                <div class="col-md-6">
+                    {{ form.repetir_a_cada_dias.label_tag }}
+                    {{ form.repetir_a_cada_dias }}
+                    <small class="text-muted d-block mt-1">{{ form.repetir_a_cada_dias.help_text }}</small>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-3">
+                <div class="col-12">
+                    {{ form.mensagem.label_tag }}
+                    {{ form.mensagem }}
+                    <small class="text-muted d-block mt-1">{{ form.mensagem.help_text }}</small>
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-md-4 d-flex align-items-center gap-2">
+                    {{ form.ativo }}
+                    {{ form.ativo.label_tag }}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a href="{% url 'lista_regras_cobranca_whatsapp' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save"></i> Salvar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

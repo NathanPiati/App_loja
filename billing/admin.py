@@ -1,13 +1,20 @@
 from django.contrib import admin
 
-from .models import Assinatura, Lead, Plano
+from .models import Assinatura, Lead, Plano, Sistema
+
+
+@admin.register(Sistema)
+class SistemaAdmin(admin.ModelAdmin):
+    list_display = ['nome', 'ativo']
+    list_filter = ['ativo']
+    search_fields = ['nome', 'slug']
 
 
 @admin.register(Plano)
 class PlanoAdmin(admin.ModelAdmin):
-    list_display = ['nome', 'valor_mensal',
+    list_display = ['nome', 'sistema', 'valor_mensal',
                     'limite_usuarios', 'ativo', 'destaque']
-    list_filter = ['ativo', 'destaque']
+    list_filter = ['sistema', 'ativo', 'destaque']
     search_fields = ['nome', 'slug']
 
 

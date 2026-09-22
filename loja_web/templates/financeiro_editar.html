@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Editar Movimento Financeiro{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <h2 class="mb-4"><i class="bi bi-pencil-square"></i> Editar Movimento Financeiro</h2>
+
+    <div class="card-custom">
+        <div class="alert alert-light border mb-4">
+            <strong>Cliente/Pedido:</strong>
+            {% if movimento.pedido %}
+                {{ movimento.pedido.cliente.nome }} - Pedido {{ movimento.pedido.id }}
+            {% elif movimento.pedido_compra %}
+                {{ movimento.pedido_compra.fornecedor.nome|default:'Pedido de compra' }} - Compra {{ movimento.pedido_compra.id }}
+            {% else %}
+                Movimento avulso
+            {% endif %}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            <div class="row g-3">
+                <div class="col-md-8">
+                    {{ form.descricao.label_tag }}
+                    {{ form.descricao }}
+                    {{ form.descricao.errors }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.parcela.label_tag }}
+                    {{ form.parcela }}
+                    {{ form.parcela.errors }}
+                </div>
+                <div class="col-md-2">
+                    {{ form.total_parcelas.label_tag }}
+                    {{ form.total_parcelas }}
+                    {{ form.total_parcelas.errors }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.valor_parcela.label_tag }}
+                    {{ form.valor_parcela }}
+                    {{ form.valor_parcela.errors }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.data_vencimento.label_tag }}
+                    {{ form.data_vencimento }}
+                    {{ form.data_vencimento.errors }}
+                </div>
+                <div class="col-md-4">
+                    {{ form.data_pagamento.label_tag }}
+                    {{ form.data_pagamento }}
+                    {{ form.data_pagamento.errors }}
+                </div>
+                <div class="col-md-8">
+                    {{ form.observacao.label_tag }}
+                    {{ form.observacao }}
+                    {{ form.observacao.errors }}
+                </div>
+                <div class="col-md-4 d-flex align-items-center gap-2">
+                    {{ form.pago }}
+                    {{ form.pago.label_tag }}
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <a href="{% url 'lista_financeiro' %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Cancelar
+                </a>
+                <button type="submit" class="btn btn-success">
+                    <i class="bi bi-save"></i> Salvar alterações
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

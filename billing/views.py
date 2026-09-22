@@ -5,13 +5,24 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import Assinatura, Plano
+from .models import Assinatura, Plano, Sistema
 from .services import AsaasPaymentService
 
 
 def lista_planos(request):
+    sistemas = Sistema.objects.filter(ativo=True)
+    sistema_slug = request.GET.get('sistema', '')
+    sistema_selecionado = sistemas.filter(slug=sistema_slug).first()
     planos = Plano.objects.filter(ativo=True).order_by('valor_mensal', 'nome')
-    return render(request, 'billing/lista_planos.html', {'planos': planos})
+    if sistema_selecionado:
+        planos = planos.filter(sistema=sistema_selecionado)
+    elif sistema_slug:
+        planos = planos.none()
+    return render(request, 'billing/lista_planos.html', {
+        'planos': planos,
+        'sistemas': sistemas,
+        'sistema_selecionado': sistema_selecionado,
+    })
 
 
 def iniciar_assinatura(request, plano_id):

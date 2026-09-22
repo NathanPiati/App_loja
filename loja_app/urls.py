@@ -98,6 +98,8 @@ urlpatterns = [
 
     path('financeiro/', views.lista_financeiro, name='lista_financeiro'),
     path('financeiro/pagar/<int:id>/', views.pagar_parcela, name='pagar_parcela'),
+    path('financeiro/editar/<int:id>/', views.editar_movimento_financeiro,
+         name='editar_movimento_financeiro'),
     path('financeiro/imprimir/', views.imprimir_financeiro,
          name='imprimir_financeiro'),
 
@@ -157,6 +159,23 @@ urlpatterns = [
          views.editar_condicao_pagamento, name='editar_condicao_pagamento'),
     path('condicoes-pagamento/excluir/<int:pk>/',
          views.excluir_condicao_pagamento, name='excluir_condicao_pagamento'),
+
+    # --- URL para Cobrança de clientes via WhatsApp ---
+    path('cobranca-whatsapp/', views.lista_regras_cobranca_whatsapp,
+         name='lista_regras_cobranca_whatsapp'),
+    path('cobranca-whatsapp/novo/', views.criar_regra_cobranca_whatsapp,
+         name='criar_regra_cobranca_whatsapp'),
+    path('cobranca-whatsapp/editar/<int:pk>/',
+         views.editar_regra_cobranca_whatsapp, name='editar_regra_cobranca_whatsapp'),
+    path('cobranca-whatsapp/excluir/<int:pk>/',
+         views.excluir_regra_cobranca_whatsapp, name='excluir_regra_cobranca_whatsapp'),
+    path('cobranca-whatsapp/historico/', views.historico_cobranca_whatsapp,
+         name='historico_cobranca_whatsapp'),
+    path('cobranca-whatsapp/manual/', views.disparo_manual_cobranca_whatsapp,
+         name='disparo_manual_cobranca_whatsapp'),
+    path('cobranca-whatsapp/disparar-agora/', views.disparar_cobrancas_whatsapp_agora,
+         name='disparar_cobrancas_whatsapp_agora'),
+
 
     # Renomeado para clareza
     path("servicos/", views.servicos, name="servicos"),

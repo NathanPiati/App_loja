@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Histórico de Cobranças WhatsApp{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <style>
+        .historico-table thead th {
+            background-color: #2e4a7a;
+            color: #ffffff;
+        }
+
+        .historico-table tbody tr:hover {
+            background-color: #e8f0fb;
+        }
+    </style>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <h2 class="mb-0"><i class="bi bi-clock-history"></i> Histórico de Cobranças WhatsApp</h2>
+        <div class="d-flex gap-2">
+            <a href="{% url 'lista_regras_cobranca_whatsapp' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Regras
+            </a>
+            <a href="{% url 'disparo_manual_cobranca_whatsapp' %}" class="btn btn-outline-success">
+                <i class="bi bi-person-check"></i> Cobrar cliente
+            </a>
+            <form method="post" action="{% url 'disparar_cobrancas_whatsapp_agora' %}" class="m-0">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-send"></i> Disparar cobranças agora
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card-custom">
+        <table class="table table-bordered table-hover align-middle historico-table">
+            <thead>
+                <tr>
+                    <th>Data/Hora</th>
+                    <th>Regra</th>
+                    <th>Pedido</th>
+                    <th>Cliente</th>
+                    <th>Número</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for envio in envios %}
+                <tr>
+                    <td>{{ envio.data_envio|date:"d/m/Y H:i" }}</td>
+                    <td>{{ envio.regra.nome|default:"-" }}</td>
+                    <td>{{ envio.movimento.pedido_id|default:"-" }}</td>
+                    <td>{{ envio.movimento.pedido.cliente.nome|default:"-" }}</td>
+                    <td>{{ envio.numero_destino }}</td>
+                    <td>
+                        {% if envio.sucesso %}
+                            <span class="badge text-bg-success">Enviado</span>
+                        {% else %}
+                            <span class="badge text-bg-danger">Falha</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center">Nenhum envio registrado ainda.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

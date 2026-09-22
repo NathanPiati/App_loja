@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% load meus_filtros %}
+
+{% block title %}Regras de Cobrança WhatsApp{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <style>
+        .cobranca-table thead th {
+            background-color: #2e4a7a;
+            color: #ffffff;
+        }
+
+        .cobranca-table tbody tr:hover {
+            background-color: #e8f0fb;
+        }
+    </style>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <h2 class="mb-0"><i class="bi bi-whatsapp"></i> Regras de Cobrança via WhatsApp</h2>
+        <div class="d-flex gap-2">
+            <a href="{% url 'historico_cobranca_whatsapp' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-clock-history"></i> Histórico de Envios
+            </a>
+            <a href="{% url 'criar_regra_cobranca_whatsapp' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i> Nova Regra
+            </a>
+        </div>
+    </div>
+
+    <div class="card-custom">
+        <table class="table table-bordered table-hover align-middle cobranca-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nome</th>
+                    <th>Aplicar a</th>
+                    <th>Disparo (dias)</th>
+                    <th>Repetição</th>
+                    <th>Ativa?</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for regra in regras %}
+                <tr>
+                    <td>{{ regra.id }}</td>
+                    <td>{{ regra.nome }}</td>
+                    <td>{{ regra.get_aplicar_a_display }}</td>
+                    <td>
+                        {% if regra.dias_referencia < 0 %}
+                            {{ regra.dias_referencia|abs }} dia(s) antes do vencimento
+                        {% elif regra.dias_referencia == 0 %}
+                            No dia do vencimento
+                        {% else %}
+                            {{ regra.dias_referencia }} dia(s) após o vencimento
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if regra.repetir_a_cada_dias %}
+                            A cada {{ regra.repetir_a_cada_dias }} dia(s)
+                        {% else %}
+                            Uma única vez
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if regra.ativo %}
+                            <span class="badge text-bg-success">Sim</span>
+                        {% else %}
+                            <span class="badge text-bg-secondary">Não</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'editar_regra_cobranca_whatsapp' regra.id %}" class="btn btn-sm btn-warning">
+                            <i class="bi bi-pencil"></i> Editar
+                        </a>
+                        <a href="{% url 'excluir_regra_cobranca_whatsapp' regra.id %}" class="btn btn-sm btn-danger">
+                            <i class="bi bi-trash"></i> Excluir
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center">Nenhuma regra de cobrança cadastrada.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

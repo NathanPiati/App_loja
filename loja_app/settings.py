@@ -108,9 +108,14 @@ VERSION = '26.07.15'
 # Integracao com Evolution API (WhatsApp)
 EVOLUTION_ENABLED = env_bool('EVOLUTION_ENABLED', False)
 EVOLUTION_BASE_URL = os.getenv(
-    'EVOLUTION_BASE_URL', 'http://localhost:8080').rstrip('/')
+    'EVOLUTION_API_URL',
+    os.getenv('EVOLUTION_BASE_URL', 'http://localhost:8080'),
+).rstrip('/')
 EVOLUTION_API_KEY = os.getenv('EVOLUTION_API_KEY', '').strip()
-EVOLUTION_INSTANCE = os.getenv('EVOLUTION_INSTANCE', 'loja').strip()
+EVOLUTION_INSTANCE = os.getenv(
+    'EVOLUTION_API_INSTANCE',
+    os.getenv('EVOLUTION_INSTANCE', 'loja'),
+).strip()
 EVOLUTION_SEND_TEXT_PATH = os.getenv(
     'EVOLUTION_SEND_TEXT_PATH', '/message/sendText/{instance}').strip()
 EVOLUTION_WEBHOOK_SECRET = os.getenv('EVOLUTION_WEBHOOK_SECRET', '').strip()
@@ -386,7 +391,7 @@ LOGGING = {
         },
         'loja_web': {
             'handlers': ['console', 'file_errors'],
-            'level': 'WARNING',
+            'level': 'INFO',
             'propagate': False,
         },
         'django.request': {

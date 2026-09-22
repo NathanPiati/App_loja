@@ -124,6 +124,24 @@
         }
         .card h3 { margin-top: 0; margin-bottom: 12px; }
         .card p, .card li { font: 0.98rem/1.6 Arial, sans-serif; color: var(--muted); }
+        .card .card-title-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font: 700 0.72rem Arial, sans-serif;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: rgba(22, 78, 99, 0.1);
+            color: var(--accent);
+        }
         .pricing {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -133,6 +151,10 @@
             font-size: 2rem;
             margin: 14px 0;
         }
+        .system-picker { display: flex; flex-wrap: wrap; gap: 10px; margin: 20px 0 28px; }
+        .system-option { border: 1px solid var(--line); border-radius: 8px; padding: 11px 15px; font: 700 0.92rem Arial, sans-serif; background: rgba(255,255,255,0.65); }
+        .system-option:hover, .system-option.selected { background: var(--accent); border-color: var(--accent); color: #fff; }
+        .system-name { color: var(--brand-dark); font: 700 0.84rem Arial, sans-serif; text-transform: uppercase; }
         .footer {
             padding: 32px 0 48px;
             color: var(--muted);
@@ -193,12 +215,52 @@
             </div>
         </section>
 
-        <section class="section">
+        <section class="section" id="sistemas">
+            <h2>O que cada sistema faz</h2>
+            <p>Descricoes oficiais dos seus sistemas cadastrados. Esta secao mostra exatamente a funcao de cada produto com base no que voce configurou no painel administrativo.</p>
+            <div class="grid">
+                {% for sistema in sistemas %}
+                <article class="card">
+                    <div class="card-title-row">
+                        <h3>{{ sistema.nome }}</h3>
+                        <span class="badge">Sistema</span>
+                    </div>
+                    <p>{{ sistema.descricao|default:'Descricao ainda nao cadastrada para este sistema.' }}</p>
+                    {% if sistema.slug == 'personais' or 'personal' in sistema.nome|lower %}
+                    <a class="button button-primary" href="{% url 'site_publico:landing' %}?sistema={{ sistema.slug }}#planos">Ir para o sistema de personais</a>
+                    {% endif %}
+                </article>
+                {% empty %}
+                <article class="card">
+                    <h3>Nenhum sistema ativo no momento</h3>
+                    <p>Cadastre os sistemas no admin para exibir as descricoes publicas de cada um.</p>
+                </article>
+                {% endfor %}
+            </div>
+            {% if sistema_personais %}
+            <div class="hero-actions" style="margin-top: 20px;">
+                <a class="button button-primary" href="{% url 'site_publico:landing' %}?sistema={{ sistema_personais.slug }}#planos">Acessar sistema de personais</a>
+            </div>
+            {% else %}
+            <div class="hero-actions" style="margin-top: 20px;">
+                <a class="button button-secondary" href="{% url 'site_publico:landing' %}?sistema=personais#planos">Acessar sistema de personais</a>
+            </div>
+            {% endif %}
+        </section>
+
+        <section class="section" id="planos">
             <h2>Planos preparados para venda</h2>
-            <p>Esses cards podem vir do banco. Ja deixei o projeto pronto para cadastrar e listar planos dinamicamente.</p>
+            <p>Selecione primeiro o sistema que deseja contratar. Os planos exibidos abaixo pertencem ao sistema escolhido.</p>
+            <div class="system-picker" aria-label="Escolha o sistema">
+                <a class="system-option{% if not sistema_selecionado %} selected{% endif %}" href="{% url 'site_publico:landing' %}">Todos os sistemas</a>
+                {% for sistema in sistemas %}
+                <a class="system-option{% if sistema_selecionado.id == sistema.id %} selected{% endif %}" href="{% url 'site_publico:landing' %}?sistema={{ sistema.slug }}">{{ sistema.nome }}</a>
+                {% endfor %}
+            </div>
             <div class="pricing">
                 {% for plano in planos %}
                 <article class="card">
+                    {% if plano.sistema %}<div class="system-name">{{ plano.sistema.nome }}</div>{% endif %}
                     <h3>{{ plano.nome }}</h3>
                     <div class="price">R$ {{ plano.valor_mensal }}<small>/mes</small></div>
                     <p>{{ plano.descricao|default:'Plano pronto para ser publicado no site.' }}</p>

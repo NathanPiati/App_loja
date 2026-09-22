@@ -5,7 +5,28 @@ from django.db import models
 from django.utils import timezone
 
 
+class Sistema(models.Model):
+    nome = models.CharField(max_length=120)
+    slug = models.SlugField(max_length=140, unique=True)
+    descricao = models.TextField(blank=True)
+    ativo = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['nome']
+
+    def __str__(self):
+        return self.nome
+
+
 class Plano(models.Model):
+    sistema = models.ForeignKey(
+        Sistema,
+        on_delete=models.PROTECT,
+        related_name='planos',
+        null=True,
+        blank=True,
+        help_text='Deixe em branco para disponibilizar este plano para todos os sistemas.',
+    )
     nome = models.CharField(max_length=120)
     slug = models.SlugField(max_length=140, unique=True)
     descricao = models.TextField(blank=True)
@@ -54,7 +75,7 @@ class Assinatura(models.Model):
     gateway = models.CharField(max_length=40, blank=True)
     gateway_customer_id = models.CharField(max_length=120, blank=True)
     gateway_subscription_id = models.CharField(max_length=120, blank=True)
-    inicio_ciclo = models.DateField(default=date.today)
+    inicio_ciclo = models.DateField(default=timezone.localdate)
     fim_ciclo = models.DateField(null=True, blank=True)
     trial_ate = models.DateField(null=True, blank=True)
     criado_em = models.DateTimeField(auto_now_add=True)

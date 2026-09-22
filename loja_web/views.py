@@ -1,10 +1,16 @@
 from django.shortcuts import render, redirect, get_object_or_404
 # Importe o novo modelo e form
-from .models import Empresa, Produto, Venda, ItemVenda, Pedido, Cliente, Categoria, CondicaoPagamento, Servicos, ItensPedido, ItemServico, MovimentoFinanceiro, Empresa, EntradaEstoque, SaidaEstoque, FechamentoCaixa, Fornecedor, SaidaFinanceira, ItemPedidoCompra, PedidoCompra, LogAuditoria, Acompanhamento, ItensPedidoAcompanhamento, UsuarioEmpresa
+from .models import Empresa, Produto, Venda, ItemVenda, Pedido, Cliente, Categoria, CondicaoPagamento, Servicos, ItensPedido, ItemServico, MovimentoFinanceiro, Empresa, EntradaEstoque, SaidaEstoque, FechamentoCaixa, Fornecedor, SaidaFinanceira, ItemPedidoCompra, PedidoCompra, LogAuditoria, Acompanhamento, ItensPedidoAcompanhamento, UsuarioEmpresa, RegraCobrancaWhatsApp, EnvioCobrancaWhatsApp
 # Adicionado ProdutoFilterForm
 from .forms import (ProdutoForm, ProdutoComposicaoFormSet, ItemVendaForm, VendaForm, VendasFilterForm, ItemPedidoCompraForm, PedidoCompraForm, ItemPedidoCompraFormSet,
                     CategoriaForm, PedidoForm, ItensPedidoForm, ItemServicoForm, ClienteForm, EntradaEstoqueForm, BaixaEstoqueForm, FornecedorForm, UploadXMLForm, ReviewEntradaForm,
-                    ProdutoFilterForm, ItensPedidoFormSet, ItemServicoFormSet, CondicaoPagamentoForm, ServicoForm, PedidoFilterForm, EmpresaForm, CondicaoPagamentoFilterForm, AcompanhamentoForm)
+                    ProdutoFilterForm, ItensPedidoFormSet, ItemServicoFormSet, CondicaoPagamentoForm, ServicoForm, PedidoFilterForm, EmpresaForm, CondicaoPagamentoFilterForm, AcompanhamentoForm, RegraCobrancaWhatsAppForm, MovimentoFinanceiroForm)
+from .cobranca_whatsapp import (
+    enviar_cobranca_cliente,
+    montar_mensagem_cliente,
+    movimentos_abertos_cliente,
+    processar_todas_regras,
+)
 from django.db.models import Sum, Avg, F, Q
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, permission_required
@@ -1031,6 +1037,7 @@ def criar_pedido(request):
             cliente = Cliente.objects.get(id=cliente_id)
 
             pedido = Pedido.objects.create(
+                empresa=get_empresa_ativa(request),
                 cliente=cliente,
                 condicao_pagamento_id=request.POST.get('condicao_pagamento'),
                 status=request.POST.get('status', 'pendente'),
@@ -1194,6 +1201,7 @@ def salvar_pedido(request):
             total_final = total_com_juros - valor_desconto
 
             pedido = Pedido.objects.create(
+                empresa=get_empresa_ativa(request),
                 cliente=cliente,
                 condicao_pagamento=cond_pag,
                 observacoes=observacoes,
@@ -2021,6 +2029,7 @@ def editar_pedido(request, pedido_id):
 
                         if entrada:
                             MovimentoFinanceiro.objects.create(
+                                empresa=pedido.empresa,
                                 pedido=pedido,
                                 descricao=f"Entrada do Pedido {pedido.id}",
                                 parcela=0,
@@ -2035,6 +2044,7 @@ def editar_pedido(request, pedido_id):
                             dias = dias_entre_parcelas * \
                                 (i + 1 if entrada else i)
                             MovimentoFinanceiro.objects.create(
+                                empresa=pedido.empresa,
                                 pedido=pedido,
                                 descricao=f"Parcela {i + 1}/{num_parcelas} do Pedido {pedido.id}",
                                 parcela=i + 1,
@@ -2533,6 +2543,137 @@ def excluir_condicao_pagamento(request, pk):
     return render(request, 'condicoes_pagamento_confirm_delete.html', {'condicao': condicao})
 
 
+# --- Cobrança de clientes via WhatsApp ---
+
+@login_required
+def lista_regras_cobranca_whatsapp(request):
+    regras = filtrar_queryset_empresa(
+        request, RegraCobrancaWhatsApp.objects.all())
+    return render(request, 'cobranca_whatsapp_lista.html', {'regras': regras})
+
+
+@login_required
+def criar_regra_cobranca_whatsapp(request):
+    if request.method == 'POST':
+        form = RegraCobrancaWhatsAppForm(request.POST)
+        if form.is_valid():
+            regra = form.save(commit=False)
+            atribuir_empresa(regra, request)
+            regra.save()
+            registrar_log(
+                request, 'criar', 'RegraCobrancaWhatsApp',
+                f'Regra #{regra.id} criada | Nome: {regra.nome}'
+            )
+            messages.success(request, 'Regra de cobrança criada com sucesso.')
+            return redirect('lista_regras_cobranca_whatsapp')
+    else:
+        form = RegraCobrancaWhatsAppForm()
+    return render(request, 'cobranca_whatsapp_form.html', {'form': form})
+
+
+@login_required
+def editar_regra_cobranca_whatsapp(request, pk):
+    regra = get_object_or_404(RegraCobrancaWhatsApp, pk=pk)
+    if request.method == 'POST':
+        form = RegraCobrancaWhatsAppForm(request.POST, instance=regra)
+        if form.is_valid():
+            form.save()
+            registrar_log(
+                request, 'editar', 'RegraCobrancaWhatsApp',
+                f'Regra #{regra.id} editada | Nome: {regra.nome}'
+            )
+            messages.success(request, 'Regra de cobrança atualizada.')
+            return redirect('lista_regras_cobranca_whatsapp')
+    else:
+        form = RegraCobrancaWhatsAppForm(instance=regra)
+    return render(request, 'cobranca_whatsapp_form.html', {'form': form})
+
+
+@login_required
+def excluir_regra_cobranca_whatsapp(request, pk):
+    regra = get_object_or_404(RegraCobrancaWhatsApp, pk=pk)
+    if request.method == 'POST':
+        regra.delete()
+        registrar_log(
+            request, 'excluir', 'RegraCobrancaWhatsApp',
+            f'Regra #{pk} excluída | Nome: {regra.nome}'
+        )
+        messages.success(request, 'Regra de cobrança excluída.')
+        return redirect('lista_regras_cobranca_whatsapp')
+    return render(request, 'cobranca_whatsapp_confirm_delete.html', {'regra': regra})
+
+
+@login_required
+def historico_cobranca_whatsapp(request):
+    envios = filtrar_queryset_empresa(
+        request,
+        EnvioCobrancaWhatsApp.objects.select_related(
+            'regra', 'movimento__pedido__cliente').all()
+    )
+    return render(request, 'cobranca_whatsapp_historico.html', {'envios': envios})
+
+
+@login_required
+def disparo_manual_cobranca_whatsapp(request):
+    empresa = get_empresa_ativa(request)
+    clientes = Cliente.objects.filter(empresa=empresa).order_by('nome')
+    cliente_id = request.POST.get(
+        'cliente_id') or request.GET.get('cliente_id')
+    cliente = clientes.filter(id=cliente_id).first() if cliente_id else None
+    movimentos = list(movimentos_abertos_cliente(
+        cliente, empresa=empresa)) if cliente else []
+    resultado = None
+    mensagem_preview = (
+        montar_mensagem_cliente(cliente, movimentos, empresa=empresa)
+        if cliente and movimentos else ''
+    )
+
+    if request.method == 'POST' and cliente:
+        mensagem_preview = request.POST.get(
+            'mensagem', '').strip() or mensagem_preview
+        resultado = enviar_cobranca_cliente(
+            cliente,
+            empresa=empresa,
+            mensagem_personalizada=mensagem_preview,
+        )
+        if resultado.get('sucesso'):
+            messages.success(
+                request, 'Cobrança enviada com sucesso pelo WhatsApp.')
+        else:
+            messages.error(
+                request,
+                f"Não foi possível enviar a cobrança: {resultado.get('erro', 'erro desconhecido')}.",
+            )
+
+    return render(request, 'cobranca_whatsapp_manual.html', {
+        'clientes': clientes,
+        'cliente_selecionado': cliente,
+        'movimentos': movimentos,
+        'today': date.today(),
+        'mensagem_preview': mensagem_preview,
+        'resultado': resultado,
+    })
+
+
+@login_required
+def disparar_cobrancas_whatsapp_agora(request):
+    if request.method == 'POST':
+        empresa = get_empresa_ativa(request)
+        resultados = processar_todas_regras(dry_run=False, empresa=empresa)
+        enviados = sum(1 for r in resultados if r.get('sucesso'))
+        registrar_log(
+            request, 'outro', 'RegraCobrancaWhatsApp',
+            f'Disparo manual de cobranças WhatsApp | Avaliadas: {len(resultados)} | Enviadas: {enviados}'
+        )
+        if resultados:
+            messages.success(
+                request, f'{len(resultados)} cobrança(s) avaliada(s), {enviados} enviada(s) com sucesso.')
+        else:
+            messages.info(
+                request, 'Nenhuma cobrança elegível para envio no momento.')
+    return redirect('historico_cobranca_whatsapp')
+
+
 # Mostrar página de relatórios
 @login_required
 def relatorios(request):
@@ -2968,6 +3109,7 @@ def PedidoTesteView(request):
                 return redirect('pedido_teste')
 
             pedido = Pedido.objects.create(
+                empresa=get_empresa_ativa(request),
                 cliente=cliente,
                 condicao_pagamento=condicao_pagamento,
                 observacoes=observacoes,
@@ -3153,6 +3295,7 @@ def PedidoTesteView(request):
 
                 for p in parcelas:
                     MovimentoFinanceiro.objects.create(
+                        empresa=pedido.empresa,
                         pedido=pedido,
                         descricao=p['descricao'],
                         parcela=p['parcela'],
@@ -3395,6 +3538,35 @@ def pagar_parcela(request, id):
     messages.success(
         request, f'Parcela {parcela.descricao} marcada como paga.')
     return redirect('lista_financeiro')
+
+
+@login_required
+def editar_movimento_financeiro(request, id):
+    movimento = get_object_or_404(
+        filtrar_queryset_empresa(request, MovimentoFinanceiro.objects.all()),
+        id=id,
+    )
+    if request.method == 'POST':
+        form = MovimentoFinanceiroForm(request.POST, instance=movimento)
+        if form.is_valid():
+            movimento_atualizado = form.save()
+            registrar_log(
+                request,
+                'editar',
+                'Movimento Financeiro',
+                f'Movimento #{movimento_atualizado.id} editado | '
+                f'Vencimento: {movimento_atualizado.data_vencimento} | '
+                f'Valor: R$ {formatar_valor_log(movimento_atualizado.valor_parcela)}'
+            )
+            messages.success(
+                request, 'Movimento financeiro atualizado com sucesso.')
+            return redirect('lista_financeiro')
+    else:
+        form = MovimentoFinanceiroForm(instance=movimento)
+    return render(request, 'financeiro_editar.html', {
+        'form': form,
+        'movimento': movimento,
+    })
 
 
 @login_required
@@ -4885,6 +5057,7 @@ def criar_pedido_compra(request):
         if form.is_valid() and formset.is_valid():
             # Save the PedidoCompra first
             pedido = form.save(commit=False)
+            pedido.empresa = get_empresa_ativa(request)
             pedido.data_criacao = date.today()
             total_valor = 0
 
@@ -4916,6 +5089,7 @@ def criar_pedido_compra(request):
                 vencimento = date.today() + timedelta(days=intervalo *
                                                       (i + 1 if condicao and condicao.entrada else i))
                 MovimentoFinanceiro.objects.create(
+                    empresa=pedido.empresa,
                     pedido_compra=pedido,
                     descricao=f'Parcela {i+1}/{parcelas} - Pedido Compra {pedido.id}',
                     parcela=i + 1,

@@ -21,8 +21,10 @@
     body {
         background-color: var(--bg-page);
         color: var(--text-main);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
         padding-top: 72px;
-        padding-bottom: 120px;
     }
 
     .navbar {
@@ -81,6 +83,7 @@
     .content {
         margin-left: 270px;
         padding: 20px;
+        flex: 1 0 auto;
     }
 
     .main-footer {
@@ -89,11 +92,8 @@
         padding: 20px;
         text-align: center;
         font-size: 0.9em;
-        position: fixed;
-        bottom: 0;
-        left: 0;
         width: 100%;
-        z-index: 1020;
+        flex-shrink: 0;
     }
 
     @media (max-width: 991.98px) {

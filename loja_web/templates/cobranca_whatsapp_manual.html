@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Cobrança Manual WhatsApp{% endblock %}
+
+{% block content %}
+<div class="fade-slide-in">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-2">
+        <h2 class="mb-0"><i class="bi bi-person-check"></i> Cobrança Manual por Cliente</h2>
+        <a href="{% url 'historico_cobranca_whatsapp' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-clock-history"></i> Histórico
+        </a>
+    </div>
+
+    <div class="card-custom mb-4">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-8">
+                <label for="cliente_id" class="form-label fw-bold">Cliente</label>
+                <select name="cliente_id" id="cliente_id" class="form-select" required>
+                    <option value="">Selecione um cliente</option>
+                    {% for cliente in clientes %}
+                        <option value="{{ cliente.id }}" {% if cliente_selecionado and cliente.id == cliente_selecionado.id %}selected{% endif %}>
+                            {{ cliente.nome }}{% if cliente.telefone %} - {{ cliente.telefone }}{% else %} - sem telefone{% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search"></i> Consultar financeiro
+                </button>
+            </div>
+        </form>
+    </div>
+
+    {% if cliente_selecionado %}
+        <div class="card-custom mb-4">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <h4 class="mb-1">{{ cliente_selecionado.nome }}</h4>
+                    <span class="text-muted">WhatsApp: {{ cliente_selecionado.telefone|default:'Não informado' }}</span>
+                </div>
+                {% if movimentos %}
+                    <form method="post" class="m-0">
+                        {% csrf_token %}
+                        <input type="hidden" name="cliente_id" value="{{ cliente_selecionado.id }}">
+                {% endif %}
+            </div>
+
+            {% if movimentos %}
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Descrição</th>
+                                <th>Pedido</th>
+                                <th>Vencimento</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for movimento in movimentos %}
+                                <tr>
+                                    <td>{{ movimento.descricao|default:'Lançamento financeiro' }}</td>
+                                    <td>{{ movimento.pedido_id|default:'-' }}</td>
+                                    <td>{{ movimento.data_vencimento|date:'d/m/Y' }}</td>
+                                    <td>R$ {{ movimento.valor_parcela|floatformat:2 }}</td>
+                                    <td>
+                                        {% if movimento.data_vencimento < today %}
+                                            <span class="badge text-bg-danger">Vencido</span>
+                                        {% elif movimento.data_vencimento == today %}
+                                            <span class="badge text-bg-warning text-dark">Vence hoje</span>
+                                        {% else %}
+                                            <span class="badge text-bg-info">A vencer</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <label for="mensagem_preview" class="form-label fw-bold mt-3">Mensagem editável</label>
+                <textarea id="mensagem_preview" name="mensagem" class="form-control" rows="12">{{ mensagem_preview }}</textarea>
+                <small class="text-muted d-block mt-1">Edite o texto se necessário. Ao clicar no botão, a mensagem será salva no histórico e enviada.</small>
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-whatsapp"></i> Salvar e enviar cobrança
+                    </button>
+                </div>
+                </form>
+            {% else %}
+                <div class="alert alert-info mb-0">Este cliente não possui lançamentos financeiros em aberto.</div>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

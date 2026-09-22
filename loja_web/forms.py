@@ -1,7 +1,7 @@
 from django import forms
 from django_select2 import forms as s2forms
 # Importe o novo modelo EntradaEstoque junto com os outros
-from .models import Produto, Venda, ItemVenda, Categoria, Pedido, ItemServico, Cliente, ItensPedido, EntradaEstoque, SaidaEstoque, CondicaoPagamento, Servicos, Empresa, Fornecedor, PedidoCompra, ItemPedidoCompra, Acompanhamento, ProdutoComposicao
+from .models import Produto, Venda, ItemVenda, Categoria, Pedido, ItemServico, Cliente, ItensPedido, EntradaEstoque, SaidaEstoque, CondicaoPagamento, Servicos, Empresa, Fornecedor, PedidoCompra, ItemPedidoCompra, Acompanhamento, ProdutoComposicao, RegraCobrancaWhatsApp, MovimentoFinanceiro
 from django.forms import inlineformset_factory
 from datetime import date
 from decimal import Decimal, InvalidOperation
@@ -528,6 +528,31 @@ class ServicoForm(forms.ModelForm):
     class Meta:
         model = Servicos
         fields = ['nome', 'preco']
+
+
+class RegraCobrancaWhatsAppForm(forms.ModelForm):
+    class Meta:
+        model = RegraCobrancaWhatsApp
+        fields = ['nome', 'aplicar_a', 'dias_referencia',
+                  'repetir_a_cada_dias', 'mensagem', 'ativo']
+        widgets = {
+            'mensagem': forms.Textarea(attrs={'rows': 4}),
+        }
+
+
+class MovimentoFinanceiroForm(forms.ModelForm):
+    class Meta:
+        model = MovimentoFinanceiro
+        fields = [
+            'descricao', 'parcela', 'total_parcelas', 'valor_parcela',
+            'data_vencimento', 'data_pagamento', 'observacao', 'pago',
+        ]
+        widgets = {
+            'data_vencimento': forms.DateInput(attrs={'type': 'date'}),
+            'data_pagamento': forms.DateInput(attrs={'type': 'date'}),
+            'observacao': forms.Textarea(attrs={'rows': 3}),
+        }
+
         widgets = {
             'nome': forms.TextInput(attrs={
                 'class': 'form-control',
